@@ -14,9 +14,127 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
-  createdAt DateTime @default(now())
+enum UserRole {
+  investor
+  broker
+  admin
+  superadmin
+}
+
+enum AppointmentStatus {
+  requested
+  confirmed
+  completed
+  canceled
+}
+
+model AppUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  investorProfile InvestorProfile?
+  brokerProfile   BrokerProfile?
+  adminProfile    AdminProfile?
+  appointments    Appointment[]
+}
+
+model InvestorProfile {
+  userId    String @id
+  firstName String
+  lastName  String
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BrokerProfile {
+  userId      String  @id
+  firstName   String
+  lastName    String
+  companyName String?
+  licenseNo   String?
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AdminProfile {
+  userId     String  @id
+  department String?
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Property {
+  id                   String    @id @default(uuid())
+  title                String
+  description          String?
+  area                 String?
+  buildingName         String?
+  developer            String?
+  unitNo               String?
+  floor                Int?
+  condition            String?
+  unitTotalSize        Float?
+  apartmentSize        Float?
+  balconySize          Float?
+  serviceChargePerSqft Float?
+  serviceChargeTotal   Float?
+  rateYear             Int?
+  status               String?
+  rentValue            Float?
+  contractValue        Float?
+  depositReceived      Float?
+  paymentMethod        String?
+  rentStart            DateTime?
+  rentExpiry           DateTime?
+  latitude             Float?
+  longitude            Float?
+  city                 String?
+  country              String?
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  governmentLeases  GovernmentLease[]
+  availabilitySlots AvailabilitySlot[]
+  appointments      Appointment[]
+}
+
+model GovernmentLease {
+  id          String   @id @default(uuid())
+  propertyId  String
+  startDate   DateTime
+  endDate     DateTime
+  monthlyRent Float
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model AvailabilitySlot {
+  id         String   @id @default(uuid())
+  propertyId String
+  startsAt   DateTime
+  endsAt     DateTime
+  capacity   Int      @default(1)
+
+  property     Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String            @id @default(uuid())
+  propertyId  String
+  bookedById  String
+  slotId      String?
+  status      AppointmentStatus @default(requested)
+  scheduledAt DateTime
+  notes       String?
+
+  property Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bookedBy AppUser           @relation(fields: [bookedById], references: [id], onDelete: Cascade)
+  slot     AvailabilitySlot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
 }

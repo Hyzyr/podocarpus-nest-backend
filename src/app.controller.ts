@@ -6,7 +6,7 @@ export class AppController {
   hello() {
     return 'Hello world';
   }
-
+  
   @Get('/health')
   showStatus() {
     return { status: 'ok' };
