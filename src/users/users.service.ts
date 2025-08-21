@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
 
 @Injectable()
-
 export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
+
   private readonly logger = new Logger(UsersService.name);
 
   create(user: any) {
@@ -12,7 +14,7 @@ export class UsersService {
 
   findAll() {
     this.logger.log('Fetching all users');
-    return [{ id: 1, name: 'Alice' }];
+    return this.prisma.appUser.findMany();
   }
   findOne(id: string) {
     this.logger.log(`Fetching user with id=${id}`);

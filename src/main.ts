@@ -8,16 +8,18 @@ import {
 import helmet from '@fastify/helmet';
 import cors from '@fastify/cors';
 
+const PORT = process.env.PORT || 3030;
+
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
 
-    await app.register(helmet);
-    // await app.register(cors, { origin: true });
+  await app.register(helmet);
+  // await app.register(cors, { origin: true });
 
-  await app.listen(3000);
-  console.log('✅ Server listening on http://localhost:3000');
+  await app.listen(PORT);
+  console.log(`✅ Server listening on http://localhost:${PORT}`);
 }
 bootstrap();
