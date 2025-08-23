@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -17,7 +18,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly mailer: MailerService, 
+    private readonly mailer: MailerService,
   ) {}
 
   async register(email: string, password: string, role: UserRole) {
@@ -80,5 +81,26 @@ export class AuthService {
     );
 
     return { message: 'Reset email sent' };
+  }
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.prisma.appUser.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: { gt: new Date() }, // not expired
+      },
+    });
+    if (!user) throw new BadRequestException('Invalid or expired token');
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    await this.prisma.appUser.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: hash,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+
+    return { message: 'Password reset successful' };
   }
 }

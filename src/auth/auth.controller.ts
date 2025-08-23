@@ -22,4 +22,8 @@ export class AuthController {
     console.log('login hitted');
     return this.auth.login(body.email, body.password);
   }
+  @Post('reset-password')
+  reset(@Body() body: { token: string; newPassword: string }) {
+    return this.auth.resetPassword(body.token, body.newPassword);
+  }
 }
