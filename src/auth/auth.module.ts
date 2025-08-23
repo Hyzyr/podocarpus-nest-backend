@@ -4,7 +4,7 @@ import { AuthController } from './auth.controller';
 import { DatabaseModule } from 'src/_helpers/database/database.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from 'src/constants';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy } from '../_helpers/jwt.strategy';
 import { MailerModule } from 'src/_helpers/mailer/mailer.module';
 
 @Module({
