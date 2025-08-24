@@ -1,29 +1,57 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserRole } from '@prisma/client';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  AuthResponseDto,
+  LoginDto,
+  RegisterDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+} from './dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private auth: AuthService) {}
 
   @Post('register')
-  register(@Body() body: { email: string; password: string; role: UserRole }) {
-    console.log('register hitted', body);
-    return this.auth.register(body.email, body.password, body.role);
-  }
-
-  @Post('forgot-password')
-  forgotPass(@Body('email') email: string) {
-    return this.auth.forgotPass(email);
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully',
+    type: AuthResponseDto,
+  })
+  register(@Body() dto: RegisterDto) {
+    return this.auth.register(dto.email, dto.password, dto.role);
   }
 
   @Post('login')
-  login(@Body() body: { email: string; password: string }) {
-    console.log('login hitted');
-    return this.auth.login(body.email, body.password);
+  @ApiOperation({ summary: 'Login user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in successfully',
+    type: AuthResponseDto,
+  })
+  login(@Body() dto: LoginDto) {
+    return this.auth.login(dto.email, dto.password);
   }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request a password reset email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent',
+  })
+  forgotPass(@Body() dto: RequestPasswordResetDto) {
+    return this.auth.forgotPass(dto.email);
+  }
+
   @Post('reset-password')
-  reset(@Body() body: { token: string; newPassword: string }) {
-    return this.auth.resetPassword(body.token, body.newPassword);
+  @ApiOperation({ summary: 'Reset password using token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successfully',
+  })
+  reset(@Body() dto: ResetPasswordDto) {
+    return this.auth.resetPassword(dto.token, dto.newPassword);
   }
 }
