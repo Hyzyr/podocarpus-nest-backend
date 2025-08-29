@@ -78,8 +78,6 @@ export class AuthService {
   async getCurrentUser(req: FastifyRequest): Promise<AuthResponseDto> {
     const { accessToken } = getAuthCookies(req);
     if (!accessToken) throw new UnauthorizedException();
-    console.log('getCurrentUser');
-    console.log('accessToken: ', accessToken);
 
     try {
       const payload =

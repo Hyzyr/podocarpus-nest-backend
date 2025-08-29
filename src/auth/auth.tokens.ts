@@ -13,7 +13,7 @@ export const setAuthCookies = (
   //   const jwtService = new JwtService();
   const accessToken = jwtService.sign(payload, { expiresIn: '15m' });
   const refreshToken = jwtService.sign(payload, { expiresIn: '7d' });
-  console.log(process.env.NODE_ENV === 'production', process.env.NODE_ENV);
+
   // set cookies
   reply.setCookie(ACCESS_TOKEN_KEY, accessToken, {
     httpOnly: true,
