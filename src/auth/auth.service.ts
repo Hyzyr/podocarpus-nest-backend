@@ -12,6 +12,9 @@ import { TokenPayload } from './auth.types';
 import * as crypto from 'crypto';
 import { WEBSITE_URL } from 'src/constants';
 import { MailerService } from 'src/_helpers/mailer/mailer.service';
+import { AuthResponseDto, authUserParser } from './dto';
+import { getAuthCookies, setAuthCookies } from './auth.tokens';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @Injectable()
 export class AuthService {
@@ -21,12 +24,21 @@ export class AuthService {
     private readonly mailer: MailerService,
   ) {}
 
-  async register(email: string, password: string, role: UserRole) {
+  async register(
+    email: string,
+    password: string,
+    role: UserRole,
+    reply: FastifyReply,
+  ): Promise<AuthResponseDto> {
     const existing = await this.prisma.appUser.findUnique({ where: { email } });
     if (existing) {
       throw new ConflictException('User already exists');
     }
+
+    // hash password
     const hash = await bcrypt.hash(password, 10);
+
+    // create user
     const user = await this.prisma.appUser.create({
       data: {
         email,
@@ -35,24 +47,87 @@ export class AuthService {
       },
     });
 
+    // create tokens
     const payload: TokenPayload = { sub: user.id, role: user.role };
+    setAuthCookies(payload, this.jwtService, reply);
+
+    // return safe user info
     return {
-      user: { id: user.id, email: user.email, role: user.role },
-      access_token: this.jwtService.sign(payload),
+      user: authUserParser.parse(user),
     };
   }
-
-  async login(email: string, password: string) {
+  async login(
+    email: string,
+    password: string,
+    reply: FastifyReply,
+  ): Promise<AuthResponseDto> {
     const user = await this.prisma.appUser.findUnique({ where: { email } });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = { sub: user.id, role: user.role };
+    // create tokens
+    const payload: TokenPayload = { sub: user.id, role: user.role };
+    setAuthCookies(payload, this.jwtService, reply);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      user: authUserParser.parse(user),
     };
+  }
+  async getCurrentUser(req: FastifyRequest): Promise<AuthResponseDto> {
+    const { accessToken } = getAuthCookies(req);
+    if (!accessToken) throw new UnauthorizedException();
+    console.log('getCurrentUser');
+    console.log('accessToken: ', accessToken);
+
+    try {
+      const payload =
+        await this.jwtService.verifyAsync<TokenPayload>(accessToken);
+
+      const user = await this.prisma.appUser.findUnique({
+        where: { id: `${payload.sub}` },
+      });
+
+      if (!user) throw new UnauthorizedException();
+
+      return {
+        user: authUserParser.parse(user),
+      };
+    } catch {
+      throw new UnauthorizedException();
+    }
+  }
+  async refreshTokens(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<AuthResponseDto> {
+    const { refreshToken } = getAuthCookies(req);
+    if (!refreshToken) throw new UnauthorizedException();
+
+    try {
+      const payload =
+        await this.jwtService.verifyAsync<TokenPayload>(refreshToken);
+
+      // optionally check if refresh token is revoked in DB
+      const user = await this.prisma.appUser.findUnique({
+        where: { id: `${payload.sub}` },
+      });
+      if (!user) throw new UnauthorizedException();
+
+      // issue new tokens
+      setAuthCookies(
+        { sub: payload.sub, role: payload.role },
+        this.jwtService,
+        reply,
+      );
+
+      return {
+        user: authUserParser.parse(user),
+      };
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 
   async forgotPass(email: string) {

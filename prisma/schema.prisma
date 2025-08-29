@@ -36,8 +36,9 @@ model AppUser {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  resetToken       String?
-  resetTokenExpiry DateTime?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  onboardingCompleted Boolean   @default(false)
 
   investorProfile InvestorProfile?
   brokerProfile   BrokerProfile?

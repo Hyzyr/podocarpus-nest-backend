@@ -1,29 +1,57 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import z from 'zod';
 
+export class AuthUserDto {
+  @ApiProperty({ example: 'uuid' })
+  id: string;
+
+  @ApiProperty({ example: 'john@example.com' })
+  email: string;
+
+  @ApiProperty({ enum: UserRole, example: UserRole.investor })
+  role: UserRole;
+
+  @ApiProperty({ type: Boolean })
+  onboardingCompleted: boolean;
+}
+export const authUserParser: z.ZodType<AuthUserDto> = z.any();
+
+export class LoginBodyDto {
+  @ApiProperty({ example: 'john.doe@example.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ example: 'securePassword123' })
+  @IsString()
+  password: string;
+}
+export class RegisterBodyDto {
+  @ApiProperty({ example: 'john.doe@example.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ minLength: 6, example: 'securePassword123' })
+  @IsString()
+  @MinLength(6)
+  password: string;
+
+  @ApiProperty({ enum: UserRole, example: UserRole.investor })
+  @IsEnum(UserRole)
+  role: UserRole;
+}
 export class AuthResponseDto {
   @ApiProperty()
-  accessToken: string;
+  user: AuthUserDto;
 
-  @ApiProperty()
-  refreshToken: string;
-
-  @ApiProperty({
-    example: {
-      id: 'uuid',
-      email: 'john.doe@example.com',
-      role: 'investor',
-      isActive: true,
-    },
-  })
-  user: {
-    id: string;
-    email: string;
-    role: UserRole;
-    isActive: boolean;
-  };
+  // @ApiProperty({
+  //   description: 'JWT access token',
+  //   example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  // })
+  // access_token: string;
 }
+
 export class UpdatePasswordDto {
   @ApiProperty({ example: 'oldPassword123' })
   @IsString()

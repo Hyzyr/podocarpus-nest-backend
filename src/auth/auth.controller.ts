@@ -1,13 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   AuthResponseDto,
-  LoginDto,
-  RegisterDto,
+  LoginBodyDto,
+  RegisterBodyDto,
   RequestPasswordResetDto,
   ResetPasswordDto,
 } from './dto';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @Controller('auth')
 export class AuthController {
@@ -20,8 +21,11 @@ export class AuthController {
     description: 'User registered successfully',
     type: AuthResponseDto,
   })
-  register(@Body() dto: RegisterDto) {
-    return this.auth.register(dto.email, dto.password, dto.role);
+  register(
+    @Body() dto: RegisterBodyDto,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    return this.auth.register(dto.email, dto.password, dto.role, reply);
   }
 
   @Post('login')
@@ -31,8 +35,37 @@ export class AuthController {
     description: 'User logged in successfully',
     type: AuthResponseDto,
   })
-  login(@Body() dto: LoginDto) {
-    return this.auth.login(dto.email, dto.password);
+  login(
+    @Body() dto: LoginBodyDto,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    return this.auth.login(dto.email, dto.password, reply);
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get current logged-in user from HttpOnly cookie' })
+  @ApiCookieAuth('token') // Swagger will show cookie auth field
+  @ApiResponse({
+    status: 200,
+    description: 'Current user profile',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async me(@Req() req: FastifyRequest) {
+    return this.auth.getCurrentUser(req);
+  }
+
+  @Get('refresh')
+  @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
+  // @ApiCookieAuth(REFRESH_TOKEN_KEY)
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refreshed',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  async refresh(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+    return this.auth.refreshTokens(req, reply);
   }
 
   @Post('forgot-password')

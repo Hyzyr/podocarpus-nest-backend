@@ -1,4 +1,5 @@
-export const WEBSITE_NAME = 'Podocarpus Real Estate LLC'
+export const WEBSITE_NAME = 'Podocarpus Real Estate LLC';
+export const COOKIE_SECRET = process.env.COOKIE_SECRET || 'podocarpus-secret';
 export const JWT_SECRET = process.env.JWT_SECRET || 'podocarpus-secret';
 export const WEBSITE_URL = process.env.WEBSITE_URL || 'https://pdcps.com';
 
