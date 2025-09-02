@@ -12,9 +12,19 @@ import { TokenPayload } from './auth.types';
 import * as crypto from 'crypto';
 import { WEBSITE_URL } from 'src/constants';
 import { MailerService } from 'src/_helpers/mailer/mailer.service';
-import { AuthResponseDto, authUserParser } from './dto';
-import { getAuthCookies, setAuthCookies } from './auth.tokens';
+import {
+  AuthResponseDto,
+  authUserParser,
+  OnboardStep1Dto,
+  OnboardStep2Dto,
+} from './dto';
+import {
+  getAuthCookies,
+  getPayloadFromCookies,
+  setAuthCookies,
+} from './auth.tokens';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
 @Injectable()
 export class AuthService {
@@ -127,7 +137,6 @@ export class AuthService {
       throw new UnauthorizedException();
     }
   }
-
   async forgotPass(email: string) {
     const user = await this.prisma.appUser.findUnique({ where: { email } });
     if (!user) throw new UnauthorizedException('No user with this email');
@@ -175,5 +184,47 @@ export class AuthService {
     });
 
     return { message: 'Password reset successful' };
+  }
+
+  async onboardStep1(user: CurrentUser, body: OnboardStep1Dto) {
+    const { userId } = user;
+
+    await this.prisma.appUser.update({
+      where: { id: userId.toString() },
+      data: { ...body },
+    });
+    return { status: 'success', message: 'Step 1 saved successfully' };
+  }
+  async onboardStep2(user: CurrentUser, body: OnboardStep2Dto) {
+    const { userId, role } = user;
+
+    if (role === 'investor')
+      await this.prisma.appUser.update({
+        where: { id: userId.toString() },
+        data: {
+          onboardingCompleted: true,
+          investorProfile: {
+            upsert: {
+              create: {
+                investorPreferences: {
+                  create: { ...body },
+                },
+              },
+              update: {
+                investorPreferences: {
+                  upsert: {
+                    where: { investorProfileId: userId.toString() },
+                    create: { ...body },
+                    update: { ...body },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    else throw new UnauthorizedException('Only Investors Allowed');
+
+    return { status: 'success', message: 'Step 2 saved successfully' };
   }
 }

@@ -1,0 +1,518 @@
+[
+  {
+    "code": "US",
+    "name": "United States",
+    "continent": "North America",
+    "nationality": "American",
+    "cities": [
+      "New York",
+      "Los Angeles",
+      "Chicago",
+      "Houston",
+      "Miami"
+    ]
+  },
+  {
+    "code": "CA",
+    "name": "Canada",
+    "continent": "North America",
+    "nationality": "Canadian",
+    "cities": [
+      "Toronto",
+      "Vancouver",
+      "Montreal",
+      "Calgary",
+      "Ottawa"
+    ]
+  },
+  {
+    "code": "MX",
+    "name": "Mexico",
+    "continent": "North America",
+    "nationality": "Mexican",
+    "cities": [
+      "Mexico City",
+      "Guadalajara",
+      "Monterrey",
+      "Cancun",
+      "Puebla"
+    ]
+  },
+  {
+    "code": "BR",
+    "name": "Brazil",
+    "continent": "South America",
+    "nationality": "Brazilian",
+    "cities": [
+      "São Paulo",
+      "Rio de Janeiro",
+      "Brasília",
+      "Salvador",
+      "Recife"
+    ]
+  },
+  {
+    "code": "AR",
+    "name": "Argentina",
+    "continent": "South America",
+    "nationality": "Argentine",
+    "cities": [
+      "Buenos Aires",
+      "Córdoba",
+      "Rosario",
+      "Mendoza",
+      "La Plata"
+    ]
+  },
+  {
+    "code": "CL",
+    "name": "Chile",
+    "continent": "South America",
+    "nationality": "Chilean",
+    "cities": [
+      "Santiago",
+      "Valparaíso",
+      "Concepción",
+      "Antofagasta",
+      "La Serena"
+    ]
+  },
+  {
+    "code": "CO",
+    "name": "Colombia",
+    "continent": "South America",
+    "nationality": "Colombian",
+    "cities": [
+      "Bogotá",
+      "Medellín",
+      "Cali",
+      "Cartagena",
+      "Barranquilla"
+    ]
+  },
+  {
+    "code": "PE",
+    "name": "Peru",
+    "continent": "South America",
+    "nationality": "Peruvian",
+    "cities": [
+      "Lima",
+      "Cusco",
+      "Arequipa",
+      "Trujillo",
+      "Iquitos"
+    ]
+  },
+  {
+    "code": "GB",
+    "name": "United Kingdom",
+    "continent": "Europe",
+    "nationality": "British",
+    "cities": [
+      "London",
+      "Manchester",
+      "Birmingham",
+      "Liverpool",
+      "Edinburgh"
+    ]
+  },
+  {
+    "code": "FR",
+    "name": "France",
+    "continent": "Europe",
+    "nationality": "French",
+    "cities": [
+      "Paris",
+      "Lyon",
+      "Marseille",
+      "Nice",
+      "Toulouse"
+    ]
+  },
+  {
+    "code": "DE",
+    "name": "Germany",
+    "continent": "Europe",
+    "nationality": "German",
+    "cities": [
+      "Berlin",
+      "Munich",
+      "Hamburg",
+      "Frankfurt",
+      "Cologne"
+    ]
+  },
+  {
+    "code": "IT",
+    "name": "Italy",
+    "continent": "Europe",
+    "nationality": "Italian",
+    "cities": [
+      "Rome",
+      "Milan",
+      "Naples",
+      "Turin",
+      "Florence"
+    ]
+  },
+  {
+    "code": "ES",
+    "name": "Spain",
+    "continent": "Europe",
+    "nationality": "Spanish",
+    "cities": [
+      "Madrid",
+      "Barcelona",
+      "Valencia",
+      "Seville",
+      "Bilbao"
+    ]
+  },
+  {
+    "code": "PT",
+    "name": "Portugal",
+    "continent": "Europe",
+    "nationality": "Portuguese",
+    "cities": [
+      "Lisbon",
+      "Porto",
+      "Coimbra",
+      "Braga",
+      "Faro"
+    ]
+  },
+  {
+    "code": "NL",
+    "name": "Netherlands",
+    "continent": "Europe",
+    "nationality": "Dutch",
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "The Hague",
+      "Utrecht",
+      "Eindhoven"
+    ]
+  },
+  {
+    "code": "BE",
+    "name": "Belgium",
+    "continent": "Europe",
+    "nationality": "Belgian",
+    "cities": [
+      "Brussels",
+      "Antwerp",
+      "Ghent",
+      "Bruges",
+      "Leuven"
+    ]
+  },
+  {
+    "code": "CH",
+    "name": "Switzerland",
+    "continent": "Europe",
+    "nationality": "Swiss",
+    "cities": [
+      "Zurich",
+      "Geneva",
+      "Bern",
+      "Basel",
+      "Lausanne"
+    ]
+  },
+  {
+    "code": "SE",
+    "name": "Sweden",
+    "continent": "Europe",
+    "nationality": "Swedish",
+    "cities": [
+      "Stockholm",
+      "Gothenburg",
+      "Malmö",
+      "Uppsala",
+      "Lund"
+    ]
+  },
+  {
+    "code": "NO",
+    "name": "Norway",
+    "continent": "Europe",
+    "nationality": "Norwegian",
+    "cities": [
+      "Oslo",
+      "Bergen",
+      "Stavanger",
+      "Trondheim",
+      "Tromsø"
+    ]
+  },
+  {
+    "code": "DK",
+    "name": "Denmark",
+    "continent": "Europe",
+    "nationality": "Danish",
+    "cities": [
+      "Copenhagen",
+      "Aarhus",
+      "Odense",
+      "Aalborg",
+      "Esbjerg"
+    ]
+  },
+  {
+    "code": "FI",
+    "name": "Finland",
+    "continent": "Europe",
+    "nationality": "Finnish",
+    "cities": [
+      "Helsinki",
+      "Espoo",
+      "Tampere",
+      "Turku",
+      "Oulu"
+    ]
+  },
+  {
+    "code": "RU",
+    "name": "Russia",
+    "continent": "Europe/Asia",
+    "nationality": "Russian",
+    "cities": [
+      "Moscow",
+      "Saint Petersburg",
+      "Novosibirsk",
+      "Yekaterinburg",
+      "Kazan"
+    ]
+  },
+  {
+    "code": "TR",
+    "name": "Turkey",
+    "continent": "Europe/Asia",
+    "nationality": "Turkish",
+    "cities": [
+      "Istanbul",
+      "Ankara",
+      "Izmir",
+      "Bursa",
+      "Antalya"
+    ]
+  },
+  {
+    "code": "SA",
+    "name": "Saudi Arabia",
+    "continent": "Asia",
+    "nationality": "Saudi",
+    "cities": [
+      "Riyadh",
+      "Jeddah",
+      "Mecca",
+      "Medina",
+      "Dammam"
+    ]
+  },
+  {
+    "code": "AE",
+    "name": "United Arab Emirates",
+    "continent": "Asia",
+    "nationality": "Emirati",
+    "cities": [
+      "Dubai",
+      "Abu Dhabi",
+      "Sharjah",
+      "Ajman",
+      "Fujairah"
+    ]
+  },
+  {
+    "code": "EG",
+    "name": "Egypt",
+    "continent": "Africa",
+    "nationality": "Egyptian",
+    "cities": [
+      "Cairo",
+      "Alexandria",
+      "Giza",
+      "Luxor",
+      "Aswan"
+    ]
+  },
+  {
+    "code": "ZA",
+    "name": "South Africa",
+    "continent": "Africa",
+    "nationality": "South African",
+    "cities": [
+      "Johannesburg",
+      "Cape Town",
+      "Durban",
+      "Pretoria",
+      "Port Elizabeth"
+    ]
+  },
+  {
+    "code": "NG",
+    "name": "Nigeria",
+    "continent": "Africa",
+    "nationality": "Nigerian",
+    "cities": [
+      "Lagos",
+      "Abuja",
+      "Kano",
+      "Ibadan",
+      "Port Harcourt"
+    ]
+  },
+  {
+    "code": "KE",
+    "name": "Kenya",
+    "continent": "Africa",
+    "nationality": "Kenyan",
+    "cities": [
+      "Nairobi",
+      "Mombasa",
+      "Kisumu",
+      "Nakuru",
+      "Eldoret"
+    ]
+  },
+  {
+    "code": "CN",
+    "name": "China",
+    "continent": "Asia",
+    "nationality": "Chinese",
+    "cities": [
+      "Beijing",
+      "Shanghai",
+      "Guangzhou",
+      "Shenzhen",
+      "Chengdu"
+    ]
+  },
+  {
+    "code": "JP",
+    "name": "Japan",
+    "continent": "Asia",
+    "nationality": "Japanese",
+    "cities": [
+      "Tokyo",
+      "Osaka",
+      "Kyoto",
+      "Nagoya",
+      "Hiroshima"
+    ]
+  },
+  {
+    "code": "KR",
+    "name": "South Korea",
+    "continent": "Asia",
+    "nationality": "South Korean",
+    "cities": [
+      "Seoul",
+      "Busan",
+      "Incheon",
+      "Daegu",
+      "Daejeon"
+    ]
+  },
+  {
+    "code": "IN",
+    "name": "India",
+    "continent": "Asia",
+    "nationality": "Indian",
+    "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Kolkata",
+      "Chennai"
+    ]
+  },
+  {
+    "code": "PK",
+    "name": "Pakistan",
+    "continent": "Asia",
+    "nationality": "Pakistani",
+    "cities": [
+      "Karachi",
+      "Lahore",
+      "Islamabad",
+      "Faisalabad",
+      "Rawalpindi"
+    ]
+  },
+  {
+    "code": "ID",
+    "name": "Indonesia",
+    "continent": "Asia",
+    "nationality": "Indonesian",
+    "cities": [
+      "Jakarta",
+      "Surabaya",
+      "Bandung",
+      "Medan",
+      "Bali"
+    ]
+  },
+  {
+    "code": "TH",
+    "name": "Thailand",
+    "continent": "Asia",
+    "nationality": "Thai",
+    "cities": [
+      "Bangkok",
+      "Chiang Mai",
+      "Phuket",
+      "Pattaya",
+      "Hat Yai"
+    ]
+  },
+  {
+    "code": "VN",
+    "name": "Vietnam",
+    "continent": "Asia",
+    "nationality": "Vietnamese",
+    "cities": [
+      "Hanoi",
+      "Ho Chi Minh City",
+      "Da Nang",
+      "Nha Trang",
+      "Hue"
+    ]
+  },
+  {
+    "code": "PH",
+    "name": "Philippines",
+    "continent": "Asia",
+    "nationality": "Filipino",
+    "cities": [
+      "Manila",
+      "Cebu",
+      "Davao",
+      "Quezon City",
+      "Makati"
+    ]
+  },
+  {
+    "code": "MY",
+    "name": "Malaysia",
+    "continent": "Asia",
+    "nationality": "Malaysian",
+    "cities": [
+      "Kuala Lumpur",
+      "George Town",
+      "Johor Bahru",
+      "Kuching",
+      "Malacca"
+    ]
+  },
+  {
+    "code": "SG",
+    "name": "Singapore",
+    "continent": "Asia",
+    "nationality": "Singaporean",
+    "cities": [
+      "Singapore"
+    ]
+  }
+]

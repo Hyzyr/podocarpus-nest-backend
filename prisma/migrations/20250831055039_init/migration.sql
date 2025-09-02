@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "public"."AppUser" ALTER COLUMN "firstName" DROP NOT NULL,
+ALTER COLUMN "lastName" DROP NOT NULL,
+ALTER COLUMN "nationality" DROP NOT NULL,
+ALTER COLUMN "phone" DROP NOT NULL;

@@ -1,14 +1,27 @@
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   AuthResponseDto,
   LoginBodyDto,
+  OnboardStep1Dto,
+  OnboardStep2Dto,
   RegisterBodyDto,
   RequestPasswordResetDto,
   ResetPasswordDto,
 } from './dto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { JwtAuthGuard } from '../_helpers/jwt-auth.guard';
+import { CommonResponse } from 'src/types/common.dto';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -86,5 +99,35 @@ export class AuthController {
   })
   reset(@Body() dto: ResetPasswordDto) {
     return this.auth.resetPassword(dto.token, dto.newPassword);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('onboard/step1')
+  @ApiOperation({ summary: 'Onboarding Step 1 - Personal Info' })
+  @ApiResponse({
+    status: 200,
+    description: 'Step 1 saved successfully',
+    type: CommonResponse,
+  })
+  async onboardStep1(
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: OnboardStep1Dto,
+  ) {
+    return this.auth.onboardStep1(user, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('onboard/step2')
+  @ApiOperation({ summary: 'Onboarding Step 2 - Investment Preferences' })
+  @ApiResponse({
+    status: 200,
+    description: 'Step 2 saved successfully',
+    type: CommonResponse,
+  })
+  async onboardStep2(
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: OnboardStep2Dto,
+  ) {
+    return this.auth.onboardStep2(user, dto);
   }
 }

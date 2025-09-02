@@ -8,6 +8,8 @@ import { InvestmentsModule } from './investments/investments.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { DatabaseModule } from './_helpers/database/database.module';
 import { MailerModule } from './_helpers/mailer/mailer.module';
+import { DataController } from './data/data.controller';
+import { DataModule } from './data/data.module';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { MailerModule } from './_helpers/mailer/mailer.module';
     PropertiesModule,
     InvestmentsModule,
     AppointmentsModule,
+    DataModule,
   ],
   controllers: [],
   providers: [],

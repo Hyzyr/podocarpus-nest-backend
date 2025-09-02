@@ -22,7 +22,6 @@ async function bootstrap() {
   );
 
   // Register plugins
-  console.log({ COOKIE_SECRET });
   await app.register<FastifyCookieOptions>(cookie, {
     secret: COOKIE_SECRET,
   });

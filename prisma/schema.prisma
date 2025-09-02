@@ -36,8 +36,16 @@ model AppUser {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // onboarding
+  firstName   String?
+  lastName    String?
+  phone       String?
+  nationality String?
+  recidence   String?
+
   resetToken          String?
   resetTokenExpiry    DateTime?
+  emailVerified       Boolean   @default(false)
   onboardingCompleted Boolean   @default(false)
 
   investorProfile InvestorProfile?
@@ -47,19 +55,26 @@ model AppUser {
 }
 
 model InvestorProfile {
-  userId    String @id
-  firstName String
-  lastName  String
+  userId String @id
 
-  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                AppUser              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investorPreferences InvestorPreferences?
+}
+
+model InvestorPreferences {
+  investorProfileId String          @id
+  investorProfile   InvestorProfile @relation(fields: [investorProfileId], references: [userId])
+
+  investingInDubai       Boolean
+  openToJointInvestments Boolean
+  wantsAdvisorCall       Boolean
+  interestedInEvents     Boolean
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model BrokerProfile {
-  userId      String  @id
-  firstName   String
-  lastName    String
-  companyName String?
-  licenseNo   String?
+  userId String @id
 
   user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  isBoolean,
+  IsEmail,
+  IsEnum,
+  IsPhoneNumber,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import z from 'zod';
 
 export class AuthUserDto {
@@ -76,4 +84,43 @@ export class ResetPasswordDto {
   @IsString()
   @MinLength(6)
   newPassword: string;
+}
+export class OnboardStep1Dto {
+  @ApiProperty({ type: String, example: 'John' })
+  @IsString()
+  firstName: string;
+
+  @ApiProperty({ type: String, example: 'Smith' })
+  @IsString()
+  lastName: string;
+
+  @ApiProperty({ type: String, example: '+701352652365' })
+  @IsPhoneNumber()
+  phone: string;
+
+  @ApiProperty({ type: String, example: 'UAE, Dubai' })
+  @IsString()
+  recidence: string;
+
+  @ApiProperty({ type: String, example: 'American' })
+  @IsString()
+  nationality: string;
+}
+
+export class OnboardStep2Dto {
+  @ApiProperty({ type: Boolean, example: true })
+  @IsBoolean()
+  investingInDubai: boolean;
+
+  @ApiProperty({ type: Boolean, example: false })
+  @IsBoolean()
+  openToJointInvestments: boolean;
+
+  @ApiProperty({ type: Boolean, example: true })
+  @IsBoolean()
+  wantsAdvisorCall: boolean;
+
+  @ApiProperty({ type: Boolean, example: false })
+  @IsBoolean()
+  interestedInEvents: boolean;
 }
