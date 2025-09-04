@@ -31,7 +31,11 @@ export class PropertiesController {
     type: PropertyDto,
   })
   create(@Body() dto: CreatePropertyDto) {
-    return this.propertiesService.create(dto);
+    return this.propertiesService.create({
+      ...dto,
+      rentStart: dto?.rentStart ? new Date(dto.rentStart) : dto?.rentStart,
+      rentExpiry: dto?.rentExpiry ? new Date(dto.rentExpiry) : dto?.rentStart,
+    });
   }
 
   @Get()
