@@ -33,7 +33,26 @@ export const setAuthCookies = (
     domain: 'podocarpus.test', // optional
   });
 };
+export const removeAuthCookies = (reply: FastifyReply) => {
+  // set cookies
+  reply.setCookie(ACCESS_TOKEN_KEY, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0, // immediately expires
+    domain: 'podocarpus.test',
+  });
 
+  reply.setCookie(REFRESH_TOKEN_KEY, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+    domain: 'podocarpus.test',
+  });
+};
 export const getAuthCookies = (req: FastifyRequest) => {
   const cookies = req.cookies as Record<string, string | undefined>;
   return {
@@ -42,16 +61,16 @@ export const getAuthCookies = (req: FastifyRequest) => {
   };
 };
 
-export const getPayloadFromCookies = async (
-  req: FastifyRequest,
-  jwtService: JwtService,
-): Promise<TokenPayload | null> => {
-  const { accessToken } = getAuthCookies(req);
-  if (!accessToken) return null;
+// export const getPayloadFromCookies = async (
+//   req: FastifyRequest,
+//   jwtService: JwtService,
+// ): Promise<TokenPayload | null> => {
+//   const { accessToken } = getAuthCookies(req);
+//   if (!accessToken) return null;
 
-  try {
-    return await jwtService.verifyAsync<TokenPayload>(accessToken);
-  } catch {
-    return null;
-  }
-};
+//   try {
+//     return await jwtService.verifyAsync<TokenPayload>(accessToken);
+//   } catch {
+//     return null;
+//   }
+// };

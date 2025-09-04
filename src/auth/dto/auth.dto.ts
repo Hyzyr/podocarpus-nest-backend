@@ -1,30 +1,20 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import {
   IsBoolean,
-  isBoolean,
   IsEmail,
   IsEnum,
   IsPhoneNumber,
   IsString,
   MinLength,
 } from 'class-validator';
+import { UserDto } from 'src/users/dto';
 import z from 'zod';
 
-export class AuthUserDto {
-  @ApiProperty({ example: 'uuid' })
-  id: string;
-
-  @ApiProperty({ example: 'john@example.com' })
-  email: string;
-
-  @ApiProperty({ enum: UserRole, example: UserRole.investor })
-  role: UserRole;
-
-  @ApiProperty({ type: Boolean })
-  onboardingCompleted: boolean;
-}
+// Get shorter user information
 export const authUserParser: z.ZodType<AuthUserDto> = z.any();
+
+export class AuthUserDto extends UserDto {} 
 
 export class LoginBodyDto {
   @ApiProperty({ example: 'john.doe@example.com' })
@@ -106,7 +96,6 @@ export class OnboardStep1Dto {
   @IsString()
   nationality: string;
 }
-
 export class OnboardStep2Dto {
   @ApiProperty({ type: Boolean, example: true })
   @IsBoolean()

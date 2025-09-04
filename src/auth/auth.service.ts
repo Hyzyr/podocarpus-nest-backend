@@ -20,7 +20,7 @@ import {
 } from './dto';
 import {
   getAuthCookies,
-  getPayloadFromCookies,
+  removeAuthCookies,
   setAuthCookies,
 } from './auth.tokens';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -84,6 +84,10 @@ export class AuthService {
     return {
       user: authUserParser.parse(user),
     };
+  }
+  async logout(reply: FastifyReply) {
+    removeAuthCookies(reply);
+    return reply.status(204).send();
   }
   async getCurrentUser(req: FastifyRequest): Promise<AuthResponseDto> {
     const { accessToken } = getAuthCookies(req);
@@ -187,11 +191,13 @@ export class AuthService {
   }
 
   async onboardStep1(user: CurrentUser, body: OnboardStep1Dto) {
-    const { userId } = user;
+    const { userId, role } = user;
+
+    const noNeedStep2 = role !== UserRole.investor;
 
     await this.prisma.appUser.update({
       where: { id: userId.toString() },
-      data: { ...body },
+      data: { ...body, onboardingCompleted: noNeedStep2 },
     });
     return { status: 'success', message: 'Step 1 saved successfully' };
   }

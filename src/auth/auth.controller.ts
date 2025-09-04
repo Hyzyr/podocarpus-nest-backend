@@ -55,6 +55,16 @@ export class AuthController {
     return this.auth.login(dto.email, dto.password, reply);
   }
 
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({
+    status: 204,
+    description: 'User logged out successfully',
+  })
+  logout(@Res({ passthrough: true }) reply: FastifyReply) {
+    return this.auth.logout(reply);
+  }
+
   @Get('me')
   @ApiOperation({ summary: 'Get current logged-in user from HttpOnly cookie' })
   @ApiCookieAuth('token') // Swagger will show cookie auth field
@@ -77,7 +87,10 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
-  async refresh(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+  async refresh(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
     return this.auth.refreshTokens(req, reply);
   }
 

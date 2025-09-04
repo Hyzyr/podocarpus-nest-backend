@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -52,18 +46,23 @@ model AppUser {
   brokerProfile   BrokerProfile?
   adminProfile    AdminProfile?
   appointments    Appointment[]
+
+  propertyStatuses UserPropertyStatus[]
+  eventStatuses    UserEventStatus[]
+  activityLogs     ActivityLog[]
 }
 
 model InvestorProfile {
   userId String @id
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user                AppUser              @relation(fields: [userId], references: [id], onDelete: Cascade)
   investorPreferences InvestorPreferences?
+  properties          Property[]  // owned properties
 }
 
 model InvestorPreferences {
   investorProfileId String          @id
-  investorProfile   InvestorProfile @relation(fields: [investorProfileId], references: [userId])
+  investorProfile   InvestorProfile @relation(fields: [investorProfileId], references: [userId], onDelete: Cascade)
 
   investingInDubai       Boolean
   openToJointInvestments Boolean
@@ -75,15 +74,13 @@ model InvestorPreferences {
 
 model BrokerProfile {
   userId String @id
-
-  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AdminProfile {
   userId     String  @id
   department String?
-
-  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Property {
@@ -117,9 +114,14 @@ model Property {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
+  // ❗ owner is optional, survives if investor removed
+  ownerId String?
+  owner   InvestorProfile? @relation(fields: [ownerId], references: [userId], onDelete: SetNull)
+
   governmentLeases  GovernmentLease[]
   availabilitySlots AvailabilitySlot[]
   appointments      Appointment[]
+  userStatuses      UserPropertyStatus[]
 }
 
 model GovernmentLease {
@@ -155,4 +157,60 @@ model Appointment {
   property Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   bookedBy AppUser           @relation(fields: [bookedById], references: [id], onDelete: Cascade)
   slot     AvailabilitySlot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  location    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userStatuses UserEventStatus[]
+}
+
+model UserPropertyStatus {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  seen       Boolean  @default(false)
+  viewedAt   DateTime @default(now())
+
+  user     AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@index([propertyId])
+}
+
+model UserEventStatus {
+  id       String   @id @default(uuid())
+  userId   String
+  eventId  String
+  seen     Boolean  @default(false)
+  viewedAt DateTime @default(now())
+
+  user  AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // e.g. "property_viewed", "event_seen", "login"
+  entityId  String?  // optional: link to property/event/etc
+  metadata  Json?    // store extra details if needed
+  createdAt DateTime @default(now())
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([entityId])
 }
