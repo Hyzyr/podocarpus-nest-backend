@@ -10,8 +10,11 @@ import {
 import cookie, { FastifyCookieOptions } from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
-import { COOKIE_SECRET } from './constants';
+import { COOKIE_SECRET, UPLOADS_URL } from './constants';
+import { join } from 'path';
 
 const PORT = process.env.PORT || 3030;
 
@@ -22,6 +25,14 @@ async function bootstrap() {
   );
 
   // Register plugins
+  // >>> file management
+  await app.register(multipart);
+  await app.register(fastifyStatic, {
+    root: join(__dirname, '..', 'uploads'), // local uploads folder
+    prefix: `${UPLOADS_URL}/`, // URL prefix
+  });
+
+  // >>> cookies & cors management
   await app.register<FastifyCookieOptions>(cookie, {
     secret: COOKIE_SECRET,
   });

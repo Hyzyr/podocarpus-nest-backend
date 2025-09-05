@@ -2,6 +2,7 @@ export const WEBSITE_NAME = 'Podocarpus Real Estate LLC';
 export const COOKIE_SECRET = process.env.COOKIE_SECRET || 'podocarpus-secret';
 export const JWT_SECRET = process.env.JWT_SECRET || 'podocarpus-secret';
 export const WEBSITE_URL = process.env.WEBSITE_URL || 'https://pdcps.com';
+export const UPLOADS_URL = process.env.UPLOADS_LOCATION || '/uploads';
 
 // mailer details :
 export const MAIL_HOST = process.env.MAIL_HOST || '';
