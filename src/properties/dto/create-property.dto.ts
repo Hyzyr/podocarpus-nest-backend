@@ -6,6 +6,7 @@ import {
   IsInt,
   IsDateString,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 
 export class CreatePropertyDto {
@@ -134,6 +135,11 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  images: string[];
 
   @ApiProperty({
     required: false,

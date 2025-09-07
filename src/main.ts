@@ -26,9 +26,13 @@ async function bootstrap() {
 
   // Register plugins
   // >>> file management
-  await app.register(multipart);
+  await app.register(multipart, {
+    limits: {
+      fileSize: 6 * 1024 * 1024, // 6 MB per file
+    },
+  });
   await app.register(fastifyStatic, {
-    root: join(__dirname, '..', 'uploads'), // local uploads folder
+    root: join(process.cwd(), UPLOADS_URL.replaceAll('/', '')), // local uploads folder
     prefix: `${UPLOADS_URL}/`, // URL prefix
   });
 

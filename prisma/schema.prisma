@@ -110,6 +110,7 @@ model Property {
   longitude            Float?
   city                 String?
   country              String?
+  images               String[]
   isActive             Boolean   @default(true)
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt

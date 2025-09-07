@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsIn,
@@ -147,6 +148,11 @@ export class PropertyDto {
   @ApiProperty()
   @IsBoolean()
   isActive: boolean;
+
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  images: string[];
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;

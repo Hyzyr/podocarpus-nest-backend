@@ -1,6 +1,7 @@
 import { Controller, Post, Req } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { StorageService } from './storage.service';
+import { safeFilename } from 'src/utils/file-rename';
 
 @Controller('storage')
 export class StorageController {
@@ -13,7 +14,7 @@ export class StorageController {
       if (part.type === 'file') {
         const url = await this.storageService.uploadStream(
           part.file, // Readable stream
-          part.filename, // Original filename
+          safeFilename(part.filename),
         );
         return { url };
       }
