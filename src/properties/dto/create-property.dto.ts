@@ -7,6 +7,7 @@ import {
   IsDateString,
   IsBoolean,
   IsArray,
+  IsNumber,
 } from 'class-validator';
 
 export class CreatePropertyDto {
@@ -135,6 +136,59 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  @ApiPropertyOptional({
+    description: 'Minimum estimated Net ROI (%)',
+    example: 9,
+  })
+  @IsOptional()
+  @IsNumber()
+  netRoiMin?: number;
+
+  @ApiPropertyOptional({
+    description: 'Maximum estimated Net ROI (%)',
+    example: 11,
+  })
+  @IsOptional()
+  @IsNumber()
+  netRoiMax?: number;
+
+  @ApiPropertyOptional({
+    description: 'Indicates if property is in a tax-free zone',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isTaxFreeZone?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Vacancy risk level (Low, Medium, High)',
+    example: 'Low',
+  })
+  @IsOptional()
+  @IsString()
+  vacancyRisk?: string;
+
+  @ApiPropertyOptional({
+    description: 'Key benefits (e.g., 100% Ownership, Tax-Free, Repatriation)',
+    example: [
+      '100% Foreign Ownership',
+      'Tax-Free Zone',
+      'Full Capital Repatriation',
+    ],
+    type: [String],
+  })
+  @IsOptional()
+  @IsString({ each: true })
+  keyBenefits?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Freezone authority governing the property',
+    example: 'DMCC Freezone',
+  })
+  @IsOptional()
+  @IsString()
+  freezoneAuthority?: string;
 
   @ApiProperty({ type: [String] })
   @IsArray()

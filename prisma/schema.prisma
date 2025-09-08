@@ -53,11 +53,11 @@ model AppUser {
 }
 
 model InvestorProfile {
-  userId String @id
+  userId String  @id
   user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   investorPreferences InvestorPreferences?
-  properties          Property[]  // owned properties
+  properties          Property[] // owned properties
 }
 
 model InvestorPreferences {
@@ -73,7 +73,7 @@ model InvestorPreferences {
 }
 
 model BrokerProfile {
-  userId String @id
+  userId String  @id
   user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -114,6 +114,14 @@ model Property {
   isActive             Boolean   @default(true)
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+
+  // New fields for card display
+  netRoiMin         Float? // e.g. 9
+  netRoiMax         Float? // e.g. 11
+  isTaxFreeZone     Boolean? // true/false
+  vacancyRisk       String? // e.g. "Low", "Medium", "High"
+  keyBenefits       String[] // ["100% Foreign Ownership", "Tax-Free Zone", "Full Capital Repatriation"]
+  freezoneAuthority String? // e.g. "DMCC Freezone"
 
   // ❗ owner is optional, survives if investor removed
   ownerId String?
@@ -161,15 +169,15 @@ model Appointment {
 }
 
 model Event {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
   startsAt    DateTime
   endsAt      DateTime?
   location    String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   userStatuses UserEventStatus[]
 }
@@ -205,9 +213,9 @@ model UserEventStatus {
 model ActivityLog {
   id        String   @id @default(uuid())
   userId    String
-  type      String   // e.g. "property_viewed", "event_seen", "login"
-  entityId  String?  // optional: link to property/event/etc
-  metadata  Json?    // store extra details if needed
+  type      String // e.g. "property_viewed", "event_seen", "login"
+  entityId  String? // optional: link to property/event/etc
+  metadata  Json? // store extra details if needed
   createdAt DateTime @default(now())
 
   user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
