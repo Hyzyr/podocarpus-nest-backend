@@ -175,6 +175,11 @@ model Event {
   startsAt    DateTime
   endsAt      DateTime?
   location    String?
+
+  // New fields
+  totalMembers Int?       // optional: can be stored or derived
+  budget       Decimal?   @db.Decimal(10,2)
+
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

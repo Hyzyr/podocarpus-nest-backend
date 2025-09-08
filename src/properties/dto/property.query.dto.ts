@@ -8,7 +8,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { PropertyDto } from './get-property.dto';
+import { PropertyDto } from './property.get.dto';
 
 export class PropertyIdParamDto {
   @ApiProperty({ description: 'Property ID' })

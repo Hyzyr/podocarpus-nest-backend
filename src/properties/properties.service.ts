@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../_helpers/database/prisma/prisma.service';
-import { CreatePropertyDto } from './dto/create-property.dto';
-import { UpdatePropertyDto } from './dto/update-property.dto';
+import { CreatePropertyDto } from './dto/property.create.dto';
+import { UpdatePropertyDto } from './dto/property.update.dto';
 import { FindAllPropertiesQueryDto } from './dto';
 
 @Injectable()

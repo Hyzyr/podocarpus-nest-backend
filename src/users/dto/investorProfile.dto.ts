@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PropertyDto } from 'src/properties/dto';
-import { UserDto } from './get-user.dto';
+import { UserDto } from './user.get.dto';
 import { IsBoolean } from 'class-validator';
 
 export class InvestorProfileDto {
