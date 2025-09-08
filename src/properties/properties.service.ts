@@ -9,9 +9,6 @@ export class PropertiesService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreatePropertyDto) {
-    console.log('create property hit: ');
-    console.log({ dto });
-
     return this.prisma.property.create({
       data: dto,
     });

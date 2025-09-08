@@ -10,6 +10,7 @@ import { DatabaseModule } from './_helpers/database/database.module';
 import { MailerModule } from './_helpers/mailer/mailer.module';
 import { DataModule } from './data/data.module';
 import { StorageModule } from './storage/storage.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { StorageModule } from './storage/storage.module';
     AppointmentsModule,
     DataModule,
     StorageModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [],
