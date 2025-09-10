@@ -7,6 +7,7 @@ export class UsersService {
 
   private readonly logger = new Logger(UsersService.name);
 
+  
   create(user: any) {
     this.logger.log(`Creating user: ${JSON.stringify(user)}`);
     return { message: 'User created', user };

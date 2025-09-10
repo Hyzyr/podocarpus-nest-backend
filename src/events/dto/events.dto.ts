@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { EventStatus } from '@prisma/client';
 import {
   IsBoolean,
   IsDateString,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -19,44 +21,92 @@ export class EventIdParamDto {
 }
 
 export class CreateEventDto {
-  @ApiProperty({ example: 'AI Arab Night Lunch with VIP members' })
+  @ApiProperty({
+    example: 'AI Arab Night Lunch with VIP members',
+    maxLength: 255,
+  })
   @IsNotEmpty()
   @IsString()
   @MaxLength(255)
   title: string;
 
-  @ApiPropertyOptional({ example: 'Podocarpus offers carefully selected properties built for lasting growth and proven returns.' })
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    maxLength: 2000,
+    example:
+      'Podocarpus offers carefully selected properties built for lasting growth and proven returns.',
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string | null;
 
-  @ApiProperty({ example: '2025-06-30T19:00:00.000Z', description: 'ISO 8601 date string' })
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    example: '2025-06-30T19:00:00.000Z',
+  })
   @IsNotEmpty()
   @IsDateString()
   startsAt: Date;
 
-  @ApiPropertyOptional({ example: '2025-06-30T23:00:00.000Z', description: 'ISO 8601 date string' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+    example: '2025-06-30T23:00:00.000Z',
+  })
   @IsOptional()
   @IsDateString()
   endsAt?: Date | null;
 
-  @ApiPropertyOptional({ example: 'Jumeirah Lakes Towers (JLT), Dubai DMCC Freezone' })
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    maxLength: 500,
+    example: 'Jumeirah Lakes Towers (JLT), Dubai DMCC Freezone',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   location?: string | null;
 
-  @ApiPropertyOptional({ example: 10000, description: 'Total members or capacity' })
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    minimum: 0,
+    example: 10000,
+    description: 'Total members or capacity',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
   totalMembers?: number | null;
 
-  @ApiPropertyOptional({ example: 17500, description: 'Budget in numeric value' })
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    minimum: 0,
+    example: 17500,
+    description: 'Budget in numeric value',
+  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
-  @IsPositive()
+  @Min(0) // use @IsPositive() if you want > 0 only
   budget?: number | null;
+
+  @ApiPropertyOptional({ enum: EventStatus, default: EventStatus.OPEN })
+  @IsOptional()
+  @IsEnum(EventStatus)
+  status?: EventStatus;
+
+  @ApiProperty({
+    type: String,
+    description: 'Image URL',
+  })
+  @IsString()
+  image: string;
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
@@ -73,7 +123,10 @@ export class EventDto {
   @ApiProperty({ example: 'AI Arab Night Lunch with VIP members' })
   title: string;
 
-  @ApiProperty({ example: 'Podocarpus offers carefully selected properties built for lasting growth and proven returns.' })
+  @ApiProperty({
+    example:
+      'Podocarpus offers carefully selected properties built for lasting growth and proven returns.',
+  })
   description?: string | null;
 
   @ApiProperty({ example: '2025-06-30T19:00:00.000Z' })
@@ -90,6 +143,16 @@ export class EventDto {
 
   @ApiProperty({ example: 17500 })
   budget?: number | null;
+
+  @ApiProperty({ enum: EventStatus })
+  status: EventStatus;
+
+  @ApiProperty({
+    type: String,
+    description: 'Image URL',
+  })
+  @IsString()
+  image: string;
 
   @ApiProperty({ example: true })
   isActive: boolean;

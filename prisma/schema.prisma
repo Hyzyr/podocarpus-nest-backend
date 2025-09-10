@@ -21,6 +21,15 @@ enum AppointmentStatus {
   canceled
 }
 
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  OPEN
+  // WAITLIST
+  ENDED
+  CANCELLED
+}
+
 model AppUser {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -89,6 +98,7 @@ model Property {
   description          String?
   area                 String?
   buildingName         String?
+  contractValue        Float     @default(1000) // for Investors
   developer            String?
   unitNo               String?
   floor                Int?
@@ -101,7 +111,6 @@ model Property {
   rateYear             Int?
   status               String?
   rentValue            Float?
-  contractValue        Float?
   depositReceived      Float?
   paymentMethod        String?
   rentStart            DateTime?
@@ -177,12 +186,14 @@ model Event {
   location    String?
 
   // New fields
-  totalMembers Int?       // optional: can be stored or derived
-  budget       Decimal?   @db.Decimal(10,2)
+  totalMembers Int? // optional: can be stored or derived
+  budget       Decimal?    @db.Decimal(10, 2)
+  status       EventStatus @default(OPEN)
+  image        String
 
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userStatuses UserEventStatus[]
 }
