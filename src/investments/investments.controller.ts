@@ -3,7 +3,8 @@ import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { InvestmentsService } from './investments.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles, RolesGuard } from 'src/auth/roles';
-import { BindInvestmentDto, PublicPropertyDto } from './dto/investments.dto';
+import { BindInvestmentDto, InvestorPropertyDto } from './dto/investments.dto';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
 @ApiTags('investments')
 @Controller('investments')
@@ -18,26 +19,27 @@ export class InvestmentsController {
   @ApiResponse({
     status: 200,
     description: 'Property created successfully.',
-    type: [PublicPropertyDto],
+    type: [InvestorPropertyDto],
   })
-  getMyProperties(@Req() req) {
-    return this.investmentsService.findInvestorProperties(req.user.userId);
+  getMyProperties(@CurrentUser() user: CurrentUser) {
+    return this.investmentsService.findInvestorProperties(user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('bind')
   //   @Roles('admin')
   @ApiOperation({ summary: 'Bind a property to current Investor' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Property successfully bound to investor',
-    type: PublicPropertyDto,
+    type: [InvestorPropertyDto],
   })
   async bindInvestmentTo(
-    @Req() req,
-    @Body() dto: BindInvestmentDto, 
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: BindInvestmentDto,
   ) {
     return this.investmentsService.bindInvestmentTo(
-      req.user.userId,
+      user.userId,
       dto.propertyId,
     );
   }

@@ -93,44 +93,46 @@ model AdminProfile {
 }
 
 model Property {
-  id                   String    @id @default(uuid())
-  title                String
-  description          String?
-  area                 String?
-  buildingName         String?
-  contractValue        Float     @default(1000) // for Investors
-  developer            String?
-  unitNo               String?
-  floor                Int?
-  condition            String?
-  unitTotalSize        Float?
-  apartmentSize        Float?
-  balconySize          Float?
-  serviceChargePerSqft Float?
-  serviceChargeTotal   Float?
-  rateYear             Int?
-  status               String?
-  rentValue            Float?
-  depositReceived      Float?
-  paymentMethod        String?
-  rentStart            DateTime?
-  rentExpiry           DateTime?
-  latitude             Float?
-  longitude            Float?
-  city                 String?
-  country              String?
-  images               String[]
-  isActive             Boolean   @default(true)
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-
-  // New fields for card display
+  id                String   @id @default(uuid())
+  title             String
+  description       String?
+  area              String?
+  buildingName      String?
+  contractValue     Float    @default(1000) // for Investors
+  developer         String?
+  unitNo            String?
+  floor             Int?
+  condition         String?
+  unitTotalSize     Float?
+  apartmentSize     Float?
+  balconySize       Float?
+  status            String?
+  latitude          Float?
+  longitude         Float?
+  city              String?
+  country           String?
+  images            String[]
+  isActive          Boolean  @default(true)
   netRoiMin         Float? // e.g. 9
   netRoiMax         Float? // e.g. 11
   isTaxFreeZone     Boolean? // true/false
-  vacancyRisk       String? // e.g. "Low", "Medium", "High"
   keyBenefits       String[] // ["100% Foreign Ownership", "Tax-Free Zone", "Full Capital Repatriation"]
   freezoneAuthority String? // e.g. "DMCC Freezone"
+
+  // investor 
+  depositReceived Float?
+  paymentMethod   String?
+  rentStart       DateTime?
+  rentExpiry      DateTime?
+  rentValue       Float?
+  rateYear        Int?
+  vacancyRisk     String? // e.g. "Low", "Medium", "High"
+
+  // admin
+  serviceChargePerSqft Float?
+  serviceChargeTotal   Float?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   // ❗ owner is optional, survives if investor removed
   ownerId String?

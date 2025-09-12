@@ -13,7 +13,7 @@ import { PropertiesService } from './properties.service';
 import {
   CreatePropertyDto,
   FindAllPropertiesQueryDto,
-  PropertyDto,
+  PublicPropertyDto,
   PropertyIdParamDto,
   UpdatePropertyDto,
 } from './dto';
@@ -28,7 +28,7 @@ export class PropertiesController {
   @ApiResponse({
     status: 201,
     description: 'Property created successfully.',
-    type: PropertyDto,
+    type: PublicPropertyDto,
   })
   create(@Body() dto: CreatePropertyDto) {
     return this.propertiesService.create({
@@ -43,7 +43,7 @@ export class PropertiesController {
   @ApiResponse({
     status: 200,
     description: 'List of properties retrieved successfully.',
-    type: [PropertyDto],
+    type: [PublicPropertyDto],
   })
   findAll(@Query() query?: FindAllPropertiesQueryDto) {
     return this.propertiesService.findAll(query);
@@ -54,7 +54,7 @@ export class PropertiesController {
   @ApiResponse({
     status: 200,
     description: 'Property retrieved successfully.',
-    type: PropertyDto,
+    type: PublicPropertyDto,
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
   findOne(@Param() { id }: PropertyIdParamDto) {
@@ -66,7 +66,7 @@ export class PropertiesController {
   @ApiResponse({
     status: 200,
     description: 'Property updated successfully.',
-    type: PropertyDto,
+    type: PublicPropertyDto,
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
   update(@Param() { id }: PropertyIdParamDto, @Body() dto: UpdatePropertyDto) {

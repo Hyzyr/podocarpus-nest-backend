@@ -3,17 +3,16 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
-  IsDateString,
-  IsIn,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
-  Min,
 } from 'class-validator';
 import { InvestorProfileDto } from 'src/users/dto';
+import z from 'zod';
 
-export class PropertyDto {
+//  for public use only
+export class PublicPropertyDto {
   @ApiProperty()
   id: string;
 
@@ -99,32 +98,7 @@ export class PropertyDto {
   @ApiPropertyOptional({ type: Number, nullable: true })
   @IsOptional()
   @Type(() => Number)
-  rentValue?: number | null;
-
-  @ApiPropertyOptional({ type: Number, nullable: true })
-  @IsOptional()
-  @Type(() => Number)
   contractValue?: number | null;
-
-  @ApiPropertyOptional({ type: Number, nullable: true })
-  @IsOptional()
-  @Type(() => Number)
-  depositReceived?: number | null;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  paymentMethod?: string | null;
-
-  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
-  @IsOptional()
-  @IsDateString()
-  rentStart?: Date | null;
-
-  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
-  @IsOptional()
-  @IsDateString()
-  rentExpiry?: Date | null;
 
   @ApiPropertyOptional({ type: Number, nullable: true })
   @IsOptional()
@@ -174,10 +148,6 @@ export class PropertyDto {
     description: 'Vacancy risk level (Low, Medium, High)',
     example: 'Low',
   })
-  @IsOptional()
-  @IsString()
-  vacancyRisk?: string;
-
   @ApiPropertyOptional({
     description: 'Key benefits (e.g., 100% Ownership, Tax-Free, Repatriation)',
     example: [
@@ -187,7 +157,6 @@ export class PropertyDto {
     ],
     type: [String],
   })
-  
   @IsOptional()
   @IsString({ each: true })
   keyBenefits?: string[];
@@ -223,3 +192,32 @@ export class PropertyDto {
   @IsBoolean()
   isActive: boolean;
 }
+export const PublicPropertySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  area: z.string().nullable().optional(),
+  buildingName: z.string().nullable().optional(),
+  contractValue: z.number(),
+  developer: z.string().nullable().optional(),
+  unitNo: z.string().nullable().optional(),
+  floor: z.number().nullable().optional(),
+  condition: z.string().nullable().optional(),
+  unitTotalSize: z.number().nullable().optional(),
+  apartmentSize: z.number().nullable().optional(),
+  balconySize: z.number().nullable().optional(),
+  status: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  city: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  images: z.array(z.string()).optional(),
+  isActive: z.boolean(),
+  netRoiMin: z.number().nullable().optional(),
+  netRoiMax: z.number().nullable().optional(),
+  isTaxFreeZone: z.boolean().nullable().optional(),
+  keyBenefits: z.array(z.string()).optional(),
+  freezoneAuthority: z.string().nullable().optional(),
+}).strip();
+
+export type PublicProperty = z.infer<typeof PublicPropertySchema>;

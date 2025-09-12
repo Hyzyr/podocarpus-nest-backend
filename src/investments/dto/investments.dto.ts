@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUUID } from 'class-validator';
+import { PublicPropertyDto, PublicPropertySchema } from 'src/properties/dto';
 import z from 'zod';
 
 export class BindInvestmentDto {
@@ -12,33 +13,45 @@ export class BindInvestmentDto {
   propertyId: string;
 }
 
-export class PublicPropertyDto  {
-  @ApiProperty({ example: 'uuid-123', description: 'Property ID' })
-  id: string;
+export class InvestorPropertyDto extends PublicPropertyDto {
+  @ApiProperty({
+    example: 5000,
+    required: false,
+    description: 'Deposit received',
+  })
+  depositReceived?: number;
 
-  @ApiProperty({ example: 'Luxury Apartment', description: 'Title' })
-  title: string;
+  @ApiProperty({ example: 'Bank Transfer', required: false })
+  paymentMethod?: string;
 
-  @ApiProperty({ example: '2-bedroom in downtown area', required: false })
-  description?: string;
+  @ApiProperty({ example: '2025-01-01T00:00:00.000Z', required: false })
+  rentStart?: Date;
 
-  @ApiProperty({ example: 'New York' })
-  city: string;
+  @ApiProperty({ example: '2028-01-01T00:00:00.000Z', required: false })
+  rentExpiry?: Date;
 
-  @ApiProperty({ example: 'USA' })
-  country: string;
+  @ApiProperty({
+    example: 25000,
+    required: false,
+    description: 'Yearly rent value',
+  })
+  rentValue?: number;
 
-  @ApiProperty({ example: 2500, required: false })
-  contractValue?: number;
-
-  @ApiProperty({ example: 40.7128, required: false })
-  latitude?: number;
-
-  @ApiProperty({ example: -74.006, required: false })
-  longitude?: number;
-
-  @ApiProperty({ example: true })
-  isActive: boolean;
+  @ApiProperty({
+    example: 'Low',
+    required: false,
+    description: 'Vacancy risk level',
+  })
+  vacancyRisk?: string;
 }
+export const InvestorPropertySchema = PublicPropertySchema.extend({
+  depositReceived: z.number().nullable().optional(),
+  paymentMethod: z.string().nullable().optional(),
+  rentStart: z.date().nullable().optional(),
+  rentExpiry: z.date().nullable().optional(),
+  rentValue: z.number().nullable().optional(),
+  rateYear: z.number().nullable().optional(),
+  vacancyRisk: z.string().nullable().optional(),
+}).strip();
 
-export const PublicPropertySchema = z.object(PublicPropertyDto);
+export type InvestorProperty = z.infer<typeof InvestorPropertySchema>;

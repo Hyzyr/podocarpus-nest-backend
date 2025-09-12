@@ -8,7 +8,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { PropertyDto } from './property.get.dto';
+import { PublicPropertyDto } from './property.get.dto';
 
 export class PropertyIdParamDto {
   @ApiProperty({ description: 'Property ID' })
@@ -98,7 +98,7 @@ export class FindAllPropertiesQueryDto {
   })
   @IsOptional()
   @IsString()
-  sortBy?: keyof PropertyDto | string;
+  sortBy?: keyof PublicPropertyDto | string;
 
   @ApiPropertyOptional({ example: 'desc', enum: ['asc', 'desc'] })
   @IsOptional()

@@ -2,16 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../_helpers/database/prisma/prisma.service';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
-import { FindAllPropertiesQueryDto } from './dto';
+import { FindAllPropertiesQueryDto, PublicPropertySchema } from './dto';
 
 @Injectable()
 export class PropertiesService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreatePropertyDto) {
-    return this.prisma.property.create({
+    const property = await this.prisma.property.create({
       data: dto,
     });
+    return PublicPropertySchema.parse(property);
   }
 
   async findAll(query?: FindAllPropertiesQueryDto) {
@@ -36,7 +37,7 @@ export class PropertiesService {
       createdTo,
     } = query || {};
 
-    return this.prisma.property.findMany({
+    const data = await this.prisma.property.findMany({
       where: {
         AND: [
           search
@@ -74,18 +75,21 @@ export class PropertiesService {
         [sortBy]: sortOrder,
       },
     });
+
+    return PublicPropertySchema.array().parse(data);
   }
   async findOne(id: string) {
     const property = await this.prisma.property.findUnique({ where: { id } });
     if (!property) throw new NotFoundException(`Property ${id} not found`);
-    return property;
+    return PublicPropertySchema.parse(property);
   }
 
   async update(id: string, dto: UpdatePropertyDto) {
-    return this.prisma.property.update({
+    const property = await this.prisma.property.update({
       where: { id },
       data: dto,
     });
+    return PublicPropertySchema.parse(property);
   }
 
   async remove(id: string) {

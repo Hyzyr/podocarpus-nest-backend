@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
-import { PublicPropertySchema } from './dto/investments.dto';
+import { InvestorPropertySchema } from './dto/investments.dto';
 
 @Injectable()
 export class InvestmentsService {
@@ -11,7 +11,12 @@ export class InvestmentsService {
       where: { userId },
       include: { properties: true },
     });
-    return PublicPropertySchema.array().parse(data?.properties);
+
+    const properties = data?.properties;
+    const parsedProperties = InvestorPropertySchema.array().parse(properties);
+    console.log(properties);
+    console.log(parsedProperties);
+    return parsedProperties;
   }
   async bindInvestmentTo(userId: string, propertyId: string) {
     const data = await this.prisma.investorProfile.update({
@@ -20,6 +25,6 @@ export class InvestmentsService {
       include: { properties: true },
     });
 
-    return PublicPropertySchema.array().parse(data.properties);
+    return InvestorPropertySchema.array().parse(data.properties);
   }
 }
