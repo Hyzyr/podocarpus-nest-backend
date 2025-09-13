@@ -36,13 +36,6 @@ export class InvestorPropertyDto extends PublicPropertyDto {
     description: 'Yearly rent value',
   })
   rentValue?: number;
-
-  @ApiProperty({
-    example: 'Low',
-    required: false,
-    description: 'Vacancy risk level',
-  })
-  vacancyRisk?: string;
 }
 export const InvestorPropertySchema = PublicPropertySchema.extend({
   depositReceived: z.number().nullable().optional(),
@@ -51,7 +44,6 @@ export const InvestorPropertySchema = PublicPropertySchema.extend({
   rentExpiry: z.date().nullable().optional(),
   rentValue: z.number().nullable().optional(),
   rateYear: z.number().nullable().optional(),
-  vacancyRisk: z.string().nullable().optional(),
 }).strip();
 
 export type InvestorProperty = z.infer<typeof InvestorPropertySchema>;

@@ -7,8 +7,6 @@ export class EventsService {
   constructor(private prisma: PrismaService) {}
 
   create(dto: CreateEventDto) {
-    console.log('create Event hit: ');
-    console.log({ dto });
 
     return this.prisma.event.create({
       data: dto,

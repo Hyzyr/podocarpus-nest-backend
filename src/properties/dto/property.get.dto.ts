@@ -144,10 +144,13 @@ export class PublicPropertyDto {
   @IsBoolean()
   isTaxFreeZone?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'Vacancy risk level (Low, Medium, High)',
+  @ApiProperty({
     example: 'Low',
+    required: false,
+    description: 'Vacancy risk level',
   })
+  vacancyRisk?: string;
+
   @ApiPropertyOptional({
     description: 'Key benefits (e.g., 100% Ownership, Tax-Free, Repatriation)',
     example: [
@@ -192,32 +195,35 @@ export class PublicPropertyDto {
   @IsBoolean()
   isActive: boolean;
 }
-export const PublicPropertySchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string().optional(),
-  area: z.string().nullable().optional(),
-  buildingName: z.string().nullable().optional(),
-  contractValue: z.number(),
-  developer: z.string().nullable().optional(),
-  unitNo: z.string().nullable().optional(),
-  floor: z.number().nullable().optional(),
-  condition: z.string().nullable().optional(),
-  unitTotalSize: z.number().nullable().optional(),
-  apartmentSize: z.number().nullable().optional(),
-  balconySize: z.number().nullable().optional(),
-  status: z.string().nullable().optional(),
-  latitude: z.number().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-  city: z.string().nullable().optional(),
-  country: z.string().nullable().optional(),
-  images: z.array(z.string()).optional(),
-  isActive: z.boolean(),
-  netRoiMin: z.number().nullable().optional(),
-  netRoiMax: z.number().nullable().optional(),
-  isTaxFreeZone: z.boolean().nullable().optional(),
-  keyBenefits: z.array(z.string()).optional(),
-  freezoneAuthority: z.string().nullable().optional(),
-}).strip();
+export const PublicPropertySchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string().optional(),
+    area: z.string().nullable().optional(),
+    buildingName: z.string().nullable().optional(),
+    contractValue: z.number(),
+    developer: z.string().nullable().optional(),
+    unitNo: z.string().nullable().optional(),
+    floor: z.number().nullable().optional(),
+    condition: z.string().nullable().optional(),
+    unitTotalSize: z.number().nullable().optional(),
+    apartmentSize: z.number().nullable().optional(),
+    balconySize: z.number().nullable().optional(),
+    status: z.string().nullable().optional(),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
+    city: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+    images: z.array(z.string()).optional(),
+    isActive: z.boolean(),
+    netRoiMin: z.number().nullable().optional(),
+    netRoiMax: z.number().nullable().optional(),
+    isTaxFreeZone: z.boolean().nullable().optional(),
+    keyBenefits: z.array(z.string()).optional(),
+    freezoneAuthority: z.string().nullable().optional(),
+    vacancyRisk: z.string().nullable().optional(),
+  })
+  .strip();
 
 export type PublicProperty = z.infer<typeof PublicPropertySchema>;

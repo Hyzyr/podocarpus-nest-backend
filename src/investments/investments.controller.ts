@@ -13,7 +13,7 @@ export class InvestmentsController {
 
   // only allowed for Investors
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Get('my')
+  @Get()
   @Roles('investor')
   @ApiOperation({ summary: 'Get Investors Properties' })
   @ApiResponse({

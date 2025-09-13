@@ -15,10 +15,11 @@ enum UserRole {
 }
 
 enum AppointmentStatus {
-  requested
-  confirmed
-  completed
-  canceled
+  requested // booking created, waiting for approval
+  confirmed // scheduled and approved
+  completed // appointment done, user visited
+  noShow // user did not attend
+  canceled // appointment canceled
 }
 
 enum EventStatus {
