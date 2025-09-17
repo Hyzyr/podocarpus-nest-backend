@@ -14,11 +14,9 @@ export class UserEventStatusService {
       where: { userId: dto.userId, eventId: dto.eventId },
     });
 
-    console.log('existing: ', !!existing);
     if (existing)
       return this.update(existing.id, dto as UpdateUserEventStatusDto);
 
-    console.log('create : ');
     return this.prisma.userEventStatus.create({
       data: dto,
     });
@@ -43,7 +41,6 @@ export class UserEventStatusService {
   }
 
   async update(id: string, dto: UpdateUserEventStatusDto) {
-    console.log('update status');
     return this.prisma.userEventStatus.update({
       where: { id },
       data: { ...dto },

@@ -33,7 +33,6 @@ export class UserEventStatusController {
     type: CreateEventStatusDto,
   })
   create(@Body() dto: CreateEventStatusDto) {
-    console.log('UserEventStatusService : create');
     return this.eventsStatusService.create(dto);
   }
 
@@ -45,7 +44,6 @@ export class UserEventStatusController {
     type: [UserEventStatusDto],
   })
   findAll(@CurrentUser() user: CurrentUser) {
-    console.log('UserEventStatusService : findAll', user.userId);
     return this.eventsStatusService.findAll(user.userId);
   }
 
@@ -58,7 +56,6 @@ export class UserEventStatusController {
   })
   @ApiResponse({ status: 404, description: 'EventStatus not found.' })
   findOne(@Param() { id }: EventIdParamDto) {
-    console.log('UserEventStatusService : findOne');
     return this.eventsStatusService.findOne(id);
   }
 
@@ -70,10 +67,10 @@ export class UserEventStatusController {
     type: UserEventStatusDto,
   })
   @ApiResponse({ status: 404, description: 'EventStatus not found.' })
-  update(@Param() { id }: EventIdParamDto, @Body() dto: UpdateUserEventStatusDto) {
-    console.log('update status');
-    console.log('UserEventStatusService : update');
-
+  update(
+    @Param() { id }: EventIdParamDto,
+    @Body() dto: UpdateUserEventStatusDto,
+  ) {
     return this.eventsStatusService.update(id, dto);
   }
 

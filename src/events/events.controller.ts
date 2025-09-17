@@ -25,7 +25,7 @@ import { CurrentUser } from 'src/_helpers/user.decorator';
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
-  
+
   @Post()
   @ApiOperation({ summary: 'Create a new Event' })
   @ApiResponse({
@@ -34,8 +34,6 @@ export class EventsController {
     type: EventDto,
   })
   create(@Body() dto: CreateEventDto) {
-    console.log('EventsController : create');
-
     return this.eventsService.create({
       ...dto,
       startsAt: dto?.startsAt ? new Date(dto.startsAt) : dto?.startsAt,
@@ -75,8 +73,6 @@ export class EventsController {
   })
   @ApiResponse({ status: 404, description: 'Event not found.' })
   update(@Param() { id }: EventIdParamDto, @Body() dto: UpdateEventDto) {
-    console.log('EventsController : update');
-
     return this.eventsService.update(id, dto);
   }
 
