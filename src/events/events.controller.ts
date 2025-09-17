@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -13,14 +14,18 @@ import {
   CreateEventDto,
   EventDto,
   EventIdParamDto,
+  EventWithStatusDto,
   UpdateEventDto,
 } from './dto';
+import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
+@UseGuards(JwtAuthGuard)
 @ApiTags('events')
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
-
+  
   @Post()
   @ApiOperation({ summary: 'Create a new Event' })
   @ApiResponse({
@@ -29,6 +34,8 @@ export class EventsController {
     type: EventDto,
   })
   create(@Body() dto: CreateEventDto) {
+    console.log('EventsController : create');
+
     return this.eventsService.create({
       ...dto,
       startsAt: dto?.startsAt ? new Date(dto.startsAt) : dto?.startsAt,
@@ -41,10 +48,10 @@ export class EventsController {
   @ApiResponse({
     status: 200,
     description: 'List of events retrieved successfully.',
-    type: [EventDto],
+    type: [EventWithStatusDto],
   })
-  findAll() {
-    return this.eventsService.findAll();
+  findAll(@CurrentUser() user: CurrentUser) {
+    return this.eventsService.findAll(user.userId);
   }
 
   @Get(':id')
@@ -68,6 +75,8 @@ export class EventsController {
   })
   @ApiResponse({ status: 404, description: 'Event not found.' })
   update(@Param() { id }: EventIdParamDto, @Body() dto: UpdateEventDto) {
+    console.log('EventsController : update');
+
     return this.eventsService.update(id, dto);
   }
 

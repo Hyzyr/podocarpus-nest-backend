@@ -5,12 +5,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
 import {
-  AppointmentDto,
   CreateAppointmentDto,
   createAppointmentSchema,
   UpdateAppointmentDto,
 } from './dto';
-import { AppointmentStatus } from '@prisma/client';
+import { UserActionsStatus } from '@prisma/client';
 import { CurrentUser } from 'src/_helpers/user.decorator';
 import { zodKeysToSelect } from 'src/utils/zod-helpers';
 import { PublicPropertySchema } from 'src/properties/dto';
@@ -39,7 +38,7 @@ export class AppointmentService {
       propertyId: dto.propertyId,
       bookedById: userId, // enforce current user
       // slotId: dto.slotId ?? null,
-      status: dto.status ?? AppointmentStatus.requested,
+      status: dto.status ?? UserActionsStatus.requested,
       scheduledAt: dto.scheduledAt,
       notes: dto.notes,
     });
@@ -47,9 +46,6 @@ export class AppointmentService {
   }
 
   async findAllForUser(userId: string) {
-    console.log('findAllForUser .>>');
-    console.log({ userId });
-
     return this.prisma.appointment.findMany({
       where: { bookedById: userId },
       include: {

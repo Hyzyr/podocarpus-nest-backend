@@ -7,7 +7,6 @@ export class InvestmentsService {
   constructor(private prisma: PrismaService) {}
 
   async findInvestorProperties(userId: string) {
-    console.log('findInvestorProperties .>> ');
     const data = await this.prisma.investorProfile.findUnique({
       where: { userId },
       include: { properties: true },

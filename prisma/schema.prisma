@@ -14,7 +14,8 @@ enum UserRole {
   superadmin
 }
 
-enum AppointmentStatus {
+enum UserActionsStatus {
+  seen // seen and no action
   requested // booking created, waiting for approval
   confirmed // scheduled and approved
   completed // appointment done, user visited
@@ -171,7 +172,7 @@ model Appointment {
   propertyId  String
   bookedById  String
   slotId      String?
-  status      AppointmentStatus @default(requested)
+  status      UserActionsStatus @default(requested)
   scheduledAt DateTime
   notes       String?
 
@@ -216,14 +217,13 @@ model UserPropertyStatus {
 }
 
 model UserEventStatus {
-  id       String   @id @default(uuid())
+  id       String            @id @default(uuid())
   userId   String
   eventId  String
-  seen     Boolean  @default(false)
-  viewedAt DateTime @default(now())
-
-  user  AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  viewedAt DateTime          @default(now())
+  status   UserActionsStatus @default(seen)
+  user     AppUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event    Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
   @@index([eventId])

@@ -11,6 +11,7 @@ import { MailerModule } from './_helpers/mailer/mailer.module';
 import { DataModule } from './data/data.module';
 import { StorageModule } from './storage/storage.module';
 import { EventsModule } from './events/events.module';
+import { EventStatusModule } from './events/event.status.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EventsModule } from './events/events.module';
     DataModule,
     StorageModule,
     EventsModule,
+    EventStatusModule,
   ],
   controllers: [],
   providers: [],

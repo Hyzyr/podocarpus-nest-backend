@@ -8,11 +8,11 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   MaxLength,
   Min,
 } from 'class-validator';
+import { UserEventStatusDto } from './event.status.dto';
 
 export class EventIdParamDto {
   @ApiProperty({ description: 'Property ID' })
@@ -162,4 +162,12 @@ export class EventDto {
 
   @ApiProperty({ example: '2025-05-08T12:00:00.000Z' })
   updatedAt: Date;
+}
+
+export class EventWithStatusDto extends EventDto {
+  @ApiProperty({
+    type: [UserEventStatusDto],
+    description: 'Statuses of users related to this event',
+  })
+  userStatuses: UserEventStatusDto[];
 }

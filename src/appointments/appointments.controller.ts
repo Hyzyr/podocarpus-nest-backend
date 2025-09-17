@@ -110,7 +110,7 @@ export class AppointmentController {
     return this.appointmentService.update(id, updateAppointmentDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Delete an appointment by ID' })

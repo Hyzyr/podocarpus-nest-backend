@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { InvestmentsService } from './investments.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -6,13 +6,14 @@ import { Roles, RolesGuard } from 'src/auth/roles';
 import { BindInvestmentDto, InvestorPropertyDto } from './dto/investments.dto';
 import { CurrentUser } from 'src/_helpers/user.decorator';
 
+@UseGuards(JwtAuthGuard)
 @ApiTags('investments')
 @Controller('investments')
 export class InvestmentsController {
   constructor(private readonly investmentsService: InvestmentsService) {}
 
   // only allowed for Investors
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Get()
   @Roles('investor')
   @ApiOperation({ summary: 'Get Investors Properties' })
@@ -25,7 +26,7 @@ export class InvestmentsController {
     return this.investmentsService.findInvestorProperties(user.userId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(RolesGuard)
   @Post('bind')
   //   @Roles('admin')
   @ApiOperation({ summary: 'Bind a property to current Investor' })
