@@ -1,6 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from './auth.types';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { WEBSITE_DOMAIN } from 'src/constants';
 
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -21,7 +22,7 @@ export const setAuthCookies = (
     sameSite: 'lax',
     path: '/', // ✅ cookie available everywhere
     maxAge: 60 * 15, // 15 minutes
-    domain: 'podocarpus.test', // optional, leave out if you want it to default to host
+    domain: WEBSITE_DOMAIN, // optional, leave out if you want it to default to host
   });
 
   reply.setCookie(REFRESH_TOKEN_KEY, refreshToken, {
@@ -30,7 +31,7 @@ export const setAuthCookies = (
     sameSite: 'lax',
     path: '/', // ✅ important
     maxAge: 60 * 60 * 24 * 7, // 7 days
-    domain: 'podocarpus.test', // optional
+    domain: WEBSITE_DOMAIN, // optional
   });
 };
 export const removeAuthCookies = (reply: FastifyReply) => {
@@ -41,7 +42,7 @@ export const removeAuthCookies = (reply: FastifyReply) => {
     sameSite: 'lax',
     path: '/',
     maxAge: 0, // immediately expires
-    domain: 'podocarpus.test',
+    domain: WEBSITE_DOMAIN,
   });
 
   reply.setCookie(REFRESH_TOKEN_KEY, '', {
@@ -50,7 +51,7 @@ export const removeAuthCookies = (reply: FastifyReply) => {
     sameSite: 'lax',
     path: '/',
     maxAge: 0,
-    domain: 'podocarpus.test',
+    domain: WEBSITE_DOMAIN,
   });
 };
 export const getAuthCookies = (req: FastifyRequest) => {

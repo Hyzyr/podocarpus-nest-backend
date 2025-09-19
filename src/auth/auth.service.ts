@@ -86,8 +86,8 @@ export class AuthService {
     };
   }
   async logout(reply: FastifyReply) {
+    console.log('logout');
     removeAuthCookies(reply);
-    return reply.status(204).send();
   }
   async getCurrentUser(req: FastifyRequest): Promise<AuthResponseDto> {
     const { accessToken } = getAuthCookies(req);

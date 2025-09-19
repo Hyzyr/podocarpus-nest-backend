@@ -8,13 +8,6 @@ import { FindAllPropertiesQueryDto, PublicPropertySchema } from './dto';
 export class PropertiesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreatePropertyDto) {
-    const property = await this.prisma.property.create({
-      data: dto,
-    });
-    return PublicPropertySchema.parse(property);
-  }
-
   async findAll(query?: FindAllPropertiesQueryDto) {
     const {
       search,
@@ -84,12 +77,25 @@ export class PropertiesService {
     return PublicPropertySchema.parse(property);
   }
 
+  // admin only props and these are not parsed to Public
+  async getAll() {
+    const data = await this.prisma.property.findMany({});
+
+    return data;
+  }
+  async create(dto: CreatePropertyDto) {
+    const property = await this.prisma.property.create({
+      data: dto,
+    });
+    return property;
+  }
+
   async update(id: string, dto: UpdatePropertyDto) {
     const property = await this.prisma.property.update({
       where: { id },
       data: dto,
     });
-    return PublicPropertySchema.parse(property);
+    return property;
   }
 
   async remove(id: string) {

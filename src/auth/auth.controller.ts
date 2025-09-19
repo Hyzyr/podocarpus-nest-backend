@@ -55,14 +55,12 @@ export class AuthController {
     return this.auth.login(dto.email, dto.password, reply);
   }
 
-  @Post('logout')
+  @Get('logout')
   @ApiOperation({ summary: 'Logout user' })
-  @ApiResponse({
-    status: 204,
-    description: 'User logged out successfully',
-  })
+  @ApiResponse({ status: 204, description: 'User logged out successfully' })
   logout(@Res({ passthrough: true }) reply: FastifyReply) {
-    return this.auth.logout(reply);
+    this.auth.logout(reply); // clears cookies
+    return; // Nest handles 204
   }
 
   @Get('me')

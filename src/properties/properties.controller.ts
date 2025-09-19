@@ -7,6 +7,7 @@ import {
   Param,
   Query,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { PropertiesService } from './properties.service';
@@ -16,27 +17,15 @@ import {
   PublicPropertyDto,
   PropertyIdParamDto,
   UpdatePropertyDto,
+  AdminPropertyDto,
 } from './dto';
+import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { Roles, RolesGuard } from 'src/auth/roles';
 
 @ApiTags('properties')
 @Controller('properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create a new property' })
-  @ApiResponse({
-    status: 201,
-    description: 'Property created successfully.',
-    type: PublicPropertyDto,
-  })
-  create(@Body() dto: CreatePropertyDto) {
-    return this.propertiesService.create({
-      ...dto,
-      rentStart: dto?.rentStart ? new Date(dto.rentStart) : dto?.rentStart,
-      rentExpiry: dto?.rentExpiry ? new Date(dto.rentExpiry) : dto?.rentStart,
-    });
-  }
 
   @Get()
   @ApiOperation({ summary: 'Get a list of properties' })
@@ -61,19 +50,53 @@ export class PropertiesController {
     return this.propertiesService.findOne(id);
   }
 
+  // admin routes secured
+
+  @Get('/all')
+  @ApiOperation({ summary: 'Get a list of all properties' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of properties retrieved successfully.',
+    type: [AdminPropertyDto],
+  })
+  getAll() {
+    return this.propertiesService.getAll();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post()
+  @Roles('admin')
+  @ApiOperation({ summary: 'Create a new property' })
+  @ApiResponse({
+    status: 201,
+    description: 'Property created successfully.',
+    type: AdminPropertyDto,
+  })
+  create(@Body() dto: CreatePropertyDto) {
+    return this.propertiesService.create({
+      ...dto,
+      rentStart: dto?.rentStart ? new Date(dto.rentStart) : dto?.rentStart,
+      rentExpiry: dto?.rentExpiry ? new Date(dto.rentExpiry) : dto?.rentStart,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
+  @Roles('admin')
   @ApiOperation({ summary: 'Update a property by ID' })
   @ApiResponse({
     status: 200,
     description: 'Property updated successfully.',
-    type: PublicPropertyDto,
+    type: AdminPropertyDto,
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
   update(@Param() { id }: PropertyIdParamDto, @Body() dto: UpdatePropertyDto) {
     return this.propertiesService.update(id, dto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
+  @Roles('admin')
   @ApiOperation({ summary: 'Delete a property by ID' })
   @ApiResponse({ status: 200, description: 'Property deleted successfully.' })
   @ApiResponse({ status: 404, description: 'Property not found.' })

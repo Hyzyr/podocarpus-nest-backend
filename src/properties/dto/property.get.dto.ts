@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { AppointmentDto } from 'src/appointments/dto';
 import { InvestorProfileDto } from 'src/users/dto';
 import z from 'zod';
 
@@ -194,6 +195,50 @@ export class PublicPropertyDto {
   @ApiProperty()
   @IsBoolean()
   isActive: boolean;
+}
+export class AdminPropertyDto extends PublicPropertyDto {
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    description: 'Deposit received from investor',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  depositReceived?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Payment method chosen by investor (e.g., Bank Transfer)',
+  })
+  @IsOptional()
+  @IsString()
+  paymentMethod?: string | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  rentStart?: Date | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  rentExpiry?: Date | null;
+
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    description: 'Rent value (per year/month as applicable)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  rentValue?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Appointments booked for this property',
+    type: () => [AppointmentDto], // <-- define separately
+  })
+  appointments?: AppointmentDto[];
+
+  // @ApiPropertyOptional({
+  //   description: 'User-specific property status entries',
+  //   type: () => [UserPropertyStatusDto], // <-- define separately
+  // })
+  // userStatuses?: UserPropertyStatusDto[];
 }
 export const PublicPropertySchema = z
   .object({
