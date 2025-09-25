@@ -21,7 +21,7 @@ export const setAuthCookies = (
     secure: process.env.NODE_ENV === 'production', // false in local dev
     sameSite: 'lax',
     path: '/', // ✅ cookie available everywhere
-    maxAge: 60 * 15, // 15 minutes
+    maxAge: 60 * 35, // 35 minutes
     domain: WEBSITE_DOMAIN, // optional, leave out if you want it to default to host
   });
 
