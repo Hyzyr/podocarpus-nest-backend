@@ -1,32 +1,48 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
+import { AdminUserDto } from './dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
-
   private readonly logger = new Logger(UsersService.name);
 
-  
-  create(user: any) {
-    this.logger.log(`Creating user: ${JSON.stringify(user)}`);
-    return { message: 'User created', user };
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    this.logger.log('Fetching all users');
-    return this.prisma.appUser.findMany();
+  async getAll() {
+    return this.prisma.appUser.findMany({});
   }
-  findOne(id: string) {
-    this.logger.log(`Fetching user with id=${id}`);
-    return { id, name: 'Bob' };
+  async findOneFullInfo(id: string) {
+    const user = await this.prisma.appUser.findUnique({
+      where: { id },
+      include: {
+        investorProfile: true,
+        brokerProfile: true,
+        adminProfile: true,
+        appointments: {
+          include: {
+            property: true,
+          },
+        },
+        // propertyStatuses: true,
+        // eventStatuses: true,
+        // activityLogs: true,
+      },
+    });
+    if (!user) throw new NotFoundException(`User ${id} not found`);
+    return user;
   }
-  update(id: string, update: any) {
-    this.logger.log(`Updating user ${id} with ${JSON.stringify(update)}`);
-    return { message: 'User updated', id, update };
+  // async create(dto: AdminUserDto) {
+  //   return this.prisma.appUser.create({
+  //     data: dto,
+  //   });
+  // }
+  async update(id: string, dto: Partial<AdminUserDto>) {
+    return this.prisma.appUser.update({
+      where: { id },
+      data: dto,
+    });
   }
-  remove(id: string) {
-    this.logger.warn(`Removing user ${id}`);
-    return { message: 'User removed', id };
+  async remove(id: string) {
+    return this.prisma.appUser.delete({ where: { id } });
   }
 }

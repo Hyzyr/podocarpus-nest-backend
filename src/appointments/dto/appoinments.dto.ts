@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsString, IsUUID, IsOptional, IsEnum, IsDate } from 'class-validator';
 import { PublicPropertyDto } from 'src/properties/dto';
+import { PublicUserDto } from 'src/users/dto';
 import { dateFromISO, uuid } from 'src/utils/zod-helpers';
 import z from 'zod';
 
@@ -64,9 +65,14 @@ export class AppointmentDto {
   @IsOptional()
   @IsString()
   notes?: string;
-  
+
   @ApiProperty({ type: () => PublicPropertyDto })
   property: PublicPropertyDto;
+}
+
+export class AppointmentWithBookedByDto extends AppointmentDto {
+  @ApiProperty({ type: () => PublicUserDto })
+  bookedBy: PublicUserDto;
 }
 
 export class CreateAppointmentDto {
@@ -145,4 +151,11 @@ export const createAppointmentSchema = z.object({
     .min(1, 'Notes cannot be empty')
     .max(2000, 'Notes is too long')
     .optional(),
+});
+
+export const getAppointmentSchema = createAppointmentSchema.extend({
+  id: z.string().uuid(),
+  // override transformations if needed
+  status: z.enum(AppointmentStatus),
+  scheduledAt: z.union([z.string().datetime(), z.date()]),
 });

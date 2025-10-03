@@ -18,6 +18,8 @@ import {
   PropertyIdParamDto,
   UpdatePropertyDto,
   AdminPropertyDto,
+  PublicPropertyWithRelations,
+  AdminPropertyWithRelationsDto,
 } from './dto';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
@@ -43,7 +45,7 @@ export class PropertiesController {
   @ApiResponse({
     status: 200,
     description: 'Property retrieved successfully.',
-    type: PublicPropertyDto,
+    type: PublicPropertyWithRelations,
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
   findOne(@Param() { id }: PropertyIdParamDto) {
@@ -61,6 +63,20 @@ export class PropertiesController {
   })
   getAll() {
     return this.propertiesService.getAll();
+  }
+
+  @Get('/full-info/:id')
+  @ApiOperation({
+    summary: 'Get a single property by ID with full info [AdminOnly]',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Property retrieved successfully.',
+    type: AdminPropertyWithRelationsDto,
+  })
+  @ApiResponse({ status: 404, description: 'Property not found.' })
+  findOneFullInfo(@Param() { id }: PropertyIdParamDto) {
+    return this.propertiesService.findOneFullInfo(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

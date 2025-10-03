@@ -2,7 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../_helpers/database/prisma/prisma.service';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
-import { FindAllPropertiesQueryDto, PublicPropertySchema } from './dto';
+import {
+  FindAllPropertiesQueryDto,
+  PublicPropertySchema,
+  PublicPropertyWithRelationsSchema,
+} from './dto';
+import { publicUserSelect } from 'src/users/dto';
 
 @Injectable()
 export class PropertiesService {
@@ -72,9 +77,14 @@ export class PropertiesService {
     return PublicPropertySchema.array().parse(data);
   }
   async findOne(id: string) {
-    const property = await this.prisma.property.findUnique({ where: { id } });
+    const property = await this.prisma.property.findUnique({
+      where: { id },
+      include: {
+        appointments: { where: { bookedById: id } },
+      },
+    });
     if (!property) throw new NotFoundException(`Property ${id} not found`);
-    return PublicPropertySchema.parse(property);
+    return PublicPropertyWithRelationsSchema.parse(property);
   }
 
   // admin only props and these are not parsed to Public
@@ -82,6 +92,22 @@ export class PropertiesService {
     const data = await this.prisma.property.findMany({});
 
     return data;
+  }
+
+  async findOneFullInfo(id: string) {
+    const property = await this.prisma.property.findUnique({
+      where: { id },
+      include: {
+        owner: { include: { user: { select: publicUserSelect } } },
+        appointments: {
+          include: {
+            bookedBy: { select: publicUserSelect },
+          },
+        },
+      },
+    });
+    if (!property) throw new NotFoundException(`Property ${id} not found`);
+    return property;
   }
   async create(dto: CreatePropertyDto) {
     const property = await this.prisma.property.create({

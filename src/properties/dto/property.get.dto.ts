@@ -8,7 +8,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { AppointmentDto } from 'src/appointments/dto';
+import {
+  AppointmentDto,
+  AppointmentWithBookedByDto,
+  getAppointmentSchema,
+} from 'src/appointments/dto';
 import { InvestorProfileDto } from 'src/users/dto';
 import z from 'zod';
 
@@ -196,6 +200,15 @@ export class PublicPropertyDto {
   @IsBoolean()
   isActive: boolean;
 }
+
+export class PublicPropertyWithRelations extends PublicPropertyDto {
+  @ApiPropertyOptional({
+    description: 'Appointments booked for this property',
+    type: () => [AppointmentDto], // <-- define separately
+  })
+  appointments?: AppointmentDto[];
+}
+
 export class AdminPropertyDto extends PublicPropertyDto {
   @ApiPropertyOptional({
     type: Number,
@@ -227,12 +240,14 @@ export class AdminPropertyDto extends PublicPropertyDto {
   @IsOptional()
   @Type(() => Number)
   rentValue?: number | null;
+}
 
+export class AdminPropertyWithRelationsDto extends AdminPropertyDto {
   @ApiPropertyOptional({
     description: 'Appointments booked for this property',
-    type: () => [AppointmentDto], // <-- define separately
+    type: () => [AppointmentWithBookedByDto], // <-- define separately
   })
-  appointments?: AppointmentDto[];
+  appointments?: AppointmentWithBookedByDto[];
 
   // @ApiPropertyOptional({
   //   description: 'User-specific property status entries',
@@ -270,5 +285,9 @@ export const PublicPropertySchema = z
     vacancyRisk: z.string().nullable().optional(),
   })
   .strip();
+
+export const PublicPropertyWithRelationsSchema = PublicPropertySchema.extend({
+  appointments: z.array(getAppointmentSchema).optional(),
+});
 
 export type PublicProperty = z.infer<typeof PublicPropertySchema>;

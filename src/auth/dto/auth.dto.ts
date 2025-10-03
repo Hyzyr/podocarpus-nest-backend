@@ -8,13 +8,13 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { UserDto } from 'src/users/dto';
+import { PublicUserDto } from 'src/users/dto';
 import z from 'zod';
 
 // Get shorter user information
 export const authUserParser: z.ZodType<AuthUserDto> = z.any();
 
-export class AuthUserDto extends UserDto {} 
+export class AuthUserDto extends PublicUserDto {} 
 
 export class LoginBodyDto {
   @ApiProperty({ example: 'john.doe@example.com' })

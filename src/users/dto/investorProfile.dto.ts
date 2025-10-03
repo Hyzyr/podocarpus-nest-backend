@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { UserDto } from './user.get.dto';
+import { PublicUserDto } from './user.get.dto';
 import { IsBoolean } from 'class-validator';
 import { InvestorPropertyDto } from 'src/investments/dto/investments.dto';
 
@@ -8,9 +8,9 @@ export class InvestorProfileDto {
   @ApiProperty()
   userId: string;
 
-  @ApiPropertyOptional({ type: () => UserDto, nullable: true })
-  @Type(() => UserDto)
-  user?: UserDto | null;
+  @ApiPropertyOptional({ type: () => PublicUserDto, nullable: true })
+  @Type(() => PublicUserDto)
+  user?: PublicUserDto | null;
 
   @ApiPropertyOptional({
     type: () => [InvestorPropertyDto],
@@ -18,9 +18,9 @@ export class InvestorProfileDto {
   })
   properties?: InvestorPropertyDto[];
 
-  @ApiPropertyOptional({ type: () => UserDto, nullable: true })
-  @Type(() => UserDto)
-  investorPreferences?: UserDto | null;
+  @ApiPropertyOptional({ type: () => PublicUserDto, nullable: true })
+  @Type(() => PublicUserDto)
+  investorPreferences?: InvestorPreferences | null;
 }
 
 export class InvestorPreferences {
