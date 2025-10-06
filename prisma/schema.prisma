@@ -23,6 +23,17 @@ enum UserActionsStatus {
   canceled // appointment canceled
 }
 
+enum ContractStatus {
+  draft // contract created but not yet signed
+  pending // awaiting approval or payment
+  active // signed and currently valid
+  suspended // temporarily paused
+  expired // reached end date
+  terminated // ended early by one or both parties
+  completed // fully executed and closed successfully
+  canceled // canceled before activation
+}
+
 enum EventStatus {
   DRAFT
   UPCOMING
@@ -58,9 +69,12 @@ model AppUser {
   adminProfile    AdminProfile?
   appointments    Appointment[]
 
-  propertyStatuses UserPropertyStatus[]
-  eventStatuses    UserEventStatus[]
-  activityLogs     ActivityLog[]
+  propertyStatuses  UserPropertyStatus[]
+  eventStatuses     UserEventStatus[]
+  activityLogs      ActivityLog[]
+  // ✅ match relation names exactly
+  investorContracts Contract[]           @relation("InvestorContracts")
+  // brokerContracts   Contract[] @relation("BrokerContracts")
 }
 
 model InvestorProfile {
@@ -114,6 +128,7 @@ model Property {
   city              String?
   country           String?
   images            String[]
+  assets            String[]
   isActive          Boolean  @default(true)
   netRoiMin         Float? // e.g. 9
   netRoiMax         Float? // e.g. 11
@@ -144,6 +159,7 @@ model Property {
   availabilitySlots AvailabilitySlot[]
   appointments      Appointment[]
   userStatuses      UserPropertyStatus[]
+  Contract          Contract[]
 }
 
 model GovernmentLease {
@@ -179,6 +195,27 @@ model Appointment {
   property Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   bookedBy AppUser           @relation(fields: [bookedById], references: [id], onDelete: Cascade)
   slot     AvailabilitySlot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
+}
+
+model Contract {
+  id           String         @id @default(uuid())
+  propertyId   String
+  investorId   String
+  brokerId     String?
+  contractCode String
+  contractLink String?
+  filesUrl     String[]
+  signedDate   DateTime?
+  startDate    DateTime?
+  endDate      DateTime?
+  price        Float?
+  status       ContractStatus @default(pending)
+  notes        String?
+
+  // ✅ unique relation names
+  investor AppUser  @relation("InvestorContracts", fields: [investorId], references: [id], onDelete: Cascade)
+  // broker   AppUser? @relation("BrokerContracts",   fields: [brokerId],   references: [id], onDelete: SetNull)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Event {

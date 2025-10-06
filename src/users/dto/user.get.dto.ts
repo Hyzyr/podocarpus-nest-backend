@@ -10,13 +10,14 @@ import {
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
 import { z } from 'zod';
+import { InvestorProfileDto } from './investorProfile.dto';
+import { AppointmentDto } from 'src/appointments/dto';
 
 export class UserIdParamDto {
   @ApiProperty({ example: 'uuid' })
   @IsUUID()
   id: string;
 }
-
 export class PublicUserDto {
   @ApiProperty({ example: 'uuid' })
   id: string;
@@ -25,30 +26,25 @@ export class PublicUserDto {
   @IsEmail()
   email: string;
 
-  @ApiPropertyOptional({ example: 'John' })
-  @IsOptional()
+  @ApiProperty({ example: 'John' })
   @IsString()
-  firstName?: string | null;
+  firstName: string;
 
-  @ApiPropertyOptional({ example: 'Smith' })
-  @IsOptional()
+  @ApiProperty({ example: 'Smith' })
   @IsString()
-  lastName?: string | null;
+  lastName: string;
 
-  @ApiPropertyOptional({ example: '+701352652365' })
-  @IsOptional()
+  @ApiProperty({ example: '+701352652365' })
   @IsPhoneNumber()
-  phone?: string | null;
+  phone: string;
 
-  @ApiPropertyOptional({ example: 'UAE, Dubai' })
-  @IsOptional()
+  @ApiProperty({ example: 'UAE, Dubai' })
   @IsString()
-  recidence?: string | null;
+  recidence: string;
 
-  @ApiPropertyOptional({ example: 'American' })
-  @IsOptional()
+  @ApiProperty({ example: 'American' })
   @IsString()
-  nationality?: string | null;
+  nationality: string;
 
   @ApiProperty({ enum: UserRole, example: UserRole.investor })
   @IsEnum(UserRole)
@@ -63,21 +59,28 @@ export class PublicUserDto {
   @ApiProperty({ type: Boolean })
   @IsBoolean()
   isActive: boolean;
-}
-export class AdminUserDto extends PublicUserDto {
+
   @ApiProperty({ type: Boolean, example: true })
   @IsBoolean()
   onboardingCompleted: boolean;
-
+}
+export class AdminUserDto extends PublicUserDto {
   @ApiPropertyOptional({ example: false })
   @IsOptional()
   @IsBoolean()
   emailVerified?: boolean;
 
-  @ApiPropertyOptional({ example: 'reset-token-uuid' })
-  @IsOptional()
-  @IsString()
-  resetToken?: string | null;
+  // @ApiPropertyOptional({ example: 'reset-token-uuid' })
+  // @IsOptional()
+  // @IsString()
+  // resetToken?: string | null;
+}
+export class AdminUserWithRelationsDto extends AdminUserDto {
+  @ApiProperty({ type: () => InvestorProfileDto, nullable: true })
+  investorProfile: InvestorProfileDto | null;
+
+  @ApiProperty({ type: () => [AppointmentDto] })
+  appointments: AppointmentDto[];
 }
 
 export const PublicUserSchema = z

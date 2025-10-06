@@ -119,4 +119,21 @@ export class PropertiesController {
   remove(@Param() { id }: PropertyIdParamDto) {
     return this.propertiesService.remove(id);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('/contract/:id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Update a property by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Property updated successfully.',
+    type: AdminPropertyDto,
+  })
+  @ApiResponse({ status: 404, description: 'Property not found.' })
+  createContract(
+    @Param() { id }: PropertyIdParamDto,
+    @Body() dto: UpdatePropertyDto,
+  ) {
+    return this.propertiesService.update(id, dto);
+  }
 }

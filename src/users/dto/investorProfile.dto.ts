@@ -18,8 +18,8 @@ export class InvestorProfileDto {
   })
   properties?: InvestorPropertyDto[];
 
-  @ApiPropertyOptional({ type: () => PublicUserDto, nullable: true })
-  @Type(() => PublicUserDto)
+  @ApiPropertyOptional({ type: () => InvestorPreferences, nullable: true })
+  @Type(() => InvestorPreferences)
   investorPreferences?: InvestorPreferences | null;
 }
 

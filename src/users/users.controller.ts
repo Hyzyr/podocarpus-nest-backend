@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
-import { AdminUserDto, PublicUserDto, UserIdParamDto } from './dto';
+import { AdminUserDto, AdminUserWithRelationsDto, PublicUserDto, UserIdParamDto } from './dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -49,7 +49,7 @@ export class UsersAdminController {
   @ApiResponse({
     status: 200,
     description: 'User retrieved successfully.',
-    type: AdminUserDto,
+    type: AdminUserWithRelationsDto,
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
   findOneFullInfo(@Param() { id }: UserIdParamDto) {
