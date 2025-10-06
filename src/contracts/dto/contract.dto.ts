@@ -9,6 +9,7 @@ import {
 import { Type } from 'class-transformer';
 import { ContractStatus } from '@prisma/client';
 
+export const ContractIdParamDto = {} 
 export class ContractDto {
   @ApiProperty({ example: 'uuid' })
   id: string;

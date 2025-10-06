@@ -10,6 +10,12 @@ import {
   IsNumber,
 } from 'class-validator';
 
+export class ContractIdParamDto {
+  @ApiProperty({ description: 'Contract ID' })
+  @IsString()
+  id: string;
+}
+
 export class CreatePropertyDto {
   @ApiProperty({ example: 'Spacious 2BR with Marina View' })
   @IsString()

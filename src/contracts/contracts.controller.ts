@@ -1,0 +1,97 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { Roles, RolesGuard } from 'src/auth/roles';
+import { ContractsService } from './contracts.service';
+import { ContractDto, CreateContractDto, UpdateContractDto } from './dto';
+import { ContractIdParamDto } from 'src/properties/dto';
+
+@UseGuards(JwtAuthGuard)
+@ApiTags('contracts')
+@Controller('contracts')
+export class ContractsController {
+  constructor(private readonly contractsService: ContractsService) {}
+
+  // ✅ Create new contract
+  @Post()
+  @ApiOperation({ summary: 'Create a new contract for a property [AdminOnly]' })
+  @ApiResponse({
+    status: 201,
+    description: 'Contract created successfully.',
+    type: ContractDto,
+  })
+  @ApiResponse({ status: 404, description: 'Property not found.' })
+  async createContract(@Body() dto: CreateContractDto) {
+    return this.contractsService.createContract(dto);
+  }
+
+  // ✅ Get all contracts
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Get()
+  @ApiOperation({ summary: 'Get all contracts [AdminOnly]' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all contracts retrieved successfully.',
+    type: [ContractDto],
+  })
+  async findAll() {
+    return this.contractsService.findAll();
+  }
+
+  // ✅ Get single contract
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a contract by ID [AdminOnly]' })
+  @ApiResponse({
+    status: 200,
+    description: 'Contract retrieved successfully.',
+    type: ContractDto,
+  })
+  @ApiResponse({ status: 404, description: 'Contract not found.' })
+  async findOne(@Param() { id }: ContractIdParamDto) {
+    return this.contractsService.findOne(id);
+  }
+
+  // ✅ Update contract
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin', 'investor')
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update an existing contract [AdminOnly]' })
+  @ApiResponse({
+    status: 200,
+    description: 'Contract updated successfully.',
+    type: ContractDto,
+  })
+  @ApiResponse({ status: 404, description: 'Contract not found.' })
+  async update(
+    @Param() { id }: ContractIdParamDto,
+    @Body() dto: UpdateContractDto,
+  ) {
+    return this.contractsService.update(id, dto);
+  }
+
+  // ✅ Delete contract
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a contract [AdminOnly]' })
+  @ApiResponse({
+    status: 200,
+    description: 'Contract deleted successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Contract not found.' })
+  async remove(@Param() { id }: ContractIdParamDto) {
+    return this.contractsService.remove(id);
+  }
+}
