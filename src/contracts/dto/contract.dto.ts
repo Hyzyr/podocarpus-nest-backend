@@ -8,8 +8,10 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ContractStatus } from '@prisma/client';
+import { InvestorPropertyDto } from 'src/investments/dto/investments.dto';
+import { InvestorProfileDto } from 'src/users/dto/investorProfile.dto';
 
-export const ContractIdParamDto = {} 
+export const ContractIdParamDto = {};
 export class ContractDto {
   @ApiProperty({ example: 'uuid' })
   id: string;
@@ -84,8 +86,24 @@ export class ContractDto {
   })
   @IsOptional()
   notes?: string | null;
+}
 
-  // ✅ You can expand this with nested property/investor later
+// when fetched from InvestorProfile
+export class ContractWithProperties extends ContractDto {
+  @ApiPropertyOptional({
+    type: () => [InvestorPropertyDto],
+    description: 'Contracts for Properties',
+  })
+  property: InvestorPropertyDto;
+}
+
+// when fetched from Property
+export class ContractWithInvestor extends ContractDto {
+  @ApiPropertyOptional({
+    type: () => [InvestorProfileDto],
+    description: 'Investor Profile',
+  })
+  investor: InvestorProfileDto;
 }
 
 export class CreateContractDto {

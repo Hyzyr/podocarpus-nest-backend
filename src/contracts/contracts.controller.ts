@@ -12,8 +12,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { ContractsService } from './contracts.service';
-import { ContractDto, CreateContractDto, UpdateContractDto } from './dto';
-import { ContractIdParamDto } from 'src/properties/dto';
+import { ContractDto, CreateContractDto, UpdateContractDto } from './dto/contract.dto';
+import { ContractIdParamDto } from 'src/properties/dto/property.create.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('contracts')
@@ -21,7 +21,6 @@ import { ContractIdParamDto } from 'src/properties/dto';
 export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
-  // ✅ Create new contract
   @Post()
   @ApiOperation({ summary: 'Create a new contract for a property [AdminOnly]' })
   @ApiResponse({
@@ -34,7 +33,6 @@ export class ContractsController {
     return this.contractsService.createContract(dto);
   }
 
-  // ✅ Get all contracts
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin')
   @Get()
@@ -48,7 +46,6 @@ export class ContractsController {
     return this.contractsService.findAll();
   }
 
-  // ✅ Get single contract
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin')
   @Get(':id')
@@ -63,7 +60,6 @@ export class ContractsController {
     return this.contractsService.findOne(id);
   }
 
-  // ✅ Update contract
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin', 'investor')
   @Patch(':id')
@@ -81,7 +77,6 @@ export class ContractsController {
     return this.contractsService.update(id, dto);
   }
 
-  // ✅ Delete contract
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin')
   @Delete(':id')

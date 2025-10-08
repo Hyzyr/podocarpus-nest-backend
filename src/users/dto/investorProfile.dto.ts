@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { PublicUserDto } from './user.get.dto';
 import { IsBoolean } from 'class-validator';
 import { InvestorPropertyDto } from 'src/investments/dto/investments.dto';
+import { ContractDto } from 'src/contracts/dto/contract.dto';
 
 export class InvestorProfileDto {
   @ApiProperty()
@@ -14,13 +15,13 @@ export class InvestorProfileDto {
 
   @ApiPropertyOptional({
     type: () => [InvestorPropertyDto],
-    description: 'Properties Investor own',
+    description: 'Investments Contracts',
   })
-  properties?: InvestorPropertyDto[];
+  contracts?: ContractDto[];
 
   @ApiPropertyOptional({ type: () => InvestorPreferences, nullable: true })
   @Type(() => InvestorPreferences)
-  investorPreferences?: InvestorPreferences | null;
+  preferences?: InvestorPreferences | null;
 }
 
 export class InvestorPreferences {

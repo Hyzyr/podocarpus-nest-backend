@@ -10,15 +10,9 @@ import {
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  CreateEventDto,
-  EventDto,
-  EventIdParamDto,
-  EventWithStatusDto,
-  UpdateEventDto,
-} from './dto';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CreateEventDto, EventDto, EventIdParamDto, EventWithStatusDto, UpdateEventDto } from './dto/events.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('events')

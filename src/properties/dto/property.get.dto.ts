@@ -13,7 +13,8 @@ import {
   AppointmentWithBookedByDto,
   getAppointmentSchema,
 } from 'src/appointments/dto';
-import { InvestorProfileDto } from 'src/users/dto';
+import { ContractDto } from 'src/contracts/dto/contract.dto';
+import { InvestorProfileDto } from 'src/users/dto/investorProfile.dto';
 import z from 'zod';
 
 //  for public use only
@@ -242,13 +243,20 @@ export class AdminPropertyDto extends PublicPropertyDto {
   rentValue?: number | null;
 }
 
+export class AdminPropertyWithContractsDto extends AdminPropertyDto {
+  @ApiProperty({ type: () => [ContractDto] })
+  contracts: ContractDto[];
+}
+
 export class AdminPropertyWithRelationsDto extends AdminPropertyDto {
   @ApiPropertyOptional({
     description: 'Appointments booked for this property',
     type: () => [AppointmentWithBookedByDto], // <-- define separately
   })
   appointments?: AppointmentWithBookedByDto[];
-
+  
+  @ApiProperty({ type: () => [ContractDto] })
+  contracts: ContractDto[];;
   // @ApiPropertyOptional({
   //   description: 'User-specific property status entries',
   //   type: () => [UserPropertyStatusDto], // <-- define separately

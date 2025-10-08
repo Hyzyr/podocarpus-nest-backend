@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
-import { AdminUserDto } from './dto';
+import { AdminUserDto } from './dto/user.get.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,15 +16,14 @@ export class UsersService {
       where: { id },
       include: {
         investorProfile: {
-          include: { investorPreferences: true, properties: true },
+          include: {
+            preferences: true,
+            contracts: { include: { property: true } },
+          },
         },
         brokerProfile: true,
         adminProfile: true,
-        appointments: {
-          include: {
-            property: true,
-          },
-        },
+        appointments: { include: { property: true } },
         // propertyStatuses: true,
         // eventStatuses: true,
         // activityLogs: true,

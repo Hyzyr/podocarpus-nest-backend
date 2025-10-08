@@ -69,20 +69,18 @@ model AppUser {
   adminProfile    AdminProfile?
   appointments    Appointment[]
 
-  propertyStatuses  UserPropertyStatus[]
-  eventStatuses     UserEventStatus[]
-  activityLogs      ActivityLog[]
-  // ✅ match relation names exactly
-  investorContracts Contract[]           @relation("InvestorContracts")
-  // brokerContracts   Contract[] @relation("BrokerContracts")
+  propertyStatuses UserPropertyStatus[]
+  eventStatuses    UserEventStatus[]
+  activityLogs     ActivityLog[]
 }
 
 model InvestorProfile {
   userId String  @id
   user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  investorPreferences InvestorPreferences?
-  properties          Property[] // owned properties
+  properties  Property[]
+  contracts   Contract[]
+  preferences InvestorPreferences?
 }
 
 model InvestorPreferences {
@@ -98,8 +96,9 @@ model InvestorPreferences {
 }
 
 model BrokerProfile {
-  userId String  @id
-  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String     @id
+  user      AppUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contracts Contract[]
 }
 
 model AdminProfile {
@@ -159,7 +158,7 @@ model Property {
   availabilitySlots AvailabilitySlot[]
   appointments      Appointment[]
   userStatuses      UserPropertyStatus[]
-  Contract          Contract[]
+  contracts         Contract[]
 }
 
 model GovernmentLease {
@@ -212,10 +211,9 @@ model Contract {
   status       ContractStatus @default(pending)
   notes        String?
 
-  // ✅ unique relation names
-  investor AppUser  @relation("InvestorContracts", fields: [investorId], references: [id], onDelete: Cascade)
-  // broker   AppUser? @relation("BrokerContracts",   fields: [brokerId],   references: [id], onDelete: SetNull)
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  investor InvestorProfile @relation(fields: [investorId], references: [userId], onDelete: Cascade)
+  broker   BrokerProfile?  @relation(fields: [brokerId], references: [userId], onDelete: SetNull)
+  property Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Event {

@@ -9,19 +9,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  CreateEventStatusDto,
-  EventIdParamDto,
-  UpdateUserEventStatusDto,
-  UserEventStatusDto,
-} from './dto';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { CurrentUser } from 'src/_helpers/user.decorator';
 import { UserEventStatusService } from './event.status.service';
+import { CreateEventStatusDto, UpdateUserEventStatusDto, UserEventStatusDto } from './dto/event.status.dto';
+import { EventIdParamDto } from './dto/events.dto';
 
 @UseGuards(JwtAuthGuard)
-@ApiTags('123evebt')
-@Controller('123evebt')
+@ApiTags('events-status')
+@Controller('events-status')
 export class UserEventStatusController {
   constructor(private readonly eventsStatusService: UserEventStatusService) {}
 

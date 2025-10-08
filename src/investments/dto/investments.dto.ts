@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUUID } from 'class-validator';
-import { PublicPropertyDto, PublicPropertySchema } from 'src/properties/dto';
+import { PublicPropertyDto, PublicPropertySchema } from 'src/properties/dto/property.get.dto';
 import z from 'zod';
 
 export class BindInvestmentDto {

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsString, IsUUID, IsOptional, IsEnum, IsDate } from 'class-validator';
-import { PublicPropertyDto } from 'src/properties/dto';
-import { PublicUserDto } from 'src/users/dto';
+import { PublicPropertyDto } from 'src/properties/dto/property.get.dto';
+import { PublicUserDto } from 'src/users/dto/user.get.dto';
 import { dateFromISO, uuid } from 'src/utils/zod-helpers';
 import z from 'zod';
 
@@ -27,13 +27,6 @@ export class AppointmentDto {
   })
   @IsUUID()
   propertyId: string;
-
-  @ApiProperty({
-    description: 'ID of the user who booked the appointment',
-    example: 'c5e74a12-234f-4c6f-9b8e-4567891230ef',
-  })
-  @IsUUID()
-  bookedById: string;
 
   @ApiPropertyOptional({
     description: 'ID of the availability slot (optional)',
@@ -68,6 +61,14 @@ export class AppointmentDto {
 
   @ApiProperty({ type: () => PublicPropertyDto })
   property: PublicPropertyDto;
+
+  // relations
+  @ApiProperty({
+    description: 'ID of the user who booked the appointment',
+    example: 'c5e74a12-234f-4c6f-9b8e-4567891230ef',
+  })
+  @IsUUID()
+  bookedById: string;
 }
 
 export class AppointmentWithBookedByDto extends AppointmentDto {

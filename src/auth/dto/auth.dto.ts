@@ -8,7 +8,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { PublicUserDto } from 'src/users/dto';
+import { PublicUserDto } from 'src/users/dto/user.get.dto';
 import z from 'zod';
 
 // Get shorter user information

@@ -2,12 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../_helpers/database/prisma/prisma.service';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
-import {
-  FindAllPropertiesQueryDto,
-  PublicPropertySchema,
-  PublicPropertyWithRelationsSchema,
-} from './dto';
-import { publicUserSelect } from 'src/users/dto';
+import { FindAllPropertiesQueryDto } from './dto/property.query.dto';
+import { PublicPropertySchema, PublicPropertyWithRelationsSchema } from './dto/property.get.dto';
+import { publicUserSelect } from 'src/users/dto/user.get.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -89,7 +86,9 @@ export class PropertiesService {
 
   // admin only props and these are not parsed to Public
   async getAll() {
-    const data = await this.prisma.property.findMany({});
+    const data = await this.prisma.property.findMany({
+      include: { contracts: true },
+    });
 
     return data;
   }

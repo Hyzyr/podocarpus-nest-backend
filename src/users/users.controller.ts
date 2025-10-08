@@ -13,13 +13,7 @@ import { UsersService } from './users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
-import { AdminUserDto, AdminUserWithRelationsDto, PublicUserDto, UserIdParamDto } from './dto';
-
-@ApiTags('users')
-@Controller('users')
-export class PublicUsersController {
-  constructor(private readonly usersService: UsersService) {}
-}
+import { AdminUserDto, AdminUserWithRelationsDto, UserIdParamDto } from './dto/user.get.dto';
 
 @ApiTags('users')
 @UseGuards(JwtAuthGuard, RolesGuard)

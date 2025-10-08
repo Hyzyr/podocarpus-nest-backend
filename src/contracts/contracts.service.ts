@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
-import { CreateContractDto, UpdateContractDto } from './dto';
+import { CreateContractDto, UpdateContractDto } from './dto/contract.dto';
 
 @Injectable()
 export class ContractsService {
@@ -21,10 +21,7 @@ export class ContractsService {
 
   async findAll() {
     return this.prisma.contract.findMany({
-      include: {
-        property: { select: { id: true, title: true } },
-        investor: { select: { id: true, email: true } },
-      },
+      include: { property: true, investor: true },
     });
   }
 
@@ -32,10 +29,7 @@ export class ContractsService {
   async findOne(id: string) {
     const contract = await this.prisma.contract.findUnique({
       where: { id },
-      include: {
-        property: { select: { id: true, title: true } },
-        investor: { select: { id: true, email: true } },
-      },
+      include: { property: true, investor: true },
     });
     if (!contract) throw new NotFoundException(`Contract ${id} not found`);
     return contract;

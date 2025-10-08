@@ -11,18 +11,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { PropertiesService } from './properties.service';
-import {
-  CreatePropertyDto,
-  FindAllPropertiesQueryDto,
-  PublicPropertyDto,
-  PropertyIdParamDto,
-  UpdatePropertyDto,
-  AdminPropertyDto,
-  PublicPropertyWithRelations,
-  AdminPropertyWithRelationsDto,
-} from './dto';
+
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
+import { AdminPropertyDto, AdminPropertyWithContractsDto, AdminPropertyWithRelationsDto, PublicPropertyDto, PublicPropertyWithRelations } from './dto/property.get.dto';
+import { FindAllPropertiesQueryDto, PropertyIdParamDto } from './dto/property.query.dto';
+import { CreatePropertyDto } from './dto/property.create.dto';
+import { UpdatePropertyDto } from './dto/property.update.dto';
 
 @ApiTags('properties')
 @Controller('properties')
@@ -53,13 +48,14 @@ export class PropertiesController {
   }
 
   // admin routes secured
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/all')
+  @Roles('admin')
   @ApiOperation({ summary: 'Get a list of all properties' })
   @ApiResponse({
     status: 200,
     description: 'List of properties retrieved successfully.',
-    type: [AdminPropertyDto],
+    type: [AdminPropertyWithContractsDto],
   })
   getAll() {
     return this.propertiesService.getAll();

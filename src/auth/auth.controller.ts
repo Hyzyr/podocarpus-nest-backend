@@ -9,19 +9,11 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import {
-  AuthResponseDto,
-  LoginBodyDto,
-  OnboardStep1Dto,
-  OnboardStep2Dto,
-  RegisterBodyDto,
-  RequestPasswordResetDto,
-  ResetPasswordDto,
-} from './dto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from '../_helpers/jwt-auth.guard';
 import { CommonResponse } from 'src/types/common.dto';
 import { CurrentUser } from 'src/_helpers/user.decorator';
+import { AuthResponseDto, LoginBodyDto, OnboardStep1Dto, OnboardStep2Dto, RegisterBodyDto, RequestPasswordResetDto, ResetPasswordDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {

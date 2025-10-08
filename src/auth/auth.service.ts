@@ -12,12 +12,7 @@ import { TokenPayload } from './auth.types';
 import * as crypto from 'crypto';
 import { WEBSITE_URL } from 'src/constants';
 import { MailerService } from 'src/_helpers/mailer/mailer.service';
-import {
-  AuthResponseDto,
-  authUserParser,
-  OnboardStep1Dto,
-  OnboardStep2Dto,
-} from './dto';
+
 import {
   getAuthCookies,
   removeAuthCookies,
@@ -25,6 +20,7 @@ import {
 } from './auth.tokens';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { CurrentUser } from 'src/_helpers/user.decorator';
+import { AuthResponseDto, authUserParser, OnboardStep1Dto, OnboardStep2Dto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -212,12 +208,12 @@ export class AuthService {
           investorProfile: {
             upsert: {
               create: {
-                investorPreferences: {
+                preferences: {
                   create: { ...body },
                 },
               },
               update: {
-                investorPreferences: {
+                preferences: {
                   upsert: {
                     where: { investorProfileId: userId.toString() },
                     create: { ...body },
