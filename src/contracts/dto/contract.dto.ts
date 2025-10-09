@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
@@ -82,7 +82,8 @@ export class ContractDto {
   status: ContractStatus;
 
   @ApiPropertyOptional({
-    example: 'Contract signed and awaiting final verification',
+    type: String,
+    example: 'Contract signed and awaiting verification',
   })
   @IsOptional()
   notes?: string | null;
@@ -162,10 +163,13 @@ export class CreateContractDto {
   @IsEnum(ContractStatus)
   status?: ContractStatus;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    type: String,
+    example: 'Contract signed and awaiting verification',
+  })
   @IsOptional()
   @IsString()
   notes?: string | null;
 }
 
-export class UpdateContractDto extends CreateContractDto {}
+export class UpdateContractDto extends PartialType(CreateContractDto) {}

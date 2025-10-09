@@ -19,6 +19,13 @@ export class ContractsService {
     });
   }
 
+  async getAll(userId: string) {
+    return this.prisma.contract.findMany({
+      where: { investorId: userId },
+      include: { property: true },
+    });
+  }
+  
   async findAll() {
     return this.prisma.contract.findMany({
       include: { property: true, investor: true },
@@ -39,6 +46,21 @@ export class ContractsService {
   async update(id: string, dto: UpdateContractDto) {
     const existing = await this.prisma.contract.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);
+
+    // when status changed
+    if (existing.status !== dto.status) {
+      if (dto.status === 'active') {
+        await this.prisma.property.update({
+          where: { id: dto.propertyId },
+          data: { ownerId: dto.investorId },
+        });
+      } else if (dto.status !== 'suspended') {
+        await this.prisma.property.update({
+          where: { id: dto.propertyId, ownerId: dto.investorId },
+          data: { ownerId: null },
+        });
+      }
+    }
 
     return this.prisma.contract.update({
       where: { id },

@@ -12,8 +12,15 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { ContractsService } from './contracts.service';
-import { ContractDto, CreateContractDto, UpdateContractDto } from './dto/contract.dto';
+import {
+  ContractDto,
+  ContractWithInvestor,
+  ContractWithProperties,
+  CreateContractDto,
+  UpdateContractDto,
+} from './dto/contract.dto';
 import { ContractIdParamDto } from 'src/properties/dto/property.create.dto';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('contracts')
@@ -34,13 +41,26 @@ export class ContractsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'superadmin')
+  @Roles('investor')
   @Get()
   @ApiOperation({ summary: 'Get all contracts [AdminOnly]' })
   @ApiResponse({
     status: 200,
     description: 'List of all contracts retrieved successfully.',
-    type: [ContractDto],
+    type: [ContractWithProperties],
+  })
+  async getAll(@CurrentUser() user: CurrentUser) {
+    return this.contractsService.getAll(user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Get('/all')
+  @ApiOperation({ summary: 'Get all contracts [AdminOnly]' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all contracts retrieved successfully.',
+    type: [ContractWithInvestor],
   })
   async findAll() {
     return this.contractsService.findAll();

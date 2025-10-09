@@ -3,14 +3,24 @@ import { PrismaService } from '../_helpers/database/prisma/prisma.service';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
 import { FindAllPropertiesQueryDto } from './dto/property.query.dto';
-import { PublicPropertySchema, PublicPropertyWithRelationsSchema } from './dto/property.get.dto';
+import {
+  PublicPropertySchema,
+  PublicPropertyWithRelationsSchema,
+} from './dto/property.get.dto';
 import { publicUserSelect } from 'src/users/dto/user.get.dto';
 
 @Injectable()
 export class PropertiesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query?: FindAllPropertiesQueryDto) {
+  async findAll() {
+    const data = await this.prisma.property.findMany({
+      where: { ownerId: null },
+    });
+    return PublicPropertySchema.array().parse(data);
+  }
+
+  async search(query?: FindAllPropertiesQueryDto) {
     const {
       search,
       city,

@@ -14,8 +14,17 @@ import { PropertiesService } from './properties.service';
 
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
-import { AdminPropertyDto, AdminPropertyWithContractsDto, AdminPropertyWithRelationsDto, PublicPropertyDto, PublicPropertyWithRelations } from './dto/property.get.dto';
-import { FindAllPropertiesQueryDto, PropertyIdParamDto } from './dto/property.query.dto';
+import {
+  AdminPropertyDto,
+  AdminPropertyWithContractsDto,
+  AdminPropertyWithRelationsDto,
+  PublicPropertyDto,
+  PublicPropertyWithRelations,
+} from './dto/property.get.dto';
+import {
+  FindAllPropertiesQueryDto,
+  PropertyIdParamDto,
+} from './dto/property.query.dto';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
 
@@ -31,8 +40,19 @@ export class PropertiesController {
     description: 'List of properties retrieved successfully.',
     type: [PublicPropertyDto],
   })
-  findAll(@Query() query?: FindAllPropertiesQueryDto) {
-    return this.propertiesService.findAll(query);
+  findAll() {
+    return this.propertiesService.findAll();
+  }
+
+  @Get('/search')
+  @ApiOperation({ summary: 'Get a list of properties' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of properties retrieved successfully.',
+    type: [PublicPropertyDto],
+  })
+  searchAll(@Query() query?: FindAllPropertiesQueryDto) {
+    return this.propertiesService.search(query);
   }
 
   @Get(':id')
