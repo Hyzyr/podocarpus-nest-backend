@@ -2,8 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PublicUserDto } from './user.get.dto';
 import { IsBoolean } from 'class-validator';
-import { InvestorPropertyDto } from 'src/investments/dto/investments.dto';
-import { ContractDto } from 'src/contracts/dto/contract.dto';
+import { ContractWithProperties } from 'src/contracts/dto/contract.dto';
 
 export class InvestorProfileDto {
   @ApiProperty()
@@ -14,10 +13,10 @@ export class InvestorProfileDto {
   user?: PublicUserDto | null;
 
   @ApiPropertyOptional({
-    type: () => [InvestorPropertyDto],
+    type: () => [ContractWithProperties],
     description: 'Investments Contracts',
   })
-  contracts?: ContractDto[];
+  contracts?: ContractWithProperties[];
 
   @ApiPropertyOptional({ type: () => InvestorPreferences, nullable: true })
   @Type(() => InvestorPreferences)

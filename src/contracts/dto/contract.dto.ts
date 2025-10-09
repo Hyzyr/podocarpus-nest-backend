@@ -90,8 +90,8 @@ export class ContractDto {
 
 // when fetched from InvestorProfile
 export class ContractWithProperties extends ContractDto {
-  @ApiPropertyOptional({
-    type: () => [InvestorPropertyDto],
+  @ApiProperty({
+    type: () => InvestorPropertyDto,
     description: 'Contracts for Properties',
   })
   property: InvestorPropertyDto;
@@ -99,7 +99,7 @@ export class ContractWithProperties extends ContractDto {
 
 // when fetched from Property
 export class ContractWithInvestor extends ContractDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: () => [InvestorProfileDto],
     description: 'Investor Profile',
   })
