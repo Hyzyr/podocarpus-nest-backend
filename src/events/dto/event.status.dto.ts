@@ -1,6 +1,8 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { UserActionsStatus } from '@prisma/client';
+import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsString } from 'class-validator';
+import { PublicUserDto } from 'src/users/dto/user.get.dto';
 
 export class CreateEventStatusDto {
   @ApiProperty({
@@ -41,6 +43,11 @@ export class UserEventStatusDto extends CreateEventStatusDto {
   })
   @IsString()
   id: string;
+}
+export class UserEventStatusWithUserDto extends UserEventStatusDto {
+  @ApiProperty({ type: () => PublicUserDto })
+  @Type(() => PublicUserDto)
+  user: PublicUserDto;
 }
 export class UpdateUserEventStatusDto extends PartialType(
   CreateEventStatusDto,

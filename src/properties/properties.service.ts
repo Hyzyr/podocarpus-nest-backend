@@ -45,6 +45,7 @@ export class PropertiesService {
     const data = await this.prisma.property.findMany({
       where: {
         AND: [
+          { ownerId: null },
           search
             ? {
                 OR: [

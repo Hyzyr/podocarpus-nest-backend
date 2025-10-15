@@ -27,6 +27,18 @@ export class EventsService {
     if (!event) throw new NotFoundException(`event ${id} not found`);
     return event;
   }
+
+  async findOneFullInfo(id: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        userStatuses: { include: { user: true } },
+      },
+    });
+    if (!event) throw new NotFoundException(`event ${id} not found`);
+    return event;
+  }
+
   async update(id: string, dto: UpdateEventDto) {
     return this.prisma.event.update({
       where: { id },

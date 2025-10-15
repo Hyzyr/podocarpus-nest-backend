@@ -252,13 +252,17 @@ model UserPropertyStatus {
 }
 
 model UserEventStatus {
-  id       String            @id @default(uuid())
-  userId   String
-  eventId  String
-  viewedAt DateTime          @default(now())
-  status   UserActionsStatus @default(seen)
-  user     AppUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event    Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id        String            @id @default(uuid())
+  userId    String
+  eventId   String
+  viewedAt  DateTime          @default(now())
+  
+  status    UserActionsStatus @default(seen)
+  user      AppUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
   @@unique([userId, eventId])
   @@index([eventId])

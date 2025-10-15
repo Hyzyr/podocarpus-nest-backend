@@ -12,7 +12,16 @@ import { EventsService } from './events.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { CurrentUser } from 'src/_helpers/user.decorator';
-import { CreateEventDto, EventDto, EventIdParamDto, EventWithStatusDto, UpdateEventDto } from './dto/events.dto';
+import {
+  CreateEventDto,
+  EventDto,
+  EventIdParamDto,
+  EventWithStatusDto,
+  UpdateEventDto,
+} from './dto/events.dto';
+import { Roles, RolesGuard } from 'src/auth/roles';
+import { PropertyIdParamDto } from 'src/properties/dto/property.query.dto';
+import { UserEventStatusWithUserDto } from './dto/event.status.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('events')
@@ -30,8 +39,10 @@ export class EventsController {
   create(@Body() dto: CreateEventDto) {
     return this.eventsService.create({
       ...dto,
-      startsAt: dto?.startsAt ? new Date(dto.startsAt) : dto?.startsAt,
-      endsAt: dto?.endsAt ? new Date(dto.endsAt) : dto?.endsAt,
+      startsAt: dto?.startsAt
+        ? new Date(dto.startsAt).toISOString()
+        : dto?.startsAt,
+      endsAt: dto?.endsAt ? new Date(dto.endsAt).toISOString() : dto?.endsAt,
     });
   }
 
@@ -76,5 +87,21 @@ export class EventsController {
   @ApiResponse({ status: 404, description: 'Event not found.' })
   remove(@Param() { id }: EventIdParamDto) {
     return this.eventsService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('/full-info/:id')
+  @Roles('admin')
+  @ApiOperation({
+    summary: 'Get a single property by ID with full info [AdminOnly]',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Property retrieved successfully.',
+    type: UserEventStatusWithUserDto,
+  })
+  @ApiResponse({ status: 404, description: 'Property not found.' })
+  findOneFullInfo(@Param() { id }: PropertyIdParamDto) {
+    return this.eventsService.findOneFullInfo(id);
   }
 }

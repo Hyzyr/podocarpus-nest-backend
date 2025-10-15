@@ -49,7 +49,7 @@ export class CreateEventDto {
   })
   @IsNotEmpty()
   @IsDateString()
-  startsAt: Date;
+  startsAt: string | Date;
 
   @ApiPropertyOptional({
     type: String,
@@ -59,7 +59,7 @@ export class CreateEventDto {
   })
   @IsOptional()
   @IsDateString()
-  endsAt?: Date | null;
+  endsAt?: string | Date | null;
 
   @ApiPropertyOptional({
     type: String,

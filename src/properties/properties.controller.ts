@@ -81,7 +81,9 @@ export class PropertiesController {
     return this.propertiesService.getAll();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/full-info/:id')
+  @Roles('admin')
   @ApiOperation({
     summary: 'Get a single property by ID with full info [AdminOnly]',
   })

@@ -263,6 +263,7 @@ export class AdminPropertyWithRelationsDto extends AdminPropertyDto {
   // })
   // userStatuses?: UserPropertyStatusDto[];
 }
+
 export const PublicPropertySchema = z
   .object({
     id: z.string(),
