@@ -29,23 +29,6 @@ import { UserEventStatusWithUserDto } from './dto/event.status.dto';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create a new Event' })
-  @ApiResponse({
-    status: 201,
-    description: 'Event created successfully.',
-    type: EventDto,
-  })
-  create(@Body() dto: CreateEventDto) {
-    return this.eventsService.create({
-      ...dto,
-      startsAt: dto?.startsAt
-        ? new Date(dto.startsAt).toISOString()
-        : dto?.startsAt,
-      endsAt: dto?.endsAt ? new Date(dto.endsAt).toISOString() : dto?.endsAt,
-    });
-  }
-
   @Get()
   @ApiOperation({ summary: 'Get a list of events' })
   @ApiResponse({
@@ -68,7 +51,31 @@ export class EventsController {
   findOne(@Param() { id }: EventIdParamDto) {
     return this.eventsService.findOne(id);
   }
+}
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+@ApiTags('events')
+@Controller('events')
+export class EventsAdminController {
+  constructor(private readonly eventsService: EventsService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new Event' })
+  @ApiResponse({
+    status: 201,
+    description: 'Event created successfully.',
+    type: EventDto,
+  })
+  create(@Body() dto: CreateEventDto) {
+    return this.eventsService.create({
+      ...dto,
+      startsAt: dto?.startsAt
+        ? new Date(dto.startsAt).toISOString()
+        : dto?.startsAt,
+      endsAt: dto?.endsAt ? new Date(dto.endsAt).toISOString() : dto?.endsAt,
+    });
+  }
   @Patch(':id')
   @ApiOperation({ summary: 'Update a event by ID' })
   @ApiResponse({
@@ -89,9 +96,7 @@ export class EventsController {
     return this.eventsService.remove(id);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/full-info/:id')
-  @Roles('admin')
   @ApiOperation({
     summary: 'Get a single property by ID with full info [AdminOnly]',
   })
