@@ -29,7 +29,7 @@ export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new contract for a property [AdminOnly]' })
+  @ApiOperation({ summary: 'Create a new contract ' })
   @ApiResponse({
     status: 201,
     description: 'Contract created successfully.',
@@ -43,7 +43,7 @@ export class ContractsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('investor')
   @Get()
-  @ApiOperation({ summary: 'Get all contracts [AdminOnly]' })
+  @ApiOperation({ summary: 'Get all contracts [InvestorOnly]' })
   @ApiResponse({
     status: 200,
     description: 'List of all contracts retrieved successfully.',
@@ -96,7 +96,6 @@ export class ContractsController {
   ) {
     return this.contractsService.update(id, dto);
   }
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin')
   @Delete(':id')

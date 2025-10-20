@@ -7,6 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum NotificationType {
+  system
+  contract
+  property
+  appointment
+  message
+}
+
+enum NotificationStatus {
+  unread
+  read
+}
+
 enum UserRole {
   investor
   broker
@@ -72,6 +85,7 @@ model AppUser {
   propertyStatuses UserPropertyStatus[]
   eventStatuses    UserEventStatus[]
   activityLogs     ActivityLog[]
+  notifications    Notification[]
 }
 
 model InvestorProfile {
@@ -252,17 +266,17 @@ model UserPropertyStatus {
 }
 
 model UserEventStatus {
-  id        String            @id @default(uuid())
-  userId    String
-  eventId   String
-  viewedAt  DateTime          @default(now())
-  
-  status    UserActionsStatus @default(seen)
-  user      AppUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event     Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id       String   @id @default(uuid())
+  userId   String
+  eventId  String
+  viewedAt DateTime @default(now())
+
+  status UserActionsStatus @default(seen)
+  user   AppUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event  Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, eventId])
   @@index([eventId])
@@ -280,4 +294,19 @@ model ActivityLog {
 
   @@index([userId, type])
   @@index([entityId])
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  userId    String
+  type      NotificationType   @default(system)
+  title     String
+  message   String
+  link      String? // optional deep link (e.g. /contracts/123)
+  status    NotificationStatus @default(unread)
+  createdAt DateTime           @default(now())
+  readAt    DateTime?
+  json      Json?
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

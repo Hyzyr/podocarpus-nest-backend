@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
 import { CreateContractDto, UpdateContractDto } from './dto/contract.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class ContractsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notification: NotificationsService,
+  ) {}
 
   async createContract(dto: CreateContractDto) {
     const propertyId = dto.propertyId;
@@ -18,21 +22,13 @@ export class ContractsService {
       data: { ...dto },
     });
   }
-
   async getAll(userId: string) {
     return this.prisma.contract.findMany({
       where: { investorId: userId },
       include: { property: true },
     });
   }
-  
-  async findAll() {
-    return this.prisma.contract.findMany({
-      include: { property: true, investor: true },
-    });
-  }
 
-  // 🔹 Get single contract
   async findOne(id: string) {
     const contract = await this.prisma.contract.findUnique({
       where: { id },
@@ -41,8 +37,6 @@ export class ContractsService {
     if (!contract) throw new NotFoundException(`Contract ${id} not found`);
     return contract;
   }
-
-  // 🔹 Update
   async update(id: string, dto: UpdateContractDto) {
     const existing = await this.prisma.contract.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);
@@ -68,7 +62,15 @@ export class ContractsService {
     });
   }
 
-  // 🔹 Delete
+  ///
+  ///
+  // Admin only
+  async findAll() {
+    return this.prisma.contract.findMany({
+      include: { property: true, investor: true },
+    });
+  }
+
   async remove(id: string) {
     const existing = await this.prisma.contract.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);

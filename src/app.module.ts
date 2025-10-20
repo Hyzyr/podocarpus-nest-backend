@@ -13,6 +13,7 @@ import { StorageModule } from './storage/storage.module';
 import { EventsModule } from './events/events.module';
 import { EventStatusModule } from './events/event.status.module';
 import { ContractsModule } from './contracts/contracts.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ContractsModule } from './contracts/contracts.module';
     EventsModule,
     EventStatusModule,
     ContractsModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],

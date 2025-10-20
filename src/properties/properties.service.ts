@@ -19,7 +19,6 @@ export class PropertiesService {
     });
     return PublicPropertySchema.array().parse(data);
   }
-
   async search(query?: FindAllPropertiesQueryDto) {
     const {
       search,
@@ -95,7 +94,11 @@ export class PropertiesService {
     return PublicPropertyWithRelationsSchema.parse(property);
   }
 
-  // admin only props and these are not parsed to Public
+  ///
+  ///
+  ///
+  // admin only props and 
+  // these are not parsed to Public
   async getAll() {
     const data = await this.prisma.property.findMany({
       include: { contracts: true },
@@ -103,7 +106,6 @@ export class PropertiesService {
 
     return data;
   }
-
   async findOneFullInfo(id: string) {
     const property = await this.prisma.property.findUnique({
       where: { id },
@@ -125,7 +127,6 @@ export class PropertiesService {
     });
     return property;
   }
-
   async update(id: string, dto: UpdatePropertyDto) {
     const property = await this.prisma.property.update({
       where: { id },
@@ -133,7 +134,6 @@ export class PropertiesService {
     });
     return property;
   }
-
   async remove(id: string) {
     return this.prisma.property.delete({ where: { id } });
   }
