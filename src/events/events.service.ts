@@ -1,15 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEventDto, UpdateEventDto } from './dto/events.dto';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
-  create(dto: CreateEventDto) {
-    return this.prisma.event.create({
+  async create(dto: CreateEventDto) {
+    const event = await this.prisma.event.create({
       data: dto,
     });
+    await this.notifications.notifyGroup(['investor', 'broker'], 'event', {
+      title: `New Event: ${dto.title}`,
+      message: `${event.description}`,
+      link: `/${event.id}`,
+    });
+    return event;
   }
 
   async findAll(userId: string) {
@@ -19,6 +29,7 @@ export class EventsService {
           where: { userId }, // only fetch status for this user
         },
       },
+      orderBy: { updatedAt: 'desc' },
     });
   }
 

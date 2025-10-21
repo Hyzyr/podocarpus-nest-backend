@@ -9,6 +9,7 @@ datasource db {
 
 enum NotificationType {
   system
+  event
   contract
   property
   appointment
@@ -297,16 +298,18 @@ model ActivityLog {
 }
 
 model Notification {
-  id        String             @id @default(uuid())
-  userId    String
-  type      NotificationType   @default(system)
-  title     String
-  message   String
-  link      String? // optional deep link (e.g. /contracts/123)
-  status    NotificationStatus @default(unread)
-  createdAt DateTime           @default(now())
-  readAt    DateTime?
-  json      Json?
+  id          String             @id @default(uuid())
+  userId      String?
+  type        NotificationType   @default(system)
+  title       String
+  message     String
+  targetRoles UserRole[]
+  link        String? // optional deep link (e.g. /contracts/123)
+  status      NotificationStatus @default(unread)
+  createdAt   DateTime           @default(now())
+  isGlobal    Boolean?           @default(false)
+  readAt      DateTime?
+  json        Json?
 
-  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user AppUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

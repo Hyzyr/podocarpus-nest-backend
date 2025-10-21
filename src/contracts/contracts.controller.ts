@@ -36,8 +36,11 @@ export class ContractsController {
     type: ContractDto,
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
-  async createContract(@Body() dto: CreateContractDto) {
-    return this.contractsService.createContract(dto);
+  async createContract(
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: CreateContractDto,
+  ) {
+    return this.contractsService.createContract(user.userId, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -91,10 +94,11 @@ export class ContractsController {
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
   async update(
+    @CurrentUser() user: CurrentUser,
     @Param() { id }: ContractIdParamDto,
     @Body() dto: UpdateContractDto,
   ) {
-    return this.contractsService.update(id, dto);
+    return this.contractsService.update(user, id, dto);
   }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin')

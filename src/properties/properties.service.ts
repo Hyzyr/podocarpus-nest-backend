@@ -97,7 +97,7 @@ export class PropertiesService {
   ///
   ///
   ///
-  // admin only props and 
+  // admin only props and
   // these are not parsed to Public
   async getAll() {
     const data = await this.prisma.property.findMany({
@@ -136,5 +136,16 @@ export class PropertiesService {
   }
   async remove(id: string) {
     return this.prisma.property.delete({ where: { id } });
+  }
+
+  ///
+  ///
+  ///
+  // in app functionality
+  async assignOwner(propertyId: string, investorId: string | null) {
+    return this.prisma.property.update({
+      where: { id: propertyId },
+      data: { ownerId: investorId },
+    });
   }
 }

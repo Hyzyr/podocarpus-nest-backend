@@ -5,6 +5,7 @@ import { PropertiesService } from './properties.service';
 
 @Module({
   imports: [DatabaseModule],
+  exports: [PropertiesService],
   controllers: [PropertiesController],
   providers: [PropertiesService],
 })

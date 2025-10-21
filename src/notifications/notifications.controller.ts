@@ -13,6 +13,7 @@ import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './notifications.dto';
 import { UpdateNotificationDto } from './notifications.dto';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
 @ApiTags('notifications')
 @UseGuards(JwtAuthGuard)
@@ -32,18 +33,18 @@ export class NotificationsController {
     return this.notificationsService.create(dto);
   }
 
-  @Get('my')
+  @Get()
   @ApiOperation({ summary: 'Get current user notifications' })
   @ApiResponse({ status: 200, description: 'List of user notifications.' })
-  getMyNotifications(@Req() req) {
-    return this.notificationsService.findUserNotifications(req.user.userId);
+  getMyNotifications(@CurrentUser() user: CurrentUser) {
+    return this.notificationsService.getRelatedNotifications(user);
   }
 
   @Patch(':id/read')
   @ApiOperation({ summary: 'Mark a notification as read' })
   @ApiResponse({ status: 200, description: 'Notification marked as read.' })
-  markAsRead(@Param('id') id: string, @Req() req) {
-    return this.notificationsService.markAsRead(id, req.user.userId);
+  markAsRead(@Param('id') id: string, @CurrentUser() { userId }: CurrentUser) {
+    return this.notificationsService.markAsRead(id, userId);
   }
 
   @Patch('mark-all-read')
