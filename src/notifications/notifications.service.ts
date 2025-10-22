@@ -24,16 +24,18 @@ export class NotificationsService {
     });
   }
   async markAsRead(id: string, userId: string) {
-    return this.prisma.notification.updateMany({
+    await this.prisma.notification.updateMany({
       where: { id, userId },
       data: { status: 'read', readAt: new Date() },
     });
+    return true;
   }
   async markAllAsRead(userId: string) {
-    return this.prisma.notification.updateMany({
+    await this.prisma.notification.updateMany({
       where: { userId },
       data: { status: 'read', readAt: new Date() },
     });
+    return true;
   }
 
   ///

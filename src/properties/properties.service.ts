@@ -8,10 +8,14 @@ import {
   PublicPropertyWithRelationsSchema,
 } from './dto/property.get.dto';
 import { publicUserSelect } from 'src/users/dto/user.get.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class PropertiesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async findAll() {
     const data = await this.prisma.property.findMany({
@@ -125,6 +129,13 @@ export class PropertiesService {
     const property = await this.prisma.property.create({
       data: dto,
     });
+
+    if (dto.status !== 'draft')
+      await this.notifications.notifyGroup(['broker', 'investor'], 'property', {
+        title: `New Property`,
+        message: `**${property.title}** is now open for investment.`,
+        link: `/${property.id}`,
+      });
     return property;
   }
   async update(id: string, dto: UpdatePropertyDto) {

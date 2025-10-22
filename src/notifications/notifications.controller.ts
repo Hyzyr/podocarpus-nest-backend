@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
-import { CreateNotificationDto } from './notifications.dto';
-import { UpdateNotificationDto } from './notifications.dto';
+import { CreateNotificationDto, NotificationDto } from './notifications.dto';
 import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
 import { CurrentUser } from 'src/_helpers/user.decorator';
 
@@ -28,6 +27,7 @@ export class NotificationsController {
   @ApiResponse({
     status: 201,
     description: 'Notification created successfully.',
+    type: [NotificationDto],
   })
   create(@Body() dto: CreateNotificationDto) {
     return this.notificationsService.create(dto);
@@ -35,7 +35,11 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'Get current user notifications' })
-  @ApiResponse({ status: 200, description: 'List of user notifications.' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of user notifications.',
+    type: [NotificationDto],
+  })
   getMyNotifications(@CurrentUser() user: CurrentUser) {
     return this.notificationsService.getRelatedNotifications(user);
   }
@@ -55,7 +59,7 @@ export class NotificationsController {
     status: 200,
     description: 'All user notifications marked as read.',
   })
-  markAllAsRead(@Req() req) {
-    return this.notificationsService.markAllAsRead(req.user.userId);
+  markAllAsRead(@CurrentUser() user: CurrentUser) {
+    return this.notificationsService.markAllAsRead(user.userId);
   }
 }
