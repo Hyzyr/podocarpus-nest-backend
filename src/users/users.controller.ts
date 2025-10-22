@@ -34,7 +34,7 @@ export class UsersAdminController {
   })
   getAll() {
     return this.usersService.getAll();
-  }
+  }  
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin')
