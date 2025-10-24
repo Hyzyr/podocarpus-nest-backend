@@ -4,17 +4,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { FastifyRequest } from 'fastify';
 import { JWT_SECRET } from 'src/constants';
 import { TokenPayload } from '../auth/auth.types';
+import { ACCESS_TOKEN_KEY } from 'src/auth/auth.constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        // Look in cookies first
-        (req: FastifyRequest) => {
-          return req?.cookies?.access_token || null;
-        },
-        // fallback to header if you still want to support Bearer
+        (req: FastifyRequest) => req?.cookies?.[ACCESS_TOKEN_KEY] ?? null,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,

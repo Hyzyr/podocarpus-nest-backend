@@ -13,7 +13,15 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from '../_helpers/jwt-auth.guard';
 import { CommonResponse } from 'src/types/common.dto';
 import { CurrentUser } from 'src/_helpers/user.decorator';
-import { AuthResponseDto, LoginBodyDto, OnboardStep1Dto, OnboardStep2Dto, RegisterBodyDto, RequestPasswordResetDto, ResetPasswordDto } from './dto/auth.dto';
+import {
+  AuthResponseDto,
+  LoginBodyDto,
+  OnboardStep1Dto,
+  OnboardStep2Dto,
+  RegisterBodyDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +34,7 @@ export class AuthController {
     description: 'User registered successfully',
     type: AuthResponseDto,
   })
-  register(
+  async register(
     @Body() dto: RegisterBodyDto,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
@@ -40,7 +48,7 @@ export class AuthController {
     description: 'User logged in successfully',
     type: AuthResponseDto,
   })
-  login(
+  async login(
     @Body() dto: LoginBodyDto,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
@@ -50,7 +58,7 @@ export class AuthController {
   @Get('logout')
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 204, description: 'User logged out successfully' })
-  logout(@Res({ passthrough: true }) reply: FastifyReply) {
+  async logout(@Res({ passthrough: true }) reply: FastifyReply) {
     this.auth.logout(reply); // clears cookies
     return; // Nest handles 204
   }
@@ -70,10 +78,9 @@ export class AuthController {
 
   @Get('refresh')
   @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
-  // @ApiCookieAuth(REFRESH_TOKEN_KEY)
   @ApiResponse({
     status: 200,
-    description: 'Tokens refreshed',
+    description: 'Tokens refreshed successfully',
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
@@ -90,7 +97,7 @@ export class AuthController {
     status: 200,
     description: 'Password reset email sent',
   })
-  forgotPass(@Body() dto: RequestPasswordResetDto) {
+  async forgotPass(@Body() dto: RequestPasswordResetDto) {
     return this.auth.forgotPass(dto.email);
   }
 
@@ -100,7 +107,7 @@ export class AuthController {
     status: 200,
     description: 'Password reset successfully',
   })
-  reset(@Body() dto: ResetPasswordDto) {
+  async reset(@Body() dto: ResetPasswordDto) {
     return this.auth.resetPassword(dto.token, dto.newPassword);
   }
 

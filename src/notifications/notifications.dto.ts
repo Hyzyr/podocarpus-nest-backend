@@ -73,6 +73,14 @@ export class NotificationDto {
   })
   @IsOptional()
   json?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    enum: NotificationStatus,
+    example: NotificationStatus.read,
+  })
+  @IsOptional()
+  @IsEnum(NotificationStatus)
+  status?: NotificationStatus;
 }
 export class CreateNotificationDto {
   @ApiPropertyOptional({
@@ -180,9 +188,10 @@ export class UpdateNotificationDto {
 //   INTERNAL TYPES (for service usage)
 // ────────────────────────────────────────────────
 //
-export interface NotificationDto {
+export interface NotificationDtoType {
   id: string;
   userId?: string;
+  status: NotificationStatus;
   type: NotificationType;
   title: string;
   message: string;

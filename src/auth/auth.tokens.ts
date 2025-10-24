@@ -2,9 +2,20 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from './auth.types';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { WEBSITE_DOMAIN } from 'src/constants';
+import {
+  ACCESS_TOKEN_KEY,
+  ACCESS_TOKEN_TTL,
+  REFRESH_TOKEN_KEY,
+  REFRESH_TOKEN_TTL,
+} from './auth.constants';
 
-const ACCESS_TOKEN_KEY = 'access_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
+const baseCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+  domain: WEBSITE_DOMAIN,
+};
 
 export const setAuthCookies = (
   payload: TokenPayload,
@@ -12,47 +23,25 @@ export const setAuthCookies = (
   reply: FastifyReply,
 ) => {
   //   const jwtService = new JwtService();
-  const accessToken = jwtService.sign(payload, { expiresIn: '15m' });
-  const refreshToken = jwtService.sign(payload, { expiresIn: '7d' });
+  const accessToken = jwtService.sign(payload, { expiresIn: ACCESS_TOKEN_TTL });
+  const refreshToken = jwtService.sign(payload, {
+    expiresIn: REFRESH_TOKEN_TTL,
+  });
+  removeAuthCookies(reply);
 
   // set cookies
   reply.setCookie(ACCESS_TOKEN_KEY, accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // false in local dev
-    sameSite: 'lax',
-    path: '/', // ✅ cookie available everywhere
-    maxAge: 60 * 35, // 35 minutes
-    domain: WEBSITE_DOMAIN, // optional, leave out if you want it to default to host
+    ...baseCookieOptions,
+    maxAge: 60 * 1, // 1 minutes
   });
-
   reply.setCookie(REFRESH_TOKEN_KEY, refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/', // ✅ important
+    ...baseCookieOptions,
     maxAge: 60 * 60 * 24 * 7, // 7 days
-    domain: WEBSITE_DOMAIN, // optional
   });
 };
 export const removeAuthCookies = (reply: FastifyReply) => {
-  // set cookies
-  reply.setCookie(ACCESS_TOKEN_KEY, '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0, // immediately expires
-    domain: WEBSITE_DOMAIN,
-  });
-
-  reply.setCookie(REFRESH_TOKEN_KEY, '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
-    domain: WEBSITE_DOMAIN,
-  });
+  reply.setCookie(ACCESS_TOKEN_KEY, '', { ...baseCookieOptions, maxAge: 0 });
+  reply.setCookie(REFRESH_TOKEN_KEY, '', { ...baseCookieOptions, maxAge: 0 });
 };
 export const getAuthCookies = (req: FastifyRequest) => {
   const cookies = req.cookies as Record<string, string | undefined>;

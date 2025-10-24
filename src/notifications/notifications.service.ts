@@ -24,11 +24,12 @@ export class NotificationsService {
     });
   }
   async markAsRead(id: string, userId: string) {
-    await this.prisma.notification.updateMany({
+    const updated = await this.prisma.notification.updateMany({
       where: { id, userId },
       data: { status: 'read', readAt: new Date() },
     });
-    return true;
+
+    return updated.count > 0;
   }
   async markAllAsRead(userId: string) {
     await this.prisma.notification.updateMany({

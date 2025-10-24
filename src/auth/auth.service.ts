@@ -20,7 +20,12 @@ import {
 } from './auth.tokens';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { CurrentUser } from 'src/_helpers/user.decorator';
-import { AuthResponseDto, authUserParser, OnboardStep1Dto, OnboardStep2Dto } from './dto/auth.dto';
+import {
+  AuthResponseDto,
+  authUserParser,
+  OnboardStep1Dto,
+  OnboardStep2Dto,
+} from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -111,6 +116,9 @@ export class AuthService {
     reply: FastifyReply,
   ): Promise<AuthResponseDto> {
     const { refreshToken } = getAuthCookies(req);
+    console.log('refreshTokens');
+    console.log('refreshToken : ', refreshToken);
+
     if (!refreshToken) throw new UnauthorizedException();
 
     try {
@@ -124,12 +132,7 @@ export class AuthService {
       if (!user) throw new UnauthorizedException();
 
       // issue new tokens
-      setAuthCookies(
-        { sub: payload.sub, role: payload.role },
-        this.jwtService,
-        reply,
-      );
-
+      setAuthCookies({ sub: user.id, role: user.role }, this.jwtService, reply);
       return {
         user: authUserParser.parse(user),
       };
