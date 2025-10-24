@@ -32,7 +32,7 @@ export const setAuthCookies = (
   // set cookies
   reply.setCookie(ACCESS_TOKEN_KEY, accessToken, {
     ...baseCookieOptions,
-    maxAge: 60 * 1, // 1 minutes
+    maxAge: 60 * 15, // 15 minutes
   });
   reply.setCookie(REFRESH_TOKEN_KEY, refreshToken, {
     ...baseCookieOptions,

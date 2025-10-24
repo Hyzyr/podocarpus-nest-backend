@@ -116,8 +116,6 @@ export class AuthService {
     reply: FastifyReply,
   ): Promise<AuthResponseDto> {
     const { refreshToken } = getAuthCookies(req);
-    console.log('refreshTokens');
-    console.log('refreshToken : ', refreshToken);
 
     if (!refreshToken) throw new UnauthorizedException();
 
