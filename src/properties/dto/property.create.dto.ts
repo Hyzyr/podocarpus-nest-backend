@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsString,
@@ -113,15 +113,15 @@ export class CreatePropertyDto {
   @IsString()
   paymentMethod?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ format: 'date-time' })
   @IsOptional()
   @IsDateString()
-  rentStart?: Date;
+  rentStart?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ format: 'date-time' })
   @IsOptional()
   @IsDateString()
-  rentExpiry?: Date;
+  rentExpiry?: string;
 
   @ApiPropertyOptional({ type: Number })
   @IsOptional()

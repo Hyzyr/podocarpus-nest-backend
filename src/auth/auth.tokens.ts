@@ -32,11 +32,11 @@ export const setAuthCookies = (
   // set cookies
   reply.setCookie(ACCESS_TOKEN_KEY, accessToken, {
     ...baseCookieOptions,
-    maxAge: 60 * 15, // 15 minutes
+    maxAge: 60 * 60 * 2, // 2 hours
   });
   reply.setCookie(REFRESH_TOKEN_KEY, refreshToken, {
     ...baseCookieOptions,
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24 * 14, // 7 days
   });
 };
 export const removeAuthCookies = (reply: FastifyReply) => {
@@ -50,17 +50,3 @@ export const getAuthCookies = (req: FastifyRequest) => {
     refreshToken: cookies[REFRESH_TOKEN_KEY],
   };
 };
-
-// export const getPayloadFromCookies = async (
-//   req: FastifyRequest,
-//   jwtService: JwtService,
-// ): Promise<TokenPayload | null> => {
-//   const { accessToken } = getAuthCookies(req);
-//   if (!accessToken) return null;
-
-//   try {
-//     return await jwtService.verifyAsync<TokenPayload>(accessToken);
-//   } catch {
-//     return null;
-//   }
-// };

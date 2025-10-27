@@ -109,8 +109,8 @@ export class PropertiesController {
   create(@Body() dto: CreatePropertyDto) {
     return this.propertiesService.create({
       ...dto,
-      rentStart: dto?.rentStart ? new Date(dto.rentStart) : dto?.rentStart,
-      rentExpiry: dto?.rentExpiry ? new Date(dto.rentExpiry) : dto?.rentStart,
+      rentStart: dto?.rentStart ? new Date(dto.rentStart).toISOString() : dto?.rentStart,
+      rentExpiry: dto?.rentExpiry ? new Date(dto.rentExpiry).toISOString() : dto?.rentExpiry,
     });
   }
 

@@ -1,5 +1,18 @@
 [
   {
+    "code": "TM",
+    "name": "Turkmenistan",
+    "continent": "Asia",
+    "nationality": "Turkmen",
+    "cities": [
+      "Ashgabat",
+      "Turkmenabat",
+      "Dashoguz",
+      "Mary",
+      "Balkanabat"
+    ]
+  },
+  {
     "code": "US",
     "name": "United States",
     "continent": "North America",
