@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from 'src/constants';
 import { JwtStrategy } from '../_helpers/jwt.strategy';
 import { MailerModule } from 'src/_helpers/mailer/mailer.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { MailerModule } from 'src/_helpers/mailer/mailer.module';
       signOptions: { expiresIn: '12h' },
     }),
     DatabaseModule,
-    MailerModule
+    MailerModule,
+    NotificationsModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

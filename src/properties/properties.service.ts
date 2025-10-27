@@ -135,6 +135,7 @@ export class PropertiesService {
         title: `New Property`,
         message: `**${property.title}** is now open for investment.`,
         link: `/${property.id}`,
+        json: { propertyId: property.id },
       });
     return property;
   }
@@ -154,9 +155,46 @@ export class PropertiesService {
   ///
   // in app functionality
   async assignOwner(propertyId: string, investorId: string | null) {
+    const existingProperty = await this.prisma.property.findUnique({
+      where: { id: propertyId },
+      select: { ownerId: true },
+    });
+    if (!existingProperty) throw new NotFoundException(`Property ${propertyId} not found`);
+
+    // if owner changed, handle cancellation and notifications
+    if (existingProperty.ownerId !== investorId) {
+      await this.handleOwnerChange(propertyId);
+    }
+
     return this.prisma.property.update({
       where: { id: propertyId },
       data: { ownerId: investorId },
     });
+  }
+  private async handleOwnerChange(propertyId: string) {
+    // get all appointments for this property
+    const appointments = await this.prisma.appointment.findMany({
+      where: { propertyId },
+      select: { id: true, bookedById: true },
+    });
+
+    // cancel all appointments
+    await this.prisma.appointment.updateMany({
+      where: { propertyId },
+      data: { status: 'canceled' },
+    });
+
+    // bulk create notifications
+    const notifications = appointments.map(appointment => ({
+      userId: appointment.bookedById,
+      body: {
+        title: 'Appointment Canceled',
+        message: `Your appointment for this property has been canceled due to ownership change.`,
+        link: `/${appointment.id}`,
+        json: { appointmentId: appointment.id, bookedById: appointment.bookedById },
+      },
+    }));
+
+    await this.notifications.notifyBulkCustom(notifications, 'appointment');
   }
 }

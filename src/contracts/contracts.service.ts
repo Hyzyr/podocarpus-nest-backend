@@ -37,6 +37,7 @@ export class ContractsService {
       currentUserId,
       contract.investorId,
       contract.id,
+      propertyId,
     );
 
     return contract;
@@ -90,16 +91,22 @@ export class ContractsService {
     currentUserId: string,
     investorId: string,
     contractId: string,
+    propertyId: string,
   ) => {
+    // structured ids included in json payload so admin UI can build the correct route
+    const jsonPayload = { investorId, propertyId, contractId };
+
     if (currentUserId === investorId)
       await this.notifications.notifyByRole('admin', 'contract', {
         ...notificationForAdmin,
-        link: `/${contractId}`,
+        link: `/${investorId}`,
+        json: jsonPayload,
       });
     else
       await this.notifications.notifyByRole('admin', 'contract', {
         ...notificationForInvestor,
-        link: `/${contractId}`,
+        link: `/${investorId}`,
+        json: jsonPayload,
       });
   };
 
@@ -120,15 +127,23 @@ export class ContractsService {
       await this.property.assignOwner(propertyId, null);
     }
 
-    if (currentUser.role === 'admin' || currentUser.role === 'superadmin')
-      await this.notifications.notify(investorId, 'contract', {
-        ...updateNotificationForAdmin,
-        link: `/${contractId}`,
-      });
-    else
+    const jsonPayload = { investorId, propertyId, contractId };
+    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
+
+    if (isAdmin) {
+      // admin updated, notify investor
       await this.notifications.notify(investorId, 'contract', {
         ...updateNotificationForInvestor,
         link: `/${contractId}`,
+        json: jsonPayload,
       });
+    } else {
+      // investor/broker updated, notify admin
+      await this.notifications.notifyByRole('admin', 'contract', {
+        ...updateNotificationForAdmin,
+        link: `/${contractId}`,
+        json: jsonPayload,
+      });
+    }
   };
 }

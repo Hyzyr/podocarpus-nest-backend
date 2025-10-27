@@ -94,7 +94,9 @@ export class AppointmentController {
     return this.appointmentService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
+  @Roles('admin', 'investor', 'broker')
   @ApiOperation({ summary: 'Update an appointment by ID' })
   @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
   @ApiResponse({
@@ -106,8 +108,9 @@ export class AppointmentController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
+    @CurrentUser() user: CurrentUser,
   ) {
-    return this.appointmentService.update(id, updateAppointmentDto);
+    return this.appointmentService.update(id, updateAppointmentDto, user);
   }
 
   @UseGuards(RolesGuard)

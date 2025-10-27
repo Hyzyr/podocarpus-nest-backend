@@ -18,6 +18,7 @@ export class EventsService {
       title: `New Event: ${dto.title}`,
       message: `${event.description}`,
       link: `/${event.id}`,
+      json: { eventId: event.id },
     });
     return event;
   }
@@ -51,10 +52,25 @@ export class EventsService {
   }
 
   async update(id: string, dto: UpdateEventDto) {
-    return this.prisma.event.update({
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException(`Event ${id} not found`);
+
+    const updated = await this.prisma.event.update({
       where: { id },
       data: dto,
     });
+
+    // notify participants if status changed
+    if (existing.status !== updated.status) {
+      await this.notifications.notifyGroup(['investor', 'broker'], 'event', {
+        title: `Event Status Updated: ${updated.title}`,
+        message: `The event status has changed to ${updated.status}.`,
+        link: `/${updated.id}`,
+        json: { eventId: updated.id },
+      });
+    }
+
+    return updated;
   }
   async remove(id: string) {
     return this.prisma.event.delete({ where: { id } });

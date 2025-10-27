@@ -76,4 +76,16 @@ export class NotificationsService {
       data: userIdArr.map((userId) => ({ userId, type, ...body })),
     });
   }
+  async notifyBulkCustom(
+    notifications: Array<{ userId: string; body: NotifyInputDto }>,
+    type: NotificationType,
+  ) {
+    return this.prisma.notification.createMany({
+      data: notifications.map(({ userId, body }) => ({
+        userId,
+        type,
+        ...body,
+      })),
+    });
+  }
 }
