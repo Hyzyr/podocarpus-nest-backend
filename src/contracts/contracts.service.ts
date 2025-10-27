@@ -14,6 +14,7 @@ import {
 } from './contract.config';
 import { PropertiesService } from 'src/properties/properties.service';
 import { CurrentUser } from 'src/_helpers/user.decorator';
+import { ContractsNotificationsService } from './contracts.notifications.service';
 
 @Injectable()
 export class ContractsService {
@@ -21,6 +22,7 @@ export class ContractsService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly property: PropertiesService,
+    private readonly contractsNotifications: ContractsNotificationsService,
   ) {}
 
   async createContract(currentUserId: string, dto: CreateContractDto) {
@@ -33,7 +35,7 @@ export class ContractsService {
     const contract = await this.prisma.contract.create({
       data: { ...dto },
     });
-    await this.newContractNotify(
+    await this.contractsNotifications.notifyNewContract(
       currentUserId,
       contract.investorId,
       contract.id,
@@ -65,7 +67,24 @@ export class ContractsService {
       data: dto,
     });
 
-    await this.statusChangeHandle(currentUser, existing, newContract);
+    // Handle status changes and notifications
+    if (existing.status !== newContract.status) {
+      if (newContract.status === 'active') {
+        // status changed to active
+        await this.property.assignOwner(existing.propertyId, existing.investorId);
+      } else if (newContract.status !== 'suspended') {
+        // status changed to something else than active and suspended
+        await this.property.assignOwner(existing.propertyId, null);
+      }
+
+      await this.contractsNotifications.notifyStatusChange(
+        currentUser,
+        existing.id,
+        existing.propertyId,
+        existing.investorId,
+        newContract.status,
+      );
+    }
 
     return newContract;
   }
@@ -85,65 +104,4 @@ export class ContractsService {
 
     return this.prisma.contract.delete({ where: { id } });
   }
-
-  // in service functionality
-  private newContractNotify = async (
-    currentUserId: string,
-    investorId: string,
-    contractId: string,
-    propertyId: string,
-  ) => {
-    // structured ids included in json payload so admin UI can build the correct route
-    const jsonPayload = { investorId, propertyId, contractId };
-
-    if (currentUserId === investorId)
-      await this.notifications.notifyByRole('admin', 'contract', {
-        ...notificationForAdmin,
-        link: `/${investorId}`,
-        json: jsonPayload,
-      });
-    else
-      await this.notifications.notifyByRole('admin', 'contract', {
-        ...notificationForInvestor,
-        link: `/${investorId}`,
-        json: jsonPayload,
-      });
-  };
-
-  private statusChangeHandle = async (
-    currentUser: CurrentUser,
-    existingContract: ContractDto,
-    newContract: ContractDto,
-  ) => {
-    const existing = existingContract;
-    if (existing.status === newContract.status) return;
-
-    const { id: contractId, propertyId, investorId } = existing;
-    if (newContract.status === 'active') {
-      // status changed to active
-      await this.property.assignOwner(propertyId, investorId);
-    } else if (newContract.status !== 'suspended') {
-      // status changed to something else than active and suspended
-      await this.property.assignOwner(propertyId, null);
-    }
-
-    const jsonPayload = { investorId, propertyId, contractId };
-    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
-
-    if (isAdmin) {
-      // admin updated, notify investor
-      await this.notifications.notify(investorId, 'contract', {
-        ...updateNotificationForInvestor,
-        link: `/${contractId}`,
-        json: jsonPayload,
-      });
-    } else {
-      // investor/broker updated, notify admin
-      await this.notifications.notifyByRole('admin', 'contract', {
-        ...updateNotificationForAdmin,
-        link: `/${contractId}`,
-        json: jsonPayload,
-      });
-    }
-  };
 }

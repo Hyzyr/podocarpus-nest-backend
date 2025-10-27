@@ -2,24 +2,21 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEventDto, UpdateEventDto } from './dto/events.dto';
 import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { EventsNotificationsService } from './events.notifications.service';
 
 @Injectable()
 export class EventsService {
   constructor(
     private prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly eventsNotifications: EventsNotificationsService,
   ) {}
 
   async create(dto: CreateEventDto) {
     const event = await this.prisma.event.create({
       data: dto,
     });
-    await this.notifications.notifyGroup(['investor', 'broker'], 'event', {
-      title: `New Event: ${dto.title}`,
-      message: `${event.description}`,
-      link: `/${event.id}`,
-      json: { eventId: event.id },
-    });
+    await this.eventsNotifications.notifyNewEvent(event.id, dto.title, event.description || '');
     return event;
   }
 
@@ -62,12 +59,7 @@ export class EventsService {
 
     // notify participants if status changed
     if (existing.status !== updated.status) {
-      await this.notifications.notifyGroup(['investor', 'broker'], 'event', {
-        title: `Event Status Updated: ${updated.title}`,
-        message: `The event status has changed to ${updated.status}.`,
-        link: `/${updated.id}`,
-        json: { eventId: updated.id },
-      });
+      await this.eventsNotifications.notifyStatusUpdate(updated.id, updated.title, updated.status);
     }
 
     return updated;

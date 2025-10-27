@@ -9,12 +9,14 @@ import {
 } from './dto/property.get.dto';
 import { publicUserSelect } from 'src/users/dto/user.get.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { PropertiesNotificationsService } from './properties.notifications.service';
 
 @Injectable()
 export class PropertiesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly propertiesNotifications: PropertiesNotificationsService,
   ) {}
 
   async findAll() {
@@ -131,12 +133,7 @@ export class PropertiesService {
     });
 
     if (dto.status !== 'draft')
-      await this.notifications.notifyGroup(['broker', 'investor'], 'property', {
-        title: `New Property`,
-        message: `**${property.title}** is now open for investment.`,
-        link: `/${property.id}`,
-        json: { propertyId: property.id },
-      });
+      await this.propertiesNotifications.notifyNewProperty(property.id, property.title);
     return property;
   }
   async update(id: string, dto: UpdatePropertyDto) {
@@ -150,10 +147,14 @@ export class PropertiesService {
     return this.prisma.property.delete({ where: { id } });
   }
 
-  ///
-  ///
-  ///
-  // in app functionality
+  // ===============================
+  // BUSINESS LOGIC METHODS
+  // ===============================
+
+  /**
+   * Assigns an investor as the owner of a property.
+   * If the owner changes, cancels all appointments and notifies participants.
+   */
   async assignOwner(propertyId: string, investorId: string | null) {
     const existingProperty = await this.prisma.property.findUnique({
       where: { id: propertyId },
@@ -163,38 +164,12 @@ export class PropertiesService {
 
     // if owner changed, handle cancellation and notifications
     if (existingProperty.ownerId !== investorId) {
-      await this.handleOwnerChange(propertyId);
+      await this.propertiesNotifications.handleOwnerChange(propertyId);
     }
 
     return this.prisma.property.update({
       where: { id: propertyId },
       data: { ownerId: investorId },
     });
-  }
-  private async handleOwnerChange(propertyId: string) {
-    // get all appointments for this property
-    const appointments = await this.prisma.appointment.findMany({
-      where: { propertyId },
-      select: { id: true, bookedById: true },
-    });
-
-    // cancel all appointments
-    await this.prisma.appointment.updateMany({
-      where: { propertyId },
-      data: { status: 'canceled' },
-    });
-
-    // bulk create notifications
-    const notifications = appointments.map(appointment => ({
-      userId: appointment.bookedById,
-      body: {
-        title: 'Appointment Canceled',
-        message: `Your appointment for this property has been canceled due to ownership change.`,
-        link: `/${appointment.id}`,
-        json: { appointmentId: appointment.id, bookedById: appointment.bookedById },
-      },
-    }));
-
-    await this.notifications.notifyBulkCustom(notifications, 'appointment');
   }
 }

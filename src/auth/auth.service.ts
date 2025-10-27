@@ -13,6 +13,7 @@ import * as crypto from 'crypto';
 import { WEBSITE_URL } from 'src/constants';
 import { MailerService } from 'src/_helpers/mailer/mailer.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { AuthNotificationsService } from './auth.notifications.service';
 
 import {
   getAuthCookies,
@@ -31,10 +32,11 @@ import {
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailer: MailerService,
     private readonly notifications: NotificationsService,
+    private readonly authNotifications: AuthNotificationsService,
   ) {}
 
   async register(
@@ -61,12 +63,7 @@ export class AuthService {
     });
 
     // notify admins about new user (include userId in json for admin routing)
-    await this.notifications.notifyByRole('admin', 'user', {
-      title: 'New User Registered',
-      message: `A new ${role} user has registered: ${email}`,
-      link: `/users/${user.id}`,
-      json: { userId: user.id },
-    });
+    await this.authNotifications.notifyNewUser(user.id, email, role);
 
     // create tokens
     const payload: TokenPayload = { sub: user.id, role: user.role };
