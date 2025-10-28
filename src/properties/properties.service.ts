@@ -89,11 +89,11 @@ export class PropertiesService {
 
     return PublicPropertySchema.array().parse(data);
   }
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
     const property = await this.prisma.property.findUnique({
       where: { id },
       include: {
-        appointments: { where: { bookedById: id } },
+        appointments: { where: { bookedById: userId } },
       },
     });
     if (!property) throw new NotFoundException(`Property ${id} not found`);
@@ -133,7 +133,10 @@ export class PropertiesService {
     });
 
     if (dto.status !== 'draft')
-      await this.propertiesNotifications.notifyNewProperty(property.id, property.title);
+      await this.propertiesNotifications.notifyNewProperty(
+        property.id,
+        property.title,
+      );
     return property;
   }
   async update(id: string, dto: UpdatePropertyDto) {
@@ -160,7 +163,8 @@ export class PropertiesService {
       where: { id: propertyId },
       select: { ownerId: true },
     });
-    if (!existingProperty) throw new NotFoundException(`Property ${propertyId} not found`);
+    if (!existingProperty)
+      throw new NotFoundException(`Property ${propertyId} not found`);
 
     // if owner changed, handle cancellation and notifications
     if (existingProperty.ownerId !== investorId) {

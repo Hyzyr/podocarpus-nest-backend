@@ -32,6 +32,7 @@ export class AppointmentService {
       where: {
         bookedById: userId,
         propertyId: dto.propertyId,
+        status: 'requested',
       },
       select: { id: true },
     });
@@ -122,8 +123,8 @@ export class AppointmentService {
         link: `/${id}`,
         json: {
           appointmentId: id,
-          bookedById: existing.bookedById
-        }
+          bookedById: existing.bookedById,
+        },
       });
     }
 

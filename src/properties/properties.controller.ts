@@ -27,6 +27,7 @@ import {
 } from './dto/property.query.dto';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
+import { CurrentUser } from 'src/_helpers/user.decorator';
 
 @ApiTags('properties')
 @Controller('properties')
@@ -55,6 +56,7 @@ export class PropertiesController {
     return this.propertiesService.search(query);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get a single property by ID' })
   @ApiResponse({
@@ -63,8 +65,11 @@ export class PropertiesController {
     type: PublicPropertyWithRelations,
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
-  findOne(@Param() { id }: PropertyIdParamDto) {
-    return this.propertiesService.findOne(id);
+  findOne(
+    @Param() { id }: PropertyIdParamDto,
+    @CurrentUser() user: CurrentUser,
+  ) {
+    return this.propertiesService.findOne(id, user.userId);
   }
 
   // admin routes secured
@@ -109,8 +114,12 @@ export class PropertiesController {
   create(@Body() dto: CreatePropertyDto) {
     return this.propertiesService.create({
       ...dto,
-      rentStart: dto?.rentStart ? new Date(dto.rentStart).toISOString() : dto?.rentStart,
-      rentExpiry: dto?.rentExpiry ? new Date(dto.rentExpiry).toISOString() : dto?.rentExpiry,
+      rentStart: dto?.rentStart
+        ? new Date(dto.rentStart).toISOString()
+        : dto?.rentStart,
+      rentExpiry: dto?.rentExpiry
+        ? new Date(dto.rentExpiry).toISOString()
+        : dto?.rentExpiry,
     });
   }
 

@@ -151,7 +151,9 @@ export const createAppointmentSchema = z.object({
     .trim()
     .min(1, 'Notes cannot be empty')
     .max(2000, 'Notes is too long')
-    .optional(),
+    .nullable()
+    .optional()
+    .transform((v) => v ?? undefined),
 });
 
 export const getAppointmentSchema = createAppointmentSchema.extend({
