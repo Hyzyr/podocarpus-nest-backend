@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
+import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
   CreateNotificationDto,
   CreateNotifyDto,
   NotifyInputDto,
 } from './notifications.dto';
 import { NotificationType, UserRole } from '@prisma/client';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @Injectable()
 export class NotificationsService {

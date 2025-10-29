@@ -59,7 +59,7 @@ export class ContractDto {
   })
   @IsOptional()
   @IsDateString()
-  startDate?: Date | null;
+  contractStart?: Date | null;
 
   @ApiPropertyOptional({
     type: String,
@@ -68,12 +68,46 @@ export class ContractDto {
   })
   @IsOptional()
   @IsDateString()
-  endDate?: Date | null;
+  contractEnd?: Date | null;
 
-  @ApiPropertyOptional({ type: Number, example: 500000 })
+  @ApiPropertyOptional({ 
+    type: Number, 
+    example: 500000,
+    description: 'Total investment amount'
+  })
   @IsOptional()
   @Type(() => Number)
-  price?: number | null;
+  contractValue?: number | null;
+
+  @ApiPropertyOptional({ 
+    type: Number, 
+    example: 50000,
+    description: 'Initial deposit paid by investor'
+  })
+  @IsOptional()
+  @Type(() => Number)
+  depositPaid?: number | null;
+
+  @ApiPropertyOptional({
+    example: 'Bank Transfer',
+    description: 'How investor pays (e.g., Bank Transfer, Installments)'
+  })
+  @IsOptional()
+  investorPaymentMethod?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Monthly',
+    description: 'Payment schedule (e.g., Monthly, Quarterly, Annual)'
+  })
+  @IsOptional()
+  paymentSchedule?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Low',
+    description: 'Vacancy risk assessment (Low, Medium, High)'
+  })
+  @IsOptional()
+  vacancyRiskLevel?: string | null;
 
   @ApiProperty({
     enum: ContractStatus,
@@ -140,20 +174,58 @@ export class CreateContractDto {
   @IsDateString()
   signedDate?: Date | null;
 
-  @ApiPropertyOptional({ format: 'date-time' })
+  @ApiPropertyOptional({ 
+    format: 'date-time',
+    description: 'Contract start date'
+  })
   @IsOptional()
   @IsDateString()
-  startDate?: Date | null;
+  contractStart?: Date | null;
 
-  @ApiPropertyOptional({ format: 'date-time' })
+  @ApiPropertyOptional({ 
+    format: 'date-time',
+    description: 'Contract end date'
+  })
   @IsOptional()
   @IsDateString()
-  endDate?: Date | null;
+  contractEnd?: Date | null;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({ 
+    type: Number,
+    description: 'Total investment amount'
+  })
   @IsOptional()
   @Type(() => Number)
-  price?: number | null;
+  contractValue?: number | null;
+
+  @ApiPropertyOptional({ 
+    type: Number,
+    description: 'Initial deposit paid by investor'
+  })
+  @IsOptional()
+  @Type(() => Number)
+  depositPaid?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'How investor pays'
+  })
+  @IsOptional()
+  @IsString()
+  investorPaymentMethod?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Payment schedule (Monthly, Quarterly, Annual)'
+  })
+  @IsOptional()
+  @IsString()
+  paymentSchedule?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Vacancy risk assessment (Low, Medium, High)'
+  })
+  @IsOptional()
+  @IsString()
+  vacancyRiskLevel?: string | null;
 
   @ApiPropertyOptional({
     enum: ContractStatus,

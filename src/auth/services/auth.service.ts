@@ -5,13 +5,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
+import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
-import { TokenPayload } from './auth.types';
+import { TokenPayload } from '../auth.types';
 import * as crypto from 'crypto';
-import { WEBSITE_URL } from 'src/constants';
-import { MailerService } from 'src/_helpers/mailer/mailer.service';
+import { WEBSITE_URL } from 'src/common/constants';
+import { MailerService } from 'src/shared/mailer/mailer.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { AuthNotificationsService } from './auth.notifications.service';
 
@@ -19,15 +19,15 @@ import {
   getAuthCookies,
   removeAuthCookies,
   setAuthCookies,
-} from './auth.tokens';
+} from '../auth.tokens';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 import {
   AuthResponseDto,
   authUserParser,
   OnboardStep1Dto,
   OnboardStep2Dto,
-} from './dto/auth.dto';
+} from '../dto/auth.dto';
 
 @Injectable()
 export class AuthService {

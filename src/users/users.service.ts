@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
+import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { AdminUserDto } from './dto/user.get.dto';
 
 @Injectable()

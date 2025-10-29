@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MAIL_HOST, MAIL_PASS, MAIL_USER, WEBSITE_NAME } from 'src/constants';
+import { MAIL_HOST, MAIL_PASS, MAIL_USER, WEBSITE_NAME } from 'src/common/constants';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()

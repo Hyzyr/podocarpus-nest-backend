@@ -1,19 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/_helpers/database/prisma/prisma.service';
+import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
   ContractDto,
   CreateContractDto,
   UpdateContractDto,
-} from './dto/contract.dto';
+} from '../dto/contract.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import {
   notificationForAdmin,
   notificationForInvestor,
   updateNotificationForAdmin,
   updateNotificationForInvestor,
-} from './contract.config';
-import { PropertiesService } from 'src/properties/properties.service';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+} from '../contract.config';
+import { PropertiesService } from 'src/properties/services/properties.service';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { ContractsNotificationsService } from './contracts.notifications.service';
 
 @Injectable()

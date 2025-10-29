@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { AdminUserDto, AdminUserWithRelationsDto, UserIdParamDto } from './dto/user.get.dto';
 

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../_helpers/database/prisma/prisma.service';
+import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import {
   notificationForAdmin,
   notificationForInvestor,
   updateNotificationForAdmin,
   updateNotificationForInvestor,
-} from './contract.config';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+} from '../contract.config';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @Injectable()
 export class ContractsNotificationsService {

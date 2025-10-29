@@ -8,10 +8,10 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { EventsService } from './events.service';
+import { EventsService } from './services/events.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 import {
   CreateEventDto,
   EventDto,

@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
-import { ContractsService } from './contracts.service';
+import { ContractsService } from './services/contracts.service';
 import {
   ContractDto,
   ContractWithInvestor,
@@ -20,7 +20,7 @@ import {
   UpdateContractDto,
 } from './dto/contract.dto';
 import { ContractIdParamDto } from 'src/properties/dto/property.create.dto';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('contracts')

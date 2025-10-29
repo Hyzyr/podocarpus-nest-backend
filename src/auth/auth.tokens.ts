@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from './auth.types';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { WEBSITE_DOMAIN } from 'src/constants';
+import { WEBSITE_DOMAIN } from 'src/common/constants';
 import {
   ACCESS_TOKEN_KEY,
   ACCESS_TOKEN_TTL,

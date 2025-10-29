@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from 'src/_helpers/database/database.module';
+import { DatabaseModule } from 'src/shared/database/database.module';
 import { PropertiesController } from './properties.controller';
-import { PropertiesService } from './properties.service';
-import { PropertiesNotificationsService } from './properties.notifications.service';
+import { PropertiesService } from './services/properties.service';
+import { PropertiesNotificationsService } from './services/properties.notifications.service';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({

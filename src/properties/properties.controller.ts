@@ -10,9 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
-import { PropertiesService } from './properties.service';
+import { PropertiesService } from './services/properties.service';
 
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import {
   AdminPropertyDto,
@@ -27,7 +27,7 @@ import {
 } from './dto/property.query.dto';
 import { CreatePropertyDto } from './dto/property.create.dto';
 import { UpdatePropertyDto } from './dto/property.update.dto';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @ApiTags('properties')
 @Controller('properties')
@@ -112,15 +112,7 @@ export class PropertiesController {
     type: AdminPropertyDto,
   })
   create(@Body() dto: CreatePropertyDto) {
-    return this.propertiesService.create({
-      ...dto,
-      rentStart: dto?.rentStart
-        ? new Date(dto.rentStart).toISOString()
-        : dto?.rentStart,
-      rentExpiry: dto?.rentExpiry
-        ? new Date(dto.rentExpiry).toISOString()
-        : dto?.rentExpiry,
-    });
+    return this.propertiesService.create(dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

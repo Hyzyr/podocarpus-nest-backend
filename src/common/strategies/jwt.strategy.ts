@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { FastifyRequest } from 'fastify';
-import { JWT_SECRET } from 'src/constants';
-import { TokenPayload } from '../auth/auth.types';
+import { JWT_SECRET } from 'src/common/constants';
+import { TokenPayload } from 'src/auth/auth.types';
 import { ACCESS_TOKEN_KEY } from 'src/auth/auth.constants';
 
 @Injectable()

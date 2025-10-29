@@ -10,15 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { AppointmentService } from './appointments.service';
+import { AppointmentService } from './services/appointments.service';
 import {
   AppointmentDto,
   CreateAppointmentDto,
   UpdateAppointmentDto,
 } from './dto';
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('appointments')

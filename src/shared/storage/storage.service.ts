@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 import { StorageProvider } from './storage.provider';
 import * as path from 'path';
 import { createWriteStream, promises as fs } from 'fs';
-import { UPLOADS_URL } from 'src/constants';
+import { UPLOADS_URL } from 'src/common/constants';
 
 export type UploadCategory = 'users' | 'events' | 'properties';
 export type UploadSubcategory = 'profile' | 'banners' | 'images' | 'files';

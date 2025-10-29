@@ -7,12 +7,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { JwtAuthGuard } from '../_helpers/jwt-auth.guard';
-import { CommonResponse } from 'src/types/common.dto';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CommonResponse } from 'src/common/types/common.dto';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 import {
   AuthResponseDto,
   LoginBodyDto,

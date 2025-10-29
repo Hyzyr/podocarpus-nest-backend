@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../_helpers/database/prisma/prisma.service';
-import { CreatePropertyDto } from './dto/property.create.dto';
-import { UpdatePropertyDto } from './dto/property.update.dto';
-import { FindAllPropertiesQueryDto } from './dto/property.query.dto';
+import { PrismaService } from 'src/shared/database/prisma/prisma.service';
+import { CreatePropertyDto } from '../dto/property.create.dto';
+import { UpdatePropertyDto } from '../dto/property.update.dto';
+import { FindAllPropertiesQueryDto } from '../dto/property.query.dto';
 import {
   PublicPropertySchema,
   PublicPropertyWithRelationsSchema,
-} from './dto/property.get.dto';
+} from '../dto/property.get.dto';
 import { publicUserSelect } from 'src/users/dto/user.get.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { PropertiesNotificationsService } from './properties.notifications.service';
@@ -71,8 +71,9 @@ export class PropertiesService {
           buildingName
             ? { buildingName: { equals: buildingName, mode: 'insensitive' } }
             : {},
-          minRent ? { rentValue: { gte: minRent } } : {},
-          maxRent ? { rentValue: { lte: maxRent } } : {},
+          // TODO: rentValue moved to TenantLease model
+          // minRent ? { rentValue: { gte: minRent } } : {},
+          // maxRent ? { rentValue: { lte: maxRent } } : {},
           minSize ? { unitTotalSize: { gte: minSize } } : {},
           maxSize ? { unitTotalSize: { lte: maxSize } } : {},
           isActive !== undefined ? { isActive } : {},

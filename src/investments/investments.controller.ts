@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { InvestmentsService } from './investments.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { BindInvestmentDto, InvestorPropertyDto } from './dto/investments.dto';
-import { CurrentUser } from 'src/_helpers/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('investments')

@@ -2,7 +2,7 @@ import { Controller, Post, Req, Query, BadRequestException } from '@nestjs/commo
 import type { FastifyRequest } from 'fastify';
 import { StorageService, UploadCategory, UploadSubcategory } from './storage.service';
 import { VALID_UPLOAD_COMBINATIONS } from './storage.constants';
-import { safeFilename } from 'src/utils/file-rename';
+import { safeFilename } from 'src/common/utils/file-rename';
 
 @Controller('storage')
 export class StorageController {

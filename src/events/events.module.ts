@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { EventsService } from './events.service';
-import { EventsNotificationsService } from './events.notifications.service';
+import { EventsService } from './services/events.service';
+import { EventsNotificationsService } from './services/events.notifications.service';
 import { EventsAdminController, EventsController } from './events.controller';
-import { DatabaseModule } from 'src/_helpers/database/database.module';
+import { DatabaseModule } from 'src/shared/database/database.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({

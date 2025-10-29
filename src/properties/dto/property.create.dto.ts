@@ -82,12 +82,6 @@ export class CreatePropertyDto {
   @Type(() => Number)
   serviceChargeTotal?: number;
 
-  @ApiPropertyOptional({ type: Number, description: 'e.g. 2025' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  rateYear?: number;
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -96,32 +90,7 @@ export class CreatePropertyDto {
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
   @Type(() => Number)
-  rentValue?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  @IsOptional()
-  @Type(() => Number)
   contractValue?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  @IsOptional()
-  @Type(() => Number)
-  depositReceived?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  paymentMethod?: string;
-
-  @ApiPropertyOptional({ format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  rentStart?: string;
-
-  @ApiPropertyOptional({ format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  rentExpiry?: string;
 
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
@@ -168,12 +137,12 @@ export class CreatePropertyDto {
   isTaxFreeZone?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Vacancy risk level (Low, Medium, High)',
-    example: 'Low',
+    description: 'Indicates if the property is currently vacant',
+    example: true,
   })
   @IsOptional()
-  @IsString()
-  vacancyRisk?: string;
+  @IsBoolean()
+  isVacant?: boolean;
 
   @ApiPropertyOptional({
     description: 'Key benefits (e.g., 100% Ownership, Tax-Free, Repatriation)',

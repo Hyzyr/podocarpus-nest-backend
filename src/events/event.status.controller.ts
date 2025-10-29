@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/_helpers/jwt-auth.guard';
-import { CurrentUser } from 'src/_helpers/user.decorator';
-import { UserEventStatusService } from './event.status.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { UserEventStatusService } from './services/event.status.service';
 import { CreateEventStatusDto, UpdateUserEventStatusDto, UserEventStatusDto } from './dto/event.status.dto';
 import { EventIdParamDto } from './dto/events.dto';
 

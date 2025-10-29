@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsString, IsUUID, IsOptional, IsEnum, IsDate } from 'class-validator';
 import { PublicPropertyDto } from 'src/properties/dto/property.get.dto';
 import { PublicUserDto } from 'src/users/dto/user.get.dto';
-import { dateFromISO, uuid } from 'src/utils/zod-helpers';
+import { dateFromISO, uuid } from 'src/common/utils/zod-helpers';
 import z from 'zod';
 
 export enum AppointmentStatus {

@@ -13,7 +13,7 @@ import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
-import { COOKIE_SECRET, UPLOADS_URL } from './constants';
+import { COOKIE_SECRET, UPLOADS_URL } from 'src/common/constants';
 import { join } from 'path';
 
 const PORT = process.env.PORT || 3030;
