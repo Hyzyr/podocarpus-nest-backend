@@ -84,10 +84,11 @@ model AppUser {
   adminProfile    AdminProfile?
   appointments    Appointment[]
 
-  propertyStatuses UserPropertyStatus[]
-  eventStatuses    UserEventStatus[]
-  activityLogs     ActivityLog[]
-  notifications    Notification[]
+  propertyStatuses  UserPropertyStatus[]
+  eventStatuses     UserEventStatus[]
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+  globalNotificationViews GlobalNotificationView[]
 }
 
 model InvestorProfile {
@@ -392,4 +393,48 @@ model Notification {
   json        Json?
 
   user AppUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Global Notifications: One notification, many users (reverse inbox pattern)
+// Used for system-wide announcements, maintenance alerts, feature releases, etc.
+model GlobalNotification {
+  id          String                  @id @default(uuid())
+  title       String
+  message     String
+  type        NotificationType        @default(system)
+  targetRoles UserRole[] // Which roles should see this
+  link        String? // Optional deep link
+  priority    String                  @default("normal") // "low", "normal", "high", "critical"
+  icon        String? // emoji or icon identifier
+  json        Json? // Additional metadata
+  startsAt    DateTime                @default(now())
+  expiresAt   DateTime? // Optional: when notification expires and is hidden
+  isActive    Boolean                 @default(true)
+  createdBy   String? // Admin user who created it
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  // Relations
+  views GlobalNotificationView[]
+
+  @@index([isActive, startsAt])
+  @@index([createdAt])
+}
+
+// Many-to-many: Tracks which users have viewed each global notification
+// This is the "view" or "seen" tracking - use inverse query pattern
+model GlobalNotificationView {
+  id                    String   @id @default(uuid())
+  userId                String
+  globalNotificationId  String
+  viewedAt              DateTime @default(now())
+  dismissed             Boolean  @default(false) // User explicitly dismissed it
+
+  user                AppUser             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  globalNotification  GlobalNotification  @relation(fields: [globalNotificationId], references: [id], onDelete: Cascade)
+
+  // Ensure each user is tracked only once per notification
+  @@unique([userId, globalNotificationId])
+  @@index([globalNotificationId, viewedAt])
+  @@index([userId, viewedAt])
 }

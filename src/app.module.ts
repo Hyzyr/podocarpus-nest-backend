@@ -14,6 +14,7 @@ import { EventsModule } from './events/events.module';
 import { EventStatusModule } from './events/event.status.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { GlobalNotificationsModule } from './global-notifications/global-notifications.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     EventStatusModule,
     ContractsModule,
     NotificationsModule,
+    GlobalNotificationsModule,
   ],
   controllers: [],
   providers: [],
