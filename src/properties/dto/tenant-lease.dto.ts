@@ -97,3 +97,24 @@ export class PropertyTenantLeasesQueryDto {
   @IsString()
   propertyId: string;
 }
+
+export class TenantLeaseQueryDto {
+  @ApiPropertyOptional({
+    description: 'Days ahead to check for expiring leases',
+    example: 30,
+    default: 30,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  daysAhead?: number;
+}
+
+export class TerminateTenantLeaseDto {
+  @ApiProperty({
+    description: 'Reason for lease termination',
+    example: 'Tenant requested early termination',
+  })
+  @IsString()
+  reason: string;
+}

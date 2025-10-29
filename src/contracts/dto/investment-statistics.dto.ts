@@ -147,53 +147,62 @@ export class ContractStatisticsQueryDto {
 }
 
 export class RoiChartDataDto {
-  @ApiProperty({ description: 'Month' })
-  month: number;
+  @ApiProperty({ description: 'Labels for chart (e.g. "10/2025")' })
+  labels: string[];
 
-  @ApiProperty({ description: 'Year' })
-  year: number;
+  @ApiProperty({ description: 'Monthly ROI percentages' })
+  monthlyRoi: number[];
 
-  @ApiProperty({ description: 'ROI percentage for this month' })
-  roiPercentage: number;
+  @ApiProperty({ description: 'Cumulative ROI percentages' })
+  cumulativeRoi: number[];
 
-  @ApiProperty({ description: 'Cumulative ROI up to this month' })
-  cumulativeRoi: number;
+  @ApiProperty({ description: 'Monthly profit values' })
+  monthlyProfit: number[];
 
-  @ApiProperty({ description: 'Net profit for this month' })
-  netProfit: number;
+  @ApiProperty({ description: 'Cumulative profit values' })
+  cumulativeProfit: number[];
 
-  @ApiProperty({ description: 'Cumulative profit up to this month' })
-  cumulativeProfit: number;
+  @ApiProperty({ description: 'Rent received per month' })
+  rentReceived: number[];
 
-  @ApiPropertyOptional({ description: 'Tenant name if applicable' })
-  tenantName?: string;
+  @ApiProperty({ description: 'Expenses per month' })
+  expenses: number[];
 }
 
 export class InvestmentSummaryDto {
+  @ApiProperty({ description: 'Contract value (total investment)' })
+  contractValue: number;
+
+  @ApiProperty({ description: 'Current cumulative profit' })
+  currentCumulativeProfit: number;
+
+  @ApiProperty({ description: 'Current cumulative ROI percentage' })
+  currentCumulativeRoi: number;
+
   @ApiProperty({ description: 'Total months tracked' })
-  totalMonths: number;
+  totalMonthsTracked: number;
 
-  @ApiProperty({ description: 'Average monthly ROI percentage' })
-  averageMonthlyRoi: number;
-
-  @ApiProperty({ description: 'Total cumulative profit' })
-  totalProfit: number;
-
-  @ApiProperty({ description: 'Total cumulative ROI percentage' })
-  totalRoi: number;
-
-  @ApiProperty({ description: 'Total income received' })
-  totalIncome: number;
+  @ApiProperty({ description: 'Total rent received' })
+  totalRentReceived: number;
 
   @ApiProperty({ description: 'Total expenses' })
   totalExpenses: number;
 
-  @ApiProperty({ description: 'Total days occupied' })
-  totalDaysOccupied: number;
+  @ApiProperty({ description: 'Total net profit' })
+  totalNetProfit: number;
 
-  @ApiProperty({ description: 'Total days vacant' })
-  totalDaysVacant: number;
+  @ApiProperty({ description: 'Average monthly rent' })
+  averageMonthlyRent: number;
+
+  @ApiProperty({ description: 'Average monthly expenses' })
+  averageMonthlyExpenses: number;
+
+  @ApiProperty({ description: 'Average monthly profit' })
+  averageMonthlyProfit: number;
 
   @ApiProperty({ description: 'Occupancy rate percentage' })
   occupancyRate: number;
+
+  @ApiProperty({ description: 'Last updated timestamp' })
+  lastUpdated: Date;
 }
