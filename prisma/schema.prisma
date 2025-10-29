@@ -151,16 +151,10 @@ model Property {
   keyBenefits       String[] // ["100% Foreign Ownership", "Tax-Free Zone", "Full Capital Repatriation"]
   freezoneAuthority String? // e.g. "DMCC Freezone"
 
-  // investor 
-  depositReceived Float?
-  paymentMethod   String?
-  rentStart       DateTime?
-  rentExpiry      DateTime?
-  rentValue       Float?
-  rateYear        Int?
-  vacancyRisk     String? // e.g. "Low", "Medium", "High"
+  // Current vacancy status
+  isVacant Boolean @default(true)
 
-  // admin
+  // Admin
   serviceChargePerSqft Float?
   serviceChargeTotal   Float?
   createdAt            DateTime @default(now())
@@ -175,6 +169,7 @@ model Property {
   appointments      Appointment[]
   userStatuses      UserPropertyStatus[]
   contracts         Contract[]
+  tenantLeases      TenantLease[]
 }
 
 model GovernmentLease {
@@ -185,6 +180,37 @@ model GovernmentLease {
   monthlyRent Float
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model TenantLease {
+  id         String @id @default(uuid())
+  propertyId String
+
+  // Tenant details
+  tenantName  String?
+  tenantEmail String?
+  tenantPhone String?
+
+  // Lease terms
+  leaseStart    DateTime
+  leaseEnd      DateTime?
+  monthlyRent   Float
+  paymentMethod String?
+  depositAmount Float?
+
+  // Status
+  isActive          Boolean @default(true)
+  terminatedEarly   Boolean @default(false)
+  terminationReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  property   Property                @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  statistics InvestmentStatistics[]
+
+  @@index([propertyId])
+  @@index([leaseStart, leaseEnd])
 }
 
 model AvailabilitySlot {
@@ -220,16 +246,69 @@ model Contract {
   contractCode String
   contractLink String?
   filesUrl     String[]
-  signedDate   DateTime?
-  startDate    DateTime?
-  endDate      DateTime?
-  price        Float?
-  status       ContractStatus @default(pending)
-  notes        String?
+  
+  // Contract dates and financial terms
+  signedDate          DateTime?
+  contractStart       DateTime?
+  contractEnd         DateTime?
+  contractValue       Float? // Total investment amount
+  depositPaid         Float? // Initial deposit paid by investor
+  investorPaymentMethod String? // How investor pays (e.g., "Bank Transfer", "Installments")
+  paymentSchedule     String? // e.g., "Monthly", "Quarterly", "Annual"
+  
+  // Risk assessment
+  vacancyRiskLevel String? // "Low", "Medium", "High"
+  
+  status ContractStatus @default(pending)
+  notes  String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  investor InvestorProfile @relation(fields: [investorId], references: [userId], onDelete: Cascade)
-  broker   BrokerProfile?  @relation(fields: [brokerId], references: [userId], onDelete: SetNull)
-  property Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  investor   InvestorProfile          @relation(fields: [investorId], references: [userId], onDelete: Cascade)
+  broker     BrokerProfile?           @relation(fields: [brokerId], references: [userId], onDelete: SetNull)
+  property   Property                 @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  statistics InvestmentStatistics[]
+}
+
+model InvestmentStatistics {
+  id            String  @id @default(uuid())
+  contractId    String
+  tenantLeaseId String? // Which tenant was active this month
+  month         Int     // 1-12
+  year          Int
+
+  // Income
+  rentReceived Float @default(0)
+
+  // Expenses
+  serviceCharge   Float @default(0)
+  maintenanceCost Float @default(0)
+  otherExpenses   Float @default(0)
+
+  // Calculated fields
+  totalExpenses Float @default(0)
+  netProfit     Float @default(0)
+  roiPercentage Float @default(0)
+
+  // Cumulative tracking for charts
+  cumulativeProfit Float @default(0) // Running total profit
+  cumulativeRoi    Float @default(0) // Running ROI %
+
+  // Occupancy tracking
+  daysOccupied Int     @default(0)
+  daysVacant   Int     @default(0)
+  wasVacant    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contract    Contract     @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  tenantLease TenantLease? @relation(fields: [tenantLeaseId], references: [id], onDelete: SetNull)
+
+  @@unique([contractId, month, year])
+  @@index([contractId])
+  @@index([year, month])
 }
 
 model Event {
