@@ -28,7 +28,7 @@ export class InvestmentsController {
 
   // @UseGuards(RolesGuard)
   @Post('bind')
-  //   @Roles('admin')
+  //   @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Bind a property to current Investor' })
   @ApiResponse({
     status: 201,

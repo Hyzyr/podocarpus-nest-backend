@@ -75,7 +75,7 @@ export class PropertiesController {
   // admin routes secured
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/all')
-  @Roles('admin')
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Get a list of all properties' })
   @ApiResponse({
     status: 200,
@@ -88,7 +88,7 @@ export class PropertiesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/full-info/:id')
-  @Roles('admin')
+  @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Get a single property by ID with full info [AdminOnly]',
   })
@@ -104,7 +104,7 @@ export class PropertiesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
-  @Roles('admin')
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Create a new property' })
   @ApiResponse({
     status: 201,
@@ -117,7 +117,7 @@ export class PropertiesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
-  @Roles('admin')
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Update a property by ID' })
   @ApiResponse({
     status: 200,
@@ -131,7 +131,7 @@ export class PropertiesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
-  @Roles('admin')
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Delete a property by ID' })
   @ApiResponse({ status: 200, description: 'Property deleted successfully.' })
   @ApiResponse({ status: 404, description: 'Property not found.' })

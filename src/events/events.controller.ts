@@ -54,7 +54,7 @@ export class EventsController {
 }
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
+@Roles('admin', 'superadmin')
 @ApiTags('events')
 @Controller('events')
 export class EventsAdminController {
