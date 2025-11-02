@@ -75,6 +75,103 @@ export class AppointmentService {
     });
   }
 
+  // ==================== Admin Methods ====================
+
+  /**
+   * Get all appointments (Admin only)
+   * Includes property details and booked user info
+   */
+  async findAll() {
+    return this.prisma.appointment.findMany({
+      include: {
+        property: { select: propertySelect },
+        bookedBy: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { scheduledAt: 'desc' },
+    });
+  }
+
+  /**
+   * Get appointments with filters (Admin only)
+   * @param status - Filter by appointment status
+   * @param propertyId - Filter by property
+   * @param userId - Filter by user
+   */
+  async findAllWithFilters(filters?: {
+    status?: UserActionsStatus;
+    propertyId?: string;
+    userId?: string;
+  }) {
+    return this.prisma.appointment.findMany({
+      where: {
+        ...(filters?.status && { status: filters.status }),
+        ...(filters?.propertyId && { propertyId: filters.propertyId }),
+        ...(filters?.userId && { bookedById: filters.userId }),
+      },
+      include: {
+        property: { select: propertySelect },
+        bookedBy: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { scheduledAt: 'desc' },
+    });
+  }
+
+  /**
+   * Get appointment statistics (Admin only)
+   */
+  async getStatistics() {
+    const [total, byStatus, byProperty] = await Promise.all([
+      // Total count
+      this.prisma.appointment.count(),
+
+      // Count by status
+      this.prisma.appointment.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+
+      // Top 5 properties by appointment count
+      this.prisma.appointment.groupBy({
+        by: ['propertyId'],
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 5,
+      }),
+    ]);
+
+    return {
+      total,
+      byStatus: byStatus.map((s) => ({
+        status: s.status,
+        count: s._count.id,
+      })),
+      topProperties: byProperty.map((p) => ({
+        propertyId: p.propertyId,
+        count: p._count.id,
+      })),
+    };
+  }
+
+  // ==================== End Admin Methods ====================
+
   async findOne(id: string) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },

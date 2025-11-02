@@ -150,13 +150,6 @@ export class PublicPropertyDto {
   @IsBoolean()
   isTaxFreeZone?: boolean;
 
-  @ApiProperty({
-    example: 'Low',
-    required: false,
-    description: 'Vacancy risk level',
-  })
-  vacancyRisk?: string;
-
   @ApiPropertyOptional({
     description: 'Key benefits (e.g., 100% Ownership, Tax-Free, Repatriation)',
     example: [
@@ -291,7 +284,6 @@ export const PublicPropertySchema = z
     isTaxFreeZone: z.boolean().nullable().optional(),
     keyBenefits: z.array(z.string()).optional(),
     freezoneAuthority: z.string().nullable().optional(),
-    vacancyRisk: z.string().nullable().optional(),
   })
   .strip();
 
