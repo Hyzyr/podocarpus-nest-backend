@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { GlobalNotificationsService } from 'src/global-notifications/global-notifications.service';
+import { NotificationType, UserRole } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @Injectable()
@@ -8,6 +10,7 @@ export class AppointmentsNotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly globalNotifications: GlobalNotificationsService,
   ) {}
 
   /**
@@ -33,9 +36,11 @@ export class AppointmentsNotificationsService {
         });
       } else {
         // investor/broker updated, notify admin
-        await this.notifications.notifyByRole('admin', 'appointment', {
+        await this.globalNotifications.create({
           title: 'Appointment Status Updated',
           message: `An appointment status has been updated to ${newStatus}.`,
+          type: NotificationType.appointment,
+          targetRoles: [UserRole.admin, UserRole.superadmin],
           link: `/${appointmentId}`,
           json: { appointmentId, bookedById },
         });

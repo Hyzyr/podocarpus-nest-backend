@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { GlobalNotificationsService } from 'src/global-notifications/global-notifications.service';
+import { NotificationType, UserRole } from '@prisma/client';
 
 @Injectable()
 export class PropertiesNotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly globalNotifications: GlobalNotificationsService,
   ) {}
 
   /**
@@ -44,10 +47,13 @@ export class PropertiesNotificationsService {
    * Sends notification for new property creation.
    */
   async notifyNewProperty(propertyId: string, title: string): Promise<void> {
-    await this.notifications.notifyGroup(['broker', 'investor'], 'property', {
-      title: 'New Property',
+    await this.globalNotifications.create({
+      title: 'New Property Available',
       message: `**${title}** is now open for investment.`,
-      link: `/${propertyId}`,
+      type: NotificationType.property,
+      targetRoles: [UserRole.broker, UserRole.investor],
+      link: `/properties/${propertyId}`,
+      priority: 'normal',
       json: { propertyId },
     });
   }

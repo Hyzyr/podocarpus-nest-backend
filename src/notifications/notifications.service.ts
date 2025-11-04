@@ -46,27 +46,8 @@ export class NotificationsService {
     const data: CreateNotifyDto = { userId, type, ...body };
     return this.create(data);
   }
-  async notifyByRole(
-    userType: UserRole,
-    type: NotificationType,
-    body: NotifyInputDto,
-  ) {
-    return this.notifyGroup([userType], type, body);
-  }
-  async notifyGroup(
-    targetRoles: UserRole[],
-    type: NotificationType,
-    body: NotifyInputDto,
-  ) {
-    return this.prisma.notification.create({
-      data: {
-        ...body,
-        type,
-        targetRoles,
-        isGlobal: true,
-      },
-    });
-  }
+
+  // Bulk notifications for specific users
   async notifyBulk(
     userIdArr: string[],
     type: NotificationType,

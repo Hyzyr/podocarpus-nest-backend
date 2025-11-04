@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { GlobalNotificationsService } from 'src/global-notifications/global-notifications.service';
+import { NotificationType, UserRole } from '@prisma/client';
 import {
   notificationForAdmin,
   notificationForInvestor,
@@ -14,6 +16,7 @@ export class ContractsNotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly globalNotifications: GlobalNotificationsService,
   ) {}
 
   /**
@@ -29,14 +32,18 @@ export class ContractsNotificationsService {
     const jsonPayload = { investorId, propertyId, contractId };
 
     if (currentUserId === investorId)
-      await this.notifications.notifyByRole('admin', 'contract', {
+      await this.globalNotifications.create({
         ...notificationForAdmin,
+        type: NotificationType.contract,
+        targetRoles: [UserRole.admin, UserRole.superadmin],
         link: `/${investorId}`,
         json: jsonPayload,
       });
     else
-      await this.notifications.notifyByRole('admin', 'contract', {
+      await this.globalNotifications.create({
         ...notificationForInvestor,
+        type: NotificationType.contract,
+        targetRoles: [UserRole.admin, UserRole.superadmin],
         link: `/${investorId}`,
         json: jsonPayload,
       });
@@ -64,8 +71,10 @@ export class ContractsNotificationsService {
       });
     } else {
       // investor/broker updated, notify admin
-      await this.notifications.notifyByRole('admin', 'contract', {
+      await this.globalNotifications.create({
         ...updateNotificationForAdmin,
+        type: NotificationType.contract,
+        targetRoles: [UserRole.admin, UserRole.superadmin],
         link: `/${contractId}`,
         json: jsonPayload,
       });
