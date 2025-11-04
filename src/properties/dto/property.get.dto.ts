@@ -12,7 +12,7 @@ import {
   AppointmentDto,
   AppointmentWithBookedByDto,
   getAppointmentSchema,
-} from 'src/appointments/dto';
+} from 'src/appointments/dto/appointments.dto';
 import { ContractDto } from 'src/contracts/dto/contract.dto';
 import { InvestorProfileDto } from 'src/users/dto/investorProfile.dto';
 import z from 'zod';
@@ -192,7 +192,7 @@ export class PublicPropertyDto {
 
   @ApiProperty()
   @IsBoolean()
-  isActive: boolean;
+  isEnabled: boolean;
 }
 
 export class PublicPropertyWithRelations extends PublicPropertyDto {
@@ -247,9 +247,9 @@ export class AdminPropertyWithRelationsDto extends AdminPropertyDto {
     type: () => [AppointmentWithBookedByDto], // <-- define separately
   })
   appointments?: AppointmentWithBookedByDto[];
-  
+
   @ApiProperty({ type: () => [ContractDto] })
-  contracts: ContractDto[];;
+  contracts: ContractDto[];
   // @ApiPropertyOptional({
   //   description: 'User-specific property status entries',
   //   type: () => [UserPropertyStatusDto], // <-- define separately
@@ -278,7 +278,7 @@ export const PublicPropertySchema = z
     city: z.string().nullable().optional(),
     country: z.string().nullable().optional(),
     images: z.array(z.string()).optional(),
-    isActive: z.boolean(),
+  isEnabled: z.boolean(),
     netRoiMin: z.number().nullable().optional(),
     netRoiMax: z.number().nullable().optional(),
     isTaxFreeZone: z.boolean().nullable().optional(),

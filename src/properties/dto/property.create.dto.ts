@@ -172,9 +172,9 @@ export class CreatePropertyDto {
 
   @ApiProperty({
     required: false,
-    description: 'Defaults to true if handled in DB',
+    description: 'If false, the property will be hidden/disabled without deleting it',
   })
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean;
+  isEnabled?: boolean;
 }

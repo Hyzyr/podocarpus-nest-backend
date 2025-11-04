@@ -8,7 +8,7 @@ import {
   CreateAppointmentDto,
   createAppointmentSchema,
   UpdateAppointmentDto,
-} from '../dto';
+} from '../dto/appointments.dto';
 import { UserActionsStatus } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { zodKeysToSelect } from 'src/common/utils/zod-helpers';

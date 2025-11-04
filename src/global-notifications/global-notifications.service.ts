@@ -162,15 +162,15 @@ export class GlobalNotificationsService {
     // Count target users based on role
     let targetedUsersCount = 0;
     if (notification.targetRoles.length === 0) {
-      // If no specific roles, count all active users
+      // If no specific roles, count all enabled users
       targetedUsersCount = await this.prisma.appUser.count({
-        where: { isActive: true },
+        where: { isEnabled: true },
       });
     } else {
       // Count users with matching roles
       targetedUsersCount = await this.prisma.appUser.count({
         where: {
-          isActive: true,
+          isEnabled: true,
           role: { in: notification.targetRoles as UserRole[] },
         },
       });

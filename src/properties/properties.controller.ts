@@ -138,4 +138,30 @@ export class PropertiesController {
   remove(@Param() { id }: PropertyIdParamDto) {
     return this.propertiesService.remove(id);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch(':id/enable')
+  @Roles('admin', 'superadmin')
+  @ApiOperation({ summary: 'Enable a property (show/make visible) [AdminOnly] - NEW' })
+  @ApiResponse({
+    status: 200,
+    description: 'Property enabled successfully',
+    type: AdminPropertyDto,
+  })
+  enable(@Param() { id }: PropertyIdParamDto) {
+    return this.propertiesService.setEnabled(id, true);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch(':id/disable')
+  @Roles('admin', 'superadmin')
+  @ApiOperation({ summary: 'Disable a property (hide/make invisible) [AdminOnly] - NEW' })
+  @ApiResponse({
+    status: 200,
+    description: 'Property disabled successfully',
+    type: AdminPropertyDto,
+  })
+  disable(@Param() { id }: PropertyIdParamDto) {
+    return this.propertiesService.setEnabled(id, false);
+  }
 }

@@ -11,7 +11,7 @@ import {
 import { UserRole } from '@prisma/client';
 import { z } from 'zod';
 import { InvestorProfileDto } from './investorProfile.dto';
-import { AppointmentDto } from 'src/appointments/dto';
+import { AppointmentDto } from 'src/appointments/dto/appointments.dto';
 
 export class UserIdParamDto {
   @ApiProperty({ example: 'uuid' })
@@ -56,9 +56,9 @@ export class PublicUserDto {
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt: Date;
 
-  @ApiProperty({ type: Boolean })
+  @ApiProperty({ type: Boolean, description: 'Whether the user is enabled (can sign in / interact)' })
   @IsBoolean()
-  isActive: boolean;
+  isEnabled: boolean;
 
   @ApiProperty({ type: Boolean, example: true })
   @IsBoolean()
@@ -99,7 +99,7 @@ export const PublicUserSchema = z
     role: z.nativeEnum(UserRole),
     createdAt: z.union([z.string().datetime(), z.date()]),
     updatedAt: z.union([z.string().datetime(), z.date()]),
-    isActive: z.boolean(),
+    isEnabled: z.boolean(),
   })
   .strip();
 

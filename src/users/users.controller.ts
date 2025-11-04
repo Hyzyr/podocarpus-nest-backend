@@ -73,4 +73,30 @@ export class UsersAdminController {
   remove(@Param() { id }: UserIdParamDto) {
     return this.usersService.remove(id);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Patch(':id/enable')
+  @ApiOperation({ summary: 'Enable a user (allow access) [AdminOnly] - NEW' })
+  @ApiResponse({
+    status: 200,
+    description: 'User enabled successfully',
+    type: AdminUserDto,
+  })
+  enable(@Param() { id }: UserIdParamDto) {
+    return this.usersService.setEnabled(id, true);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Patch(':id/disable')
+  @ApiOperation({ summary: 'Disable a user (block access) [AdminOnly] - NEW' })
+  @ApiResponse({
+    status: 200,
+    description: 'User disabled successfully',
+    type: AdminUserDto,
+  })
+  disable(@Param() { id }: UserIdParamDto) {
+    return this.usersService.setEnabled(id, false);
+  }
 }

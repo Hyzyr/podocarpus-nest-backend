@@ -38,7 +38,7 @@ export class PropertiesService {
       maxRent,
       minSize,
       maxSize,
-      isActive,
+      isEnabled,
       page = 1,
       limit = 20,
       sortBy = 'createdAt',
@@ -76,7 +76,7 @@ export class PropertiesService {
           // maxRent ? { rentValue: { lte: maxRent } } : {},
           minSize ? { unitTotalSize: { gte: minSize } } : {},
           maxSize ? { unitTotalSize: { lte: maxSize } } : {},
-          isActive !== undefined ? { isActive } : {},
+          isEnabled !== undefined ? { isEnabled } : {},
           createdFrom ? { createdAt: { gte: new Date(createdFrom) } } : {},
           createdTo ? { createdAt: { lte: new Date(createdTo) } } : {},
         ],
@@ -149,6 +149,23 @@ export class PropertiesService {
   }
   async remove(id: string) {
     return this.prisma.property.delete({ where: { id } });
+  }
+
+  /**
+   * Toggle property enabled status (show/hide property)
+   * @param id Property ID
+   * @param isEnabled true to show/enable, false to hide/disable
+   * @returns Updated property
+   */
+  async setEnabled(id: string, isEnabled: boolean) {
+    const property = await this.prisma.property.findUnique({ where: { id } });
+    if (!property)
+      throw new NotFoundException(`Property ${id} not found`);
+
+    return this.prisma.property.update({
+      where: { id },
+      data: { isEnabled },
+    });
   }
 
   // ===============================

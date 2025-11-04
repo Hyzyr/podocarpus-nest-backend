@@ -46,4 +46,20 @@ export class UsersService {
   async remove(id: string) {
     return this.prisma.appUser.delete({ where: { id } });
   }
+
+  /**
+   * Toggle user enabled status (enable/disable user access)
+   * @param id User ID
+   * @param isEnabled true to enable, false to disable
+   * @returns Updated user
+   */
+  async setEnabled(id: string, isEnabled: boolean) {
+    const user = await this.prisma.appUser.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException(`User ${id} not found`);
+
+    return this.prisma.appUser.update({
+      where: { id },
+      data: { isEnabled },
+    });
+  }
 }

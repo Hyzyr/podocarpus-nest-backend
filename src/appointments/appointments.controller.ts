@@ -22,7 +22,7 @@ import {
   AppointmentDto,
   CreateAppointmentDto,
   UpdateAppointmentDto,
-} from './dto';
+} from './dto/appointments.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { CurrentUser } from 'src/common/decorators/user.decorator';

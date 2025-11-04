@@ -63,7 +63,9 @@ model AppUser {
   email        String   @unique
   passwordHash String
   role         UserRole
-  isActive     Boolean  @default(true)
+  // `isEnabled` controls whether the user is allowed to access the system.
+  // Set to false to block/disable the user without deleting their data.
+  isEnabled    Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -145,7 +147,9 @@ model Property {
   country           String?
   images            String[]
   assets            String[]
-  isActive          Boolean  @default(true)
+  // `isEnabled` controls whether the property is visible/available to users.
+  // Set to false to hide the property without deleting contract/investment data.
+  isEnabled         Boolean  @default(true)
   netRoiMin         Float? // e.g. 9
   netRoiMax         Float? // e.g. 11
   isTaxFreeZone     Boolean? // true/false
