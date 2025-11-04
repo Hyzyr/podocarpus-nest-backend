@@ -53,12 +53,18 @@ export class AuthService {
     // hash password
     const hash = await bcrypt.hash(password, 10);
 
+    // Determine if user should be enabled by default
+    // Admins/superadmins must be approved by an existing admin
+    // Regular users (investor, broker) are enabled by default
+    const isEnabledByDefault = role !== UserRole.admin && role !== UserRole.superadmin;
+
     // create user
     const user = await this.prisma.appUser.create({
       data: {
         email,
         passwordHash: hash,
         role,
+        isEnabled: isEnabledByDefault,
       },
     });
 
@@ -87,6 +93,11 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
+    // Check if user is enabled
+    if (!user.isEnabled) {
+      throw new UnauthorizedException('Account is disabled. Please contact an administrator.');
+    }
+
     // create tokens
     const payload: TokenPayload = { sub: user.id, role: user.role };
     setAuthCookies(payload, this.jwtService, reply);
@@ -112,6 +123,11 @@ export class AuthService {
       });
 
       if (!user) throw new UnauthorizedException();
+
+      // Check if user is enabled
+      if (!user.isEnabled) {
+        throw new UnauthorizedException('Account is disabled. Please contact an administrator.');
+      }
 
       return {
         user: authUserParser.parse(user),

@@ -21,7 +21,10 @@ export class PropertiesService {
 
   async findAll() {
     const data = await this.prisma.property.findMany({
-      where: { ownerId: null },
+      where: { 
+        ownerId: null,
+        isEnabled: true, // Only show enabled properties to public
+      },
     });
     return PublicPropertySchema.array().parse(data);
   }
@@ -51,6 +54,9 @@ export class PropertiesService {
       where: {
         AND: [
           { ownerId: null },
+          // Filter by isEnabled: default to true (public only sees enabled)
+          // unless explicitly set by query param (admin can override)
+          { isEnabled: isEnabled !== undefined ? isEnabled : true },
           search
             ? {
                 OR: [
@@ -76,7 +82,6 @@ export class PropertiesService {
           // maxRent ? { rentValue: { lte: maxRent } } : {},
           minSize ? { unitTotalSize: { gte: minSize } } : {},
           maxSize ? { unitTotalSize: { lte: maxSize } } : {},
-          isEnabled !== undefined ? { isEnabled } : {},
           createdFrom ? { createdAt: { gte: new Date(createdFrom) } } : {},
           createdTo ? { createdAt: { lte: new Date(createdTo) } } : {},
         ],

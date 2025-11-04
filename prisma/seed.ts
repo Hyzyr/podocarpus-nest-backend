@@ -1,7 +1,42 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+
 const prisma = new PrismaClient();
 
 async function main() {
+  // ========================================
+  // Create initial superadmin user (bootstrap)
+  // ========================================
+  const existingSuperadmin = await prisma.appUser.findFirst({
+    where: { role: UserRole.superadmin },
+  });
+
+  if (!existingSuperadmin) {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@podocarpus.local';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    
+    const passwordHash = await bcrypt.hash(adminPassword, 10);
+    const superadmin = await prisma.appUser.create({
+      data: {
+        email: adminEmail,
+        passwordHash,
+        role: UserRole.superadmin,
+        isEnabled: true, // Initial superadmin is enabled so they can log in and approve other admins
+        firstName: 'System',
+        lastName: 'Administrator',
+        emailVerified: true,
+        onboardingCompleted: true,
+      },
+    });
+    console.log('✅ Initial superadmin created:', superadmin.email);
+    console.log('⚠️  Default credentials - change password after first login!');
+  } else {
+    console.log('ℹ️  Superadmin already exists, skipping creation');
+  }
+
+  // ========================================
+  // Seed properties
+  // ========================================
   await prisma.property.createMany({
     data: [
       {
