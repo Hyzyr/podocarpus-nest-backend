@@ -16,6 +16,7 @@ import {
   ContractDto,
   ContractWithInvestor,
   ContractWithProperties,
+  ContractWithRelations,
   CreateContractDto,
   UpdateContractDto,
 } from './dto/contract.dto';
@@ -70,16 +71,17 @@ export class ContractsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'superadmin')
+  @Roles('admin', 'superadmin', 'investor')
   @Get(':id')
   @ApiOperation({ summary: 'Get a contract by ID [AdminOnly]' })
   @ApiResponse({
     status: 200,
     description: 'Contract retrieved successfully.',
-    type: ContractDto,
+    type: ContractWithRelations,
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
   async findOne(@Param() { id }: ContractIdParamDto) {
+    console.log('Finding contract with id:', id);
     return this.contractsService.findOne(id);
   }
 

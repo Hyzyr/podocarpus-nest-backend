@@ -52,9 +52,15 @@ export class ContractsService {
   }
 
   async findOne(id: string) {
+    console.log('Finding contract with id:', id);
     const contract = await this.prisma.contract.findUnique({
       where: { id },
-      include: { property: true, investor: true },
+      include: {
+        property: true,
+        investor: {
+          include: { user: true },
+        },
+      },
     });
     if (!contract) throw new NotFoundException(`Contract ${id} not found`);
     return contract;
@@ -71,7 +77,10 @@ export class ContractsService {
     if (existing.status !== newContract.status) {
       if (newContract.status === 'active') {
         // status changed to active
-        await this.property.assignOwner(existing.propertyId, existing.investorId);
+        await this.property.assignOwner(
+          existing.propertyId,
+          existing.investorId,
+        );
       } else if (newContract.status !== 'suspended') {
         // status changed to something else than active and suspended
         await this.property.assignOwner(existing.propertyId, null);
@@ -94,7 +103,12 @@ export class ContractsService {
   // Admin only
   async findAll() {
     return this.prisma.contract.findMany({
-      include: { property: true, investor: true },
+      include: {
+        property: true,
+        investor: {
+          include: { user: true },
+        },
+      },
     });
   }
 

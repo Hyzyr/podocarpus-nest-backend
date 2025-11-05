@@ -9,7 +9,7 @@ import {
 import { Type } from 'class-transformer';
 import { ContractStatus } from '@prisma/client';
 import { InvestorPropertyDto } from 'src/investments/dto/investments.dto';
-import { InvestorProfileDto } from 'src/users/dto/investorProfile.dto';
+import { InvestorProfileWithUserDto } from 'src/users/dto/investorProfile.dto';
 
 export const ContractIdParamDto = {};
 export class ContractDto {
@@ -70,19 +70,19 @@ export class ContractDto {
   @IsDateString()
   contractEnd?: Date | null;
 
-  @ApiPropertyOptional({ 
-    type: Number, 
+  @ApiPropertyOptional({
+    type: Number,
     example: 500000,
-    description: 'Total investment amount'
+    description: 'Total investment amount',
   })
   @IsOptional()
   @Type(() => Number)
   contractValue?: number | null;
 
-  @ApiPropertyOptional({ 
-    type: Number, 
+  @ApiPropertyOptional({
+    type: Number,
     example: 50000,
-    description: 'Initial deposit paid by investor'
+    description: 'Initial deposit paid by investor',
   })
   @IsOptional()
   @Type(() => Number)
@@ -90,21 +90,21 @@ export class ContractDto {
 
   @ApiPropertyOptional({
     example: 'Bank Transfer',
-    description: 'How investor pays (e.g., Bank Transfer, Installments)'
+    description: 'How investor pays (e.g., Bank Transfer, Installments)',
   })
   @IsOptional()
   investorPaymentMethod?: string | null;
 
   @ApiPropertyOptional({
     example: 'Monthly',
-    description: 'Payment schedule (e.g., Monthly, Quarterly, Annual)'
+    description: 'Payment schedule (e.g., Monthly, Quarterly, Annual)',
   })
   @IsOptional()
   paymentSchedule?: string | null;
 
   @ApiPropertyOptional({
     example: 'Low',
-    description: 'Vacancy risk assessment (Low, Medium, High)'
+    description: 'Vacancy risk assessment (Low, Medium, High)',
   })
   @IsOptional()
   vacancyRiskLevel?: string | null;
@@ -135,10 +135,24 @@ export class ContractWithProperties extends ContractDto {
 // when fetched from Property
 export class ContractWithInvestor extends ContractDto {
   @ApiProperty({
-    type: () => [InvestorProfileDto],
+    type: () => InvestorProfileWithUserDto,
     description: 'Investor Profile',
   })
-  investor: InvestorProfileDto;
+  investor: InvestorProfileWithUserDto;
+}
+// when fetched from Property
+export class ContractWithRelations extends ContractDto {
+  @ApiProperty({
+    type: () => InvestorPropertyDto,
+    description: 'Contracts for Properties',
+  })
+  property: InvestorPropertyDto;
+
+  @ApiProperty({
+    type: () => InvestorProfileWithUserDto,
+    description: 'Investor Profile',
+  })
+  investor: InvestorProfileWithUserDto;
 }
 
 export class CreateContractDto {
@@ -174,54 +188,54 @@ export class CreateContractDto {
   @IsDateString()
   signedDate?: Date | null;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     format: 'date-time',
-    description: 'Contract start date'
+    description: 'Contract start date',
   })
   @IsOptional()
   @IsDateString()
   contractStart?: Date | null;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     format: 'date-time',
-    description: 'Contract end date'
+    description: 'Contract end date',
   })
   @IsOptional()
   @IsDateString()
   contractEnd?: Date | null;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     type: Number,
-    description: 'Total investment amount'
+    description: 'Total investment amount',
   })
   @IsOptional()
   @Type(() => Number)
   contractValue?: number | null;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     type: Number,
-    description: 'Initial deposit paid by investor'
+    description: 'Initial deposit paid by investor',
   })
   @IsOptional()
   @Type(() => Number)
   depositPaid?: number | null;
 
   @ApiPropertyOptional({
-    description: 'How investor pays'
+    description: 'How investor pays',
   })
   @IsOptional()
   @IsString()
   investorPaymentMethod?: string | null;
 
   @ApiPropertyOptional({
-    description: 'Payment schedule (Monthly, Quarterly, Annual)'
+    description: 'Payment schedule (Monthly, Quarterly, Annual)',
   })
   @IsOptional()
   @IsString()
   paymentSchedule?: string | null;
 
   @ApiPropertyOptional({
-    description: 'Vacancy risk assessment (Low, Medium, High)'
+    description: 'Vacancy risk assessment (Low, Medium, High)',
   })
   @IsOptional()
   @IsString()

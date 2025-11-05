@@ -23,6 +23,12 @@ export class InvestorProfileDto {
   preferences?: InvestorPreferences | null;
 }
 
+export class InvestorProfileWithUserDto extends InvestorProfileDto {
+  @ApiProperty({ type: () => PublicUserDto })
+  @Type(() => PublicUserDto)
+  declare user: PublicUserDto;
+}
+
 export class InvestorPreferences {
   @ApiProperty()
   investorProfileId: string;
