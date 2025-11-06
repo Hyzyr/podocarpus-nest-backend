@@ -5,13 +5,7 @@ import {
   CreateContractDto,
   UpdateContractDto,
 } from '../dto/contract.dto';
-import { NotificationsService } from 'src/notifications/notifications.service';
-import {
-  notificationForAdmin,
-  notificationForInvestor,
-  updateNotificationForAdmin,
-  updateNotificationForInvestor,
-} from '../contract.config';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { PropertiesService } from 'src/properties/services/properties.service';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { ContractsNotificationsService } from './contracts.notifications.service';

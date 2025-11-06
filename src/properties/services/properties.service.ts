@@ -8,7 +8,7 @@ import {
   PublicPropertyWithRelationsSchema,
 } from '../dto/property.get.dto';
 import { publicUserSelect } from 'src/users/dto/user.get.dto';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { PropertiesNotificationsService } from './properties.notifications.service';
 
 @Injectable()

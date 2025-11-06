@@ -5,7 +5,7 @@ import {
   InvestmentSummaryDto,
   RoiChartDataDto,
 } from '../dto/investment-statistics.dto';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { NotificationType, UserRole } from '@prisma/client';
 
 @Injectable()

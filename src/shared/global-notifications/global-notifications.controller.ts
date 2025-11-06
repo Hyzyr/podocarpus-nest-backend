@@ -20,8 +20,14 @@ import {
   GlobalNotificationDto,
   GetGlobalNotificationsResponseDto,
   GlobalNotificationStatsDto,
+  GlobalNotificationIdParamDto,
+  GetAllNotificationsQueryDto,
+  NotificationActionResponseDto,
+  GetAllNotificationsResponseDto,
+  GetAnalyticsResponseDto,
 } from './global-notifications.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Roles, RolesGuard } from 'src/auth/roles';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { UserRole } from '@prisma/client';
 
@@ -38,7 +44,9 @@ export class GlobalNotificationsController {
    * Create a new global notification
    * Admin/superadmin only
    */
+  @UseGuards(RolesGuard)
   @Post()
+  @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new global notification (Admin only)',
@@ -73,9 +81,12 @@ export class GlobalNotificationsController {
    * Update an existing global notification
    * Admin/superadmin only
    */
+  @UseGuards(RolesGuard)
   @Patch(':id')
+  @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Update a global notification (Admin only)',
+    description: 'Update an existing global notification by ID.',
   })
   @ApiResponse({
     status: 200,
@@ -92,7 +103,7 @@ export class GlobalNotificationsController {
   })
   async update(
     @CurrentUser() user: CurrentUser,
-    @Param('id') id: string,
+    @Param() { id }: GlobalNotificationIdParamDto,
     @Body() dto: UpdateGlobalNotificationDto,
   ) {
     const adminRoles: UserRole[] = [UserRole.admin, UserRole.superadmin];
@@ -113,11 +124,11 @@ export class GlobalNotificationsController {
   @ApiOperation({
     summary: 'Get active global notifications for current user',
     description:
-      'Returns all active global notifications that target the user\'s role, sorted by creation date (newest first)',
+      'Returns all active global notifications that target the user\'s role, sorted by creation date (newest first). Includes viewed and dismissed status.',
   })
   @ApiResponse({
     status: 200,
-    description: 'List of active global notifications',
+    description: 'List of active global notifications retrieved successfully.',
     type: GetGlobalNotificationsResponseDto,
   })
   async getActiveNotifications(
@@ -156,14 +167,19 @@ export class GlobalNotificationsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Notification marked as viewed',
+    description: 'Notification marked as viewed successfully.',
+    type: NotificationActionResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Notification not found.',
   })
   async markAsViewed(
-    @Param('id') notificationId: string,
+    @Param() { id }: GlobalNotificationIdParamDto,
     @CurrentUser() user: CurrentUser,
   ) {
     await this.globalNotificationsService.markAsViewed(
-      notificationId,
+      id,
       user.userId,
       false,
     );
@@ -184,14 +200,19 @@ export class GlobalNotificationsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Notification dismissed successfully',
+    description: 'Notification dismissed successfully.',
+    type: NotificationActionResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Notification not found.',
   })
   async dismissNotification(
-    @Param('id') notificationId: string,
+    @Param() { id }: GlobalNotificationIdParamDto,
     @CurrentUser() user: CurrentUser,
   ) {
     await this.globalNotificationsService.dismissNotification(
-      notificationId,
+      id,
       user.userId,
     );
 
@@ -202,7 +223,9 @@ export class GlobalNotificationsController {
    * Get view statistics for a notification
    * Admin/superadmin only
    */
+  @UseGuards(RolesGuard)
   @Get(':id/stats')
+  @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Get statistics for a global notification (Admin only)',
     description:
@@ -210,16 +233,20 @@ export class GlobalNotificationsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Notification statistics',
+    description: 'Notification statistics retrieved successfully.',
     type: GlobalNotificationStatsDto,
   })
   @ApiResponse({
     status: 403,
     description: 'User is not admin or superadmin',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Notification not found.',
+  })
   async getStats(
     @CurrentUser() user: CurrentUser,
-    @Param('id') notificationId: string,
+    @Param() { id }: GlobalNotificationIdParamDto,
   ) {
     const adminRoles: UserRole[] = [UserRole.admin, UserRole.superadmin];
     if (!adminRoles.includes(user.role)) {
@@ -228,16 +255,16 @@ export class GlobalNotificationsController {
       );
     }
 
-    return this.globalNotificationsService.getNotificationStats(
-      notificationId,
-    );
+    return this.globalNotificationsService.getNotificationStats(id);
   }
 
   /**
    * Get detailed view analytics for a notification
    * Admin/superadmin only
    */
+  @UseGuards(RolesGuard)
   @Get(':id/analytics')
+  @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Get detailed analytics for a notification (Admin only)',
     description:
@@ -245,15 +272,20 @@ export class GlobalNotificationsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Detailed view analytics',
+    description: 'Detailed view analytics retrieved successfully.',
+    type: GetAnalyticsResponseDto,
   })
   @ApiResponse({
     status: 403,
     description: 'User is not admin or superadmin',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Notification not found.',
+  })
   async getAnalytics(
     @CurrentUser() user: CurrentUser,
-    @Param('id') notificationId: string,
+    @Param() { id }: GlobalNotificationIdParamDto,
   ) {
     const adminRoles: UserRole[] = [UserRole.admin, UserRole.superadmin];
     if (!adminRoles.includes(user.role)) {
@@ -262,22 +294,25 @@ export class GlobalNotificationsController {
       );
     }
 
-    return this.globalNotificationsService.getViewAnalytics(notificationId);
+    return this.globalNotificationsService.getViewAnalytics(id);
   }
 
   /**
    * Get all global notifications for admin dashboard
    * Admin/superadmin only - with pagination
    */
+  @UseGuards(RolesGuard)
   @Get('admin/all')
+  @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Get all global notifications (Admin only)',
     description:
-      'Get all notifications with view counts for admin dashboard',
+      'Get all notifications with view counts for admin dashboard. Supports pagination.',
   })
   @ApiResponse({
     status: 200,
-    description: 'All global notifications',
+    description: 'All global notifications retrieved successfully.',
+    type: GetAllNotificationsResponseDto,
   })
   @ApiResponse({
     status: 403,
@@ -285,8 +320,7 @@ export class GlobalNotificationsController {
   })
   async getAllNotifications(
     @CurrentUser() user: CurrentUser,
-    @Query('limit') limit: number = 50,
-    @Query('offset') offset: number = 0,
+    @Query() query: GetAllNotificationsQueryDto,
   ) {
     const adminRoles: UserRole[] = [UserRole.admin, UserRole.superadmin];
     if (!adminRoles.includes(user.role)) {
@@ -295,29 +329,40 @@ export class GlobalNotificationsController {
       );
     }
 
-    return this.globalNotificationsService.getAllNotifications(limit, offset);
+    return this.globalNotificationsService.getAllNotifications(
+      query.limit,
+      query.offset,
+    );
   }
 
   /**
    * Delete a global notification
    * Admin/superadmin only
    */
+  @UseGuards(RolesGuard)
   @Delete(':id')
+  @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a global notification (Admin only)',
+    description: 'Permanently delete a global notification by ID.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Notification deleted successfully',
+    description: 'Notification deleted successfully.',
+    type: NotificationActionResponseDto,
   })
   @ApiResponse({
     status: 403,
     description: 'User is not admin or superadmin',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Notification not found.',
+  })
   async delete(
     @CurrentUser() user: CurrentUser,
-    @Param('id') id: string,
+    @Param() { id }: GlobalNotificationIdParamDto,
   ) {
     const adminRoles: UserRole[] = [UserRole.admin, UserRole.superadmin];
     if (!adminRoles.includes(user.role)) {

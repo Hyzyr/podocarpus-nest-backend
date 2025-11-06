@@ -10,6 +10,13 @@ import {
 } from 'class-validator';
 import { NotificationType, NotificationStatus, UserRole } from '@prisma/client';
 
+// Param validation DTOs
+export class NotificationIdParamDto {
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @IsUUID()
+  id: string;
+}
+
 export class NotificationDto {
   @ApiProperty()
   id: string;
@@ -211,4 +218,13 @@ export interface CreateNotifyDto extends NotifyInputDto {
   type: NotificationType;
   targetRoles?: UserRole[];
   isGlobal?: boolean;
+}
+
+// Response DTOs
+export class MarkAsReadResponseDto {
+  @ApiProperty({ 
+    example: true,
+    description: 'Whether the notification was successfully marked as read',
+  })
+  success: boolean;
 }

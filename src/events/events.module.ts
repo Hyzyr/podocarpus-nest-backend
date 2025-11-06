@@ -3,7 +3,7 @@ import { EventsService } from './services/events.service';
 import { EventsNotificationsService } from './services/events.notifications.service';
 import { EventsAdminController, EventsController } from './events.controller';
 import { DatabaseModule } from 'src/shared/database/database.module';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { NotificationsModule } from 'src/shared/notifications/notifications.module';
 
 @Module({
   imports: [DatabaseModule, NotificationsModule],

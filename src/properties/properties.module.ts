@@ -5,7 +5,7 @@ import { TenantLeasesController } from './tenant-leases.controller';
 import { PropertiesService } from './services/properties.service';
 import { PropertiesNotificationsService } from './services/properties.notifications.service';
 import { TenantLeasesService } from './services/tenant-leases.service';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { NotificationsModule } from 'src/shared/notifications/notifications.module';
 
 @Module({
   imports: [DatabaseModule, NotificationsModule],

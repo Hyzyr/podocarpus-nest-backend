@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from 'src/common/constants';
 import { JwtStrategy } from 'src/common/strategies/jwt.strategy';
 import { MailerModule } from 'src/shared/mailer/mailer.module';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { NotificationsModule } from 'src/shared/notifications/notifications.module';
 
 @Module({
   imports: [

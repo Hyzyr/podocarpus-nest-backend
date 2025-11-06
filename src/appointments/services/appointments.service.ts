@@ -13,7 +13,7 @@ import { UserActionsStatus } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { zodKeysToSelect } from 'src/common/utils/zod-helpers';
 import { PublicPropertySchema } from 'src/properties/dto/property.get.dto';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { AppointmentsNotificationsService } from './appointments.notifications.service';
 
 const propertySelect = zodKeysToSelect(PublicPropertySchema);

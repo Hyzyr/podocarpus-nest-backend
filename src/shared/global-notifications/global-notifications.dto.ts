@@ -7,8 +7,35 @@ import {
   IsDateString,
   IsBoolean,
   IsUUID,
+  IsNumber,
+  Min,
 } from 'class-validator';
 import { NotificationType, UserRole } from '@prisma/client';
+import { Type } from 'class-transformer';
+
+// Param validation DTOs
+export class GlobalNotificationIdParamDto {
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @IsUUID()
+  id: string;
+}
+
+// Query validation DTOs
+export class GetAllNotificationsQueryDto {
+  @ApiPropertyOptional({ example: 50, default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  limit?: number = 50;
+
+  @ApiPropertyOptional({ example: 0, default: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  offset?: number = 0;
+}
 
 export class GlobalNotificationDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -93,6 +120,21 @@ export class GlobalNotificationDto {
 
   @ApiPropertyOptional({ example: '2025-10-29T10:30:00Z' })
   updatedAt?: string;
+}
+
+// Response DTO with user-specific view status
+export class GlobalNotificationWithStatusDto extends GlobalNotificationDto {
+  @ApiProperty({ 
+    example: true,
+    description: 'Whether the current user has viewed this notification',
+  })
+  viewed: boolean;
+
+  @ApiProperty({ 
+    example: false,
+    description: 'Whether the current user has dismissed this notification',
+  })
+  dismissed: boolean;
 }
 
 export class CreateGlobalNotificationDto {
@@ -260,12 +302,116 @@ export class GlobalNotificationStatsDto {
 }
 
 export class GetGlobalNotificationsResponseDto {
-  @ApiProperty({ type: [GlobalNotificationDto] })
-  notifications: GlobalNotificationDto[];
+  @ApiProperty({ 
+    type: [GlobalNotificationWithStatusDto],
+    description: 'List of global notifications with view/dismiss status for current user',
+  })
+  notifications: GlobalNotificationWithStatusDto[];
 
-  @ApiProperty({ example: 12 })
+  @ApiProperty({ 
+    example: 12,
+    description: 'Total number of active notifications',
+  })
   total: number;
 
-  @ApiProperty({ example: 8 })
+  @ApiProperty({ 
+    example: 8,
+    description: 'Number of notifications not yet viewed by current user',
+  })
   unviewedCount: number;
+}
+
+// Success response DTO
+export class NotificationActionResponseDto {
+  @ApiProperty({ example: true })
+  success: boolean;
+
+  @ApiProperty({ example: 'Notification marked as viewed' })
+  message: string;
+}
+
+// Admin: Get all notifications response
+export class GlobalNotificationWithViewCountDto extends GlobalNotificationDto {
+  @ApiProperty({ example: 150, description: 'Total number of views' })
+  viewCount: number;
+}
+
+export class GetAllNotificationsResponseDto {
+  @ApiProperty({ 
+    type: [GlobalNotificationWithViewCountDto],
+    description: 'List of all global notifications with view counts',
+  })
+  notifications: GlobalNotificationWithViewCountDto[];
+
+  @ApiProperty({ 
+    example: 25,
+    description: 'Total count of all notifications',
+  })
+  total: number;
+}
+
+// Analytics response DTOs
+export class ViewsByRoleDto {
+  @ApiProperty({ example: 45 })
+  total: number;
+
+  @ApiProperty({ example: 12 })
+  dismissed: number;
+}
+
+export class RecentViewDto {
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  id: string;
+
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174001' })
+  userId: string;
+
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174002' })
+  globalNotificationId: string;
+
+  @ApiProperty({ example: '2025-10-29T10:30:00Z' })
+  viewedAt: Date;
+
+  @ApiProperty({ example: false })
+  dismissed: boolean;
+
+  @ApiProperty()
+  user: {
+    id: string;
+    role: string;
+    email: string;
+  };
+}
+
+export class GetAnalyticsResponseDto {
+  @ApiProperty({ example: 234, description: 'Total number of views' })
+  totalViews: number;
+
+  @ApiProperty({ example: 45, description: 'Total number of dismissed views' })
+  totalDismissed: number;
+
+  @ApiProperty({ 
+    type: 'object',
+    additionalProperties: { type: 'object' },
+    example: {
+      admin: { total: 45, dismissed: 12 },
+      investor: { total: 120, dismissed: 23 },
+    },
+    description: 'Views grouped by user role',
+  })
+  viewsByRole: Record<string, ViewsByRoleDto>;
+
+  @ApiProperty({ 
+    type: 'object',
+    additionalProperties: { type: 'number' },
+    example: { '9': 23, '10': 45, '11': 32 },
+    description: 'Views grouped by hour of day (0-23)',
+  })
+  viewsByHour: Record<number, number>;
+
+  @ApiProperty({ 
+    type: [RecentViewDto],
+    description: 'Most recent 10 views',
+  })
+  recentViews: RecentViewDto[];
 }

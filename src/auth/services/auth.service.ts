@@ -12,7 +12,7 @@ import { TokenPayload } from '../auth.types';
 import * as crypto from 'crypto';
 import { WEBSITE_URL } from 'src/common/constants';
 import { MailerService } from 'src/shared/mailer/mailer.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { AuthNotificationsService } from './auth.notifications.service';
 
 import {

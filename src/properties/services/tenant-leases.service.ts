@@ -4,7 +4,7 @@ import {
   CreateTenantLeaseDto,
   UpdateTenantLeaseDto,
 } from '../dto/tenant-lease.dto';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { NotificationType, UserRole } from '@prisma/client';
 
 @Injectable()

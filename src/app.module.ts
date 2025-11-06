@@ -13,8 +13,7 @@ import { StorageModule } from 'src/shared/storage/storage.module';
 import { EventsModule } from './events/events.module';
 import { EventStatusModule } from './events/event.status.module';
 import { ContractsModule } from './contracts/contracts.module';
-import { NotificationsModule } from './notifications/notifications.module';
-import { GlobalNotificationsModule } from './global-notifications/global-notifications.module';
+import { NotificationsModule } from './shared/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -32,7 +31,6 @@ import { GlobalNotificationsModule } from './global-notifications/global-notific
     EventStatusModule,
     ContractsModule,
     NotificationsModule,
-    GlobalNotificationsModule,
   ],
   controllers: [],
   providers: [],

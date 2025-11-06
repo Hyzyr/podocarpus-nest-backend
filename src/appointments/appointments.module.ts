@@ -3,7 +3,7 @@ import { DatabaseModule } from 'src/shared/database/database.module';
 import { AppointmentController } from './appointments.controller';
 import { AppointmentService } from './services/appointments.service';
 import { AppointmentsNotificationsService } from './services/appointments.notifications.service';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { NotificationsModule } from 'src/shared/notifications/notifications.module';
 
 @Module({
   imports: [DatabaseModule, NotificationsModule],

@@ -5,7 +5,7 @@ import { ContractsService } from './services/contracts.service';
 import { ContractsNotificationsService } from './services/contracts.notifications.service';
 import { InvestmentStatisticsService } from './services/investment-statistics.service';
 import { DatabaseModule } from 'src/shared/database/database.module';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { NotificationsModule } from 'src/shared/notifications/notifications.module';
 import { PropertiesModule } from 'src/properties/properties.module';
 
 @Module({

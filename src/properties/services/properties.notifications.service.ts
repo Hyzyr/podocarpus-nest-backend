@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
-import { GlobalNotificationsService } from 'src/global-notifications/global-notifications.service';
+import { NotificationsService } from 'src/shared/notifications/notifications.service';
+import { GlobalNotificationsService } from 'src/shared/global-notifications/global-notifications.service';
 import { NotificationType, UserRole } from '@prisma/client';
 
 @Injectable()
