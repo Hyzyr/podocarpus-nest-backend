@@ -1,6 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { AdminUserDto } from './dto/user.get.dto';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -8,8 +10,17 @@ export class UsersService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAll() {
-    return this.prisma.appUser.findMany({});
+  async getAll(currentUser: CurrentUser) {
+    let where: any = {};
+    if (currentUser.role !== UserRole.superadmin) {
+      where = {
+        AND: [
+          { role: { not: UserRole.superadmin } },
+          { id: { not: currentUser.userId } }
+        ]
+      };
+    }
+    return this.prisma.appUser.findMany({ where });
   }
   async findOneFullInfo(id: string) {
     const user = await this.prisma.appUser.findUnique({

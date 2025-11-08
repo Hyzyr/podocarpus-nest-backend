@@ -14,6 +14,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { AdminUserDto, AdminUserWithRelationsDto, UserIdParamDto } from './dto/user.get.dto';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @ApiTags('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -32,8 +33,8 @@ export class UsersAdminController {
     description: 'List of users retrieved successfully.',
     type: [AdminUserDto],
   })
-  getAll() {
-    return this.usersService.getAll();
+  getAll(@CurrentUser() currentUser: CurrentUser) {
+    return this.usersService.getAll(currentUser);
   }  
 
   @UseGuards(JwtAuthGuard, RolesGuard)

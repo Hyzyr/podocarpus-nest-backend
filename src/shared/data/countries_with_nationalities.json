@@ -527,5 +527,1110 @@
     "cities": [
       "Singapore"
     ]
+  },
+  {
+    "code": "AU",
+    "name": "Australia",
+    "continent": "Oceania",
+    "nationality": "Australian",
+    "cities": [
+      "Sydney",
+      "Melbourne",
+      "Brisbane",
+      "Perth",
+      "Adelaide"
+    ]
+  },
+  {
+    "code": "NZ",
+    "name": "New Zealand",
+    "continent": "Oceania",
+    "nationality": "New Zealander",
+    "cities": [
+      "Auckland",
+      "Wellington",
+      "Christchurch",
+      "Hamilton",
+      "Dunedin"
+    ]
+  },
+  {
+    "code": "AT",
+    "name": "Austria",
+    "continent": "Europe",
+    "nationality": "Austrian",
+    "cities": [
+      "Vienna",
+      "Graz",
+      "Linz",
+      "Salzburg",
+      "Innsbruck"
+    ]
+  },
+  {
+    "code": "PL",
+    "name": "Poland",
+    "continent": "Europe",
+    "nationality": "Polish",
+    "cities": [
+      "Warsaw",
+      "Krakow",
+      "Łódź",
+      "Wrocław",
+      "Poznań"
+    ]
+  },
+  {
+    "code": "CZ",
+    "name": "Czech Republic",
+    "continent": "Europe",
+    "nationality": "Czech",
+    "cities": [
+      "Prague",
+      "Brno",
+      "Ostrava",
+      "Plzeň",
+      "Liberec"
+    ]
+  },
+  {
+    "code": "HU",
+    "name": "Hungary",
+    "continent": "Europe",
+    "nationality": "Hungarian",
+    "cities": [
+      "Budapest",
+      "Debrecen",
+      "Szeged",
+      "Miskolc",
+      "Pécs"
+    ]
+  },
+  {
+    "code": "GR",
+    "name": "Greece",
+    "continent": "Europe",
+    "nationality": "Greek",
+    "cities": [
+      "Athens",
+      "Thessaloniki",
+      "Patras",
+      "Heraklion",
+      "Larissa"
+    ]
+  },
+  {
+    "code": "RO",
+    "name": "Romania",
+    "continent": "Europe",
+    "nationality": "Romanian",
+    "cities": [
+      "Bucharest",
+      "Cluj-Napoca",
+      "Timișoara",
+      "Iași",
+      "Constanța"
+    ]
+  },
+  {
+    "code": "BG",
+    "name": "Bulgaria",
+    "continent": "Europe",
+    "nationality": "Bulgarian",
+    "cities": [
+      "Sofia",
+      "Plovdiv",
+      "Varna",
+      "Burgas",
+      "Ruse"
+    ]
+  },
+  {
+    "code": "HR",
+    "name": "Croatia",
+    "continent": "Europe",
+    "nationality": "Croatian",
+    "cities": [
+      "Zagreb",
+      "Split",
+      "Rijeka",
+      "Osijek",
+      "Zadar"
+    ]
+  },
+  {
+    "code": "RS",
+    "name": "Serbia",
+    "continent": "Europe",
+    "nationality": "Serbian",
+    "cities": [
+      "Belgrade",
+      "Novi Sad",
+      "Niš",
+      "Kragujevac",
+      "Subotica"
+    ]
+  },
+  {
+    "code": "SI",
+    "name": "Slovenia",
+    "continent": "Europe",
+    "nationality": "Slovenian",
+    "cities": [
+      "Ljubljana",
+      "Maribor",
+      "Celje",
+      "Kranj",
+      "Velenje"
+    ]
+  },
+  {
+    "code": "SK",
+    "name": "Slovakia",
+    "continent": "Europe",
+    "nationality": "Slovak",
+    "cities": [
+      "Bratislava",
+      "Košice",
+      "Prešov",
+      "Žilina",
+      "Banská Bystrica"
+    ]
+  },
+  {
+    "code": "EE",
+    "name": "Estonia",
+    "continent": "Europe",
+    "nationality": "Estonian",
+    "cities": [
+      "Tallinn",
+      "Tartu",
+      "Narva",
+      "Pärnu",
+      "Kohtla-Järve"
+    ]
+  },
+  {
+    "code": "LV",
+    "name": "Latvia",
+    "continent": "Europe",
+    "nationality": "Latvian",
+    "cities": [
+      "Riga",
+      "Daugavpils",
+      "Liepāja",
+      "Jelgava",
+      "Jūrmala"
+    ]
+  },
+  {
+    "code": "LT",
+    "name": "Lithuania",
+    "continent": "Europe",
+    "nationality": "Lithuanian",
+    "cities": [
+      "Vilnius",
+      "Kaunas",
+      "Klaipėda",
+      "Šiauliai",
+      "Panevėžys"
+    ]
+  },
+  {
+    "code": "IE",
+    "name": "Ireland",
+    "continent": "Europe",
+    "nationality": "Irish",
+    "cities": [
+      "Dublin",
+      "Cork",
+      "Limerick",
+      "Galway",
+      "Waterford"
+    ]
+  },
+  {
+    "code": "LU",
+    "name": "Luxembourg",
+    "continent": "Europe",
+    "nationality": "Luxembourgish",
+    "cities": [
+      "Luxembourg City",
+      "Esch-sur-Alzette",
+      "Differdange",
+      "Dudelange",
+      "Ettelbruck"
+    ]
+  },
+  {
+    "code": "MT",
+    "name": "Malta",
+    "continent": "Europe",
+    "nationality": "Maltese",
+    "cities": [
+      "Valletta",
+      "Sliema",
+      "Birkirkara",
+      "Mosta",
+      "Qormi"
+    ]
+  },
+  {
+    "code": "CY",
+    "name": "Cyprus",
+    "continent": "Europe",
+    "nationality": "Cypriot",
+    "cities": [
+      "Nicosia",
+      "Limassol",
+      "Larnaca",
+      "Famagusta",
+      "Paphos"
+    ]
+  },
+  {
+    "code": "IS",
+    "name": "Iceland",
+    "continent": "Europe",
+    "nationality": "Icelandic",
+    "cities": [
+      "Reykjavík",
+      "Kópavogur",
+      "Hafnarfjörður",
+      "Akureyri",
+      "Reykjanesbær"
+    ]
+  },
+  {
+    "code": "IL",
+    "name": "Israel",
+    "continent": "Asia",
+    "nationality": "Israeli",
+    "cities": [
+      "Jerusalem",
+      "Tel Aviv",
+      "Haifa",
+      "Rishon LeZion",
+      "Petah Tikva"
+    ]
+  },
+  {
+    "code": "JO",
+    "name": "Jordan",
+    "continent": "Asia",
+    "nationality": "Jordanian",
+    "cities": [
+      "Amman",
+      "Zarqa",
+      "Irbid",
+      "Russeifa",
+      "Al-Quwaysimah"
+    ]
+  },
+  {
+    "code": "LB",
+    "name": "Lebanon",
+    "continent": "Asia",
+    "nationality": "Lebanese",
+    "cities": [
+      "Beirut",
+      "Tripoli",
+      "Sidon",
+      "Tyre",
+      "Byblos"
+    ]
+  },
+  {
+    "code": "KW",
+    "name": "Kuwait",
+    "continent": "Asia",
+    "nationality": "Kuwaiti",
+    "cities": [
+      "Kuwait City",
+      "Al Ahmadi",
+      "Hawalli",
+      "Al Farwaniyah",
+      "Al Jahra"
+    ]
+  },
+  {
+    "code": "QA",
+    "name": "Qatar",
+    "continent": "Asia",
+    "nationality": "Qatari",
+    "cities": [
+      "Doha",
+      "Al Rayyan",
+      "Umm Salal",
+      "Al Wakrah",
+      "Al Khor"
+    ]
+  },
+  {
+    "code": "BH",
+    "name": "Bahrain",
+    "continent": "Asia",
+    "nationality": "Bahraini",
+    "cities": [
+      "Manama",
+      "Riffa",
+      "Muharraq",
+      "Hamad Town",
+      "A'ali"
+    ]
+  },
+  {
+    "code": "OM",
+    "name": "Oman",
+    "continent": "Asia",
+    "nationality": "Omani",
+    "cities": [
+      "Muscat",
+      "Seeb",
+      "Salalah",
+      "Bawshar",
+      "Sohar"
+    ]
+  },
+  {
+    "code": "YE",
+    "name": "Yemen",
+    "continent": "Asia",
+    "nationality": "Yemeni",
+    "cities": [
+      "Sana'a",
+      "Aden",
+      "Taiz",
+      "Al Hudaydah",
+      "Mukalla"
+    ]
+  },
+  {
+    "code": "IQ",
+    "name": "Iraq",
+    "continent": "Asia",
+    "nationality": "Iraqi",
+    "cities": [
+      "Baghdad",
+      "Basra",
+      "Mosul",
+      "Erbil",
+      "Sulaymaniyah"
+    ]
+  },
+  {
+    "code": "SY",
+    "name": "Syria",
+    "continent": "Asia",
+    "nationality": "Syrian",
+    "cities": [
+      "Damascus",
+      "Aleppo",
+      "Homs",
+      "Hama",
+      "Latakia"
+    ]
+  },
+  {
+    "code": "IR",
+    "name": "Iran",
+    "continent": "Asia",
+    "nationality": "Iranian",
+    "cities": [
+      "Tehran",
+      "Mashhad",
+      "Isfahan",
+      "Karaj",
+      "Tabriz"
+    ]
+  },
+  {
+    "code": "AZ",
+    "name": "Azerbaijan",
+    "continent": "Asia",
+    "nationality": "Azerbaijani",
+    "cities": [
+      "Baku",
+      "Ganja",
+      "Sumqayit",
+      "Mingachevir",
+      "Lankaran"
+    ]
+  },
+  {
+    "code": "GE",
+    "name": "Georgia",
+    "continent": "Asia",
+    "nationality": "Georgian",
+    "cities": [
+      "Tbilisi",
+      "Kutaisi",
+      "Batumi",
+      "Sukhumi",
+      "Zugdidi"
+    ]
+  },
+  {
+    "code": "AM",
+    "name": "Armenia",
+    "continent": "Asia",
+    "nationality": "Armenian",
+    "cities": [
+      "Yerevan",
+      "Gyumri",
+      "Vanadzor",
+      "Vagharshapat",
+      "Hrazdan"
+    ]
+  },
+  {
+    "code": "UZ",
+    "name": "Uzbekistan",
+    "continent": "Asia",
+    "nationality": "Uzbek",
+    "cities": [
+      "Tashkent",
+      "Samarkand",
+      "Bukhara",
+      "Andijan",
+      "Namangan"
+    ]
+  },
+  {
+    "code": "KZ",
+    "name": "Kazakhstan",
+    "continent": "Asia",
+    "nationality": "Kazakh",
+    "cities": [
+      "Almaty",
+      "Nur-Sultan",
+      "Shymkent",
+      "Aktobe",
+      "Karaganda"
+    ]
+  },
+  {
+    "code": "KG",
+    "name": "Kyrgyzstan",
+    "continent": "Asia",
+    "nationality": "Kyrgyz",
+    "cities": [
+      "Bishkek",
+      "Osh",
+      "Jalal-Abad",
+      "Karakol",
+      "Tokmok"
+    ]
+  },
+  {
+    "code": "TJ",
+    "name": "Tajikistan",
+    "continent": "Asia",
+    "nationality": "Tajik",
+    "cities": [
+      "Dushanbe",
+      "Khujand",
+      "Kulob",
+      "Kurgan-Tyube",
+      "Istaravshan"
+    ]
+  },
+  {
+    "code": "BD",
+    "name": "Bangladesh",
+    "continent": "Asia",
+    "nationality": "Bangladeshi",
+    "cities": [
+      "Dhaka",
+      "Chittagong",
+      "Khulna",
+      "Rajshahi",
+      "Sylhet"
+    ]
+  },
+  {
+    "code": "LK",
+    "name": "Sri Lanka",
+    "continent": "Asia",
+    "nationality": "Sri Lankan",
+    "cities": [
+      "Colombo",
+      "Gampaha",
+      "Kurunegala",
+      "Kandy",
+      "Galle"
+    ]
+  },
+  {
+    "code": "NP",
+    "name": "Nepal",
+    "continent": "Asia",
+    "nationality": "Nepali",
+    "cities": [
+      "Kathmandu",
+      "Pokhara",
+      "Lalitpur",
+      "Biratnagar",
+      "Birgunj"
+    ]
+  },
+  {
+    "code": "BT",
+    "name": "Bhutan",
+    "continent": "Asia",
+    "nationality": "Bhutanese",
+    "cities": [
+      "Thimphu",
+      "Phuntsholing",
+      "Paro",
+      "Punakha",
+      "Wangdue Phodrang"
+    ]
+  },
+  {
+    "code": "MM",
+    "name": "Myanmar",
+    "continent": "Asia",
+    "nationality": "Burmese",
+    "cities": [
+      "Yangon",
+      "Mandalay",
+      "Naypyidaw",
+      "Mawlamyine",
+      "Bago"
+    ]
+  },
+  {
+    "code": "KH",
+    "name": "Cambodia",
+    "continent": "Asia",
+    "nationality": "Cambodian",
+    "cities": [
+      "Phnom Penh",
+      "Siem Reap",
+      "Battambang",
+      "Sihanoukville",
+      "Poipet"
+    ]
+  },
+  {
+    "code": "LA",
+    "name": "Laos",
+    "continent": "Asia",
+    "nationality": "Laotian",
+    "cities": [
+      "Vientiane",
+      "Pakse",
+      "Savannakhet",
+      "Luang Prabang",
+      "Xam Nua"
+    ]
+  },
+  {
+    "code": "MN",
+    "name": "Mongolia",
+    "continent": "Asia",
+    "nationality": "Mongolian",
+    "cities": [
+      "Ulaanbaatar",
+      "Erdenet",
+      "Darkhan",
+      "Choibalsan",
+      "Mörön"
+    ]
+  },
+  {
+    "code": "AF",
+    "name": "Afghanistan",
+    "continent": "Asia",
+    "nationality": "Afghan",
+    "cities": [
+      "Kabul",
+      "Kandahar",
+      "Herat",
+      "Mazar-i-Sharif",
+      "Jalalabad"
+    ]
+  },
+  {
+    "code": "MA",
+    "name": "Morocco",
+    "continent": "Africa",
+    "nationality": "Moroccan",
+    "cities": [
+      "Casablanca",
+      "Rabat",
+      "Fes",
+      "Marrakech",
+      "Agadir"
+    ]
+  },
+  {
+    "code": "TN",
+    "name": "Tunisia",
+    "continent": "Africa",
+    "nationality": "Tunisian",
+    "cities": [
+      "Tunis",
+      "Sfax",
+      "Sousse",
+      "Ettadhamen",
+      "Kairouan"
+    ]
+  },
+  {
+    "code": "DZ",
+    "name": "Algeria",
+    "continent": "Africa",
+    "nationality": "Algerian",
+    "cities": [
+      "Algiers",
+      "Oran",
+      "Constantine",
+      "Annaba",
+      "Blida"
+    ]
+  },
+  {
+    "code": "LY",
+    "name": "Libya",
+    "continent": "Africa",
+    "nationality": "Libyan",
+    "cities": [
+      "Tripoli",
+      "Benghazi",
+      "Misrata",
+      "Tarhuna",
+      "Al Khums"
+    ]
+  },
+  {
+    "code": "SD",
+    "name": "Sudan",
+    "continent": "Africa",
+    "nationality": "Sudanese",
+    "cities": [
+      "Khartoum",
+      "Omdurman",
+      "Khartoum North",
+      "Port Sudan",
+      "Kassala"
+    ]
+  },
+  {
+    "code": "SS",
+    "name": "South Sudan",
+    "continent": "Africa",
+    "nationality": "South Sudanese",
+    "cities": [
+      "Juba",
+      "Wau",
+      "Malakal",
+      "Yei",
+      "Nimule"
+    ]
+  },
+  {
+    "code": "ET",
+    "name": "Ethiopia",
+    "continent": "Africa",
+    "nationality": "Ethiopian",
+    "cities": [
+      "Addis Ababa",
+      "Dire Dawa",
+      "Mek'ele",
+      "Gondar",
+      "Hawassa"
+    ]
+  },
+  {
+    "code": "UG",
+    "name": "Uganda",
+    "continent": "Africa",
+    "nationality": "Ugandan",
+    "cities": [
+      "Kampala",
+      "Gulu",
+      "Lira",
+      "Mbarara",
+      "Jinja"
+    ]
+  },
+  {
+    "code": "TZ",
+    "name": "Tanzania",
+    "continent": "Africa",
+    "nationality": "Tanzanian",
+    "cities": [
+      "Dar es Salaam",
+      "Dodoma",
+      "Mwanza",
+      "Arusha",
+      "Mbeya"
+    ]
+  },
+  {
+    "code": "GH",
+    "name": "Ghana",
+    "continent": "Africa",
+    "nationality": "Ghanaian",
+    "cities": [
+      "Accra",
+      "Kumasi",
+      "Tamale",
+      "Takoradi",
+      "Atsiaman"
+    ]
+  },
+  {
+    "code": "CI",
+    "name": "Ivory Coast",
+    "continent": "Africa",
+    "nationality": "Ivorian",
+    "cities": [
+      "Abidjan",
+      "Bouaké",
+      "Daloa",
+      "Yamoussoukro",
+      "San-Pédro"
+    ]
+  },
+  {
+    "code": "SN",
+    "name": "Senegal",
+    "continent": "Africa",
+    "nationality": "Senegalese",
+    "cities": [
+      "Dakar",
+      "Pikine",
+      "Touba",
+      "Thiès",
+      "Kaolack"
+    ]
+  },
+  {
+    "code": "CM",
+    "name": "Cameroon",
+    "continent": "Africa",
+    "nationality": "Cameroonian",
+    "cities": [
+      "Yaoundé",
+      "Douala",
+      "Garoua",
+      "Kousséri",
+      "Bamenda"
+    ]
+  },
+  {
+    "code": "MG",
+    "name": "Madagascar",
+    "continent": "Africa",
+    "nationality": "Malagasy",
+    "cities": [
+      "Antananarivo",
+      "Toamasina",
+      "Antsirabe",
+      "Fianarantsoa",
+      "Mahajanga"
+    ]
+  },
+  {
+    "code": "ZW",
+    "name": "Zimbabwe",
+    "continent": "Africa",
+    "nationality": "Zimbabwean",
+    "cities": [
+      "Harare",
+      "Bulawayo",
+      "Chitungwiza",
+      "Mutare",
+      "Gweru"
+    ]
+  },
+  {
+    "code": "ZM",
+    "name": "Zambia",
+    "continent": "Africa",
+    "nationality": "Zambian",
+    "cities": [
+      "Lusaka",
+      "Kitwe",
+      "Ndola",
+      "Kabwe",
+      "Chingola"
+    ]
+  },
+  {
+    "code": "BW",
+    "name": "Botswana",
+    "continent": "Africa",
+    "nationality": "Botswanan",
+    "cities": [
+      "Gaborone",
+      "Francistown",
+      "Molepolole",
+      "Selebi-Phikwe",
+      "Maun"
+    ]
+  },
+  {
+    "code": "MW",
+    "name": "Malawi",
+    "continent": "Africa",
+    "nationality": "Malawian",
+    "cities": [
+      "Lilongwe",
+      "Blantyre",
+      "Mzuzu",
+      "Zomba",
+      "Karonga"
+    ]
+  },
+  {
+    "code": "MZ",
+    "name": "Mozambique",
+    "continent": "Africa",
+    "nationality": "Mozambican",
+    "cities": [
+      "Maputo",
+      "Matola",
+      "Beira",
+      "Nampula",
+      "Chimoio"
+    ]
+  },
+  {
+    "code": "AO",
+    "name": "Angola",
+    "continent": "Africa",
+    "nationality": "Angolan",
+    "cities": [
+      "Luanda",
+      "Huambo",
+      "Lobito",
+      "Benguela",
+      "Kuito"
+    ]
+  },
+  {
+    "code": "VE",
+    "name": "Venezuela",
+    "continent": "South America",
+    "nationality": "Venezuelan",
+    "cities": [
+      "Caracas",
+      "Maracaibo",
+      "Valencia",
+      "Barquisimeto",
+      "Maracay"
+    ]
+  },
+  {
+    "code": "UY",
+    "name": "Uruguay",
+    "continent": "South America",
+    "nationality": "Uruguayan",
+    "cities": [
+      "Montevideo",
+      "Salto",
+      "Paysandú",
+      "Las Piedras",
+      "Rivera"
+    ]
+  },
+  {
+    "code": "PY",
+    "name": "Paraguay",
+    "continent": "South America",
+    "nationality": "Paraguayan",
+    "cities": [
+      "Asunción",
+      "Ciudad del Este",
+      "San Lorenzo",
+      "Luque",
+      "Capiatá"
+    ]
+  },
+  {
+    "code": "BO",
+    "name": "Bolivia",
+    "continent": "South America",
+    "nationality": "Bolivian",
+    "cities": [
+      "Santa Cruz de la Sierra",
+      "La Paz",
+      "El Alto",
+      "Cochabamba",
+      "Sucre"
+    ]
+  },
+  {
+    "code": "EC",
+    "name": "Ecuador",
+    "continent": "South America",
+    "nationality": "Ecuadorian",
+    "cities": [
+      "Guayaquil",
+      "Quito",
+      "Cuenca",
+      "Santo Domingo",
+      "Machala"
+    ]
+  },
+  {
+    "code": "JM",
+    "name": "Jamaica",
+    "continent": "North America",
+    "nationality": "Jamaican",
+    "cities": [
+      "Kingston",
+      "Montego Bay",
+      "Spanish Town",
+      "Portmore",
+      "Mandeville"
+    ]
+  },
+  {
+    "code": "TT",
+    "name": "Trinidad and Tobago",
+    "continent": "North America",
+    "nationality": "Trinidadian",
+    "cities": [
+      "Port of Spain",
+      "Chaguanas",
+      "San Fernando",
+      "Arima",
+      "Point Fortin"
+    ]
+  },
+  {
+    "code": "BS",
+    "name": "Bahamas",
+    "continent": "North America",
+    "nationality": "Bahamian",
+    "cities": [
+      "Nassau",
+      "Freeport",
+      "West End",
+      "Coopers Town",
+      "Marsh Harbour"
+    ]
+  },
+  {
+    "code": "BB",
+    "name": "Barbados",
+    "continent": "North America",
+    "nationality": "Barbadian",
+    "cities": [
+      "Bridgetown",
+      "Speightstown",
+      "Oistins",
+      "Bathsheba",
+      "Holetown"
+    ]
+  },
+  {
+    "code": "HT",
+    "name": "Haiti",
+    "continent": "North America",
+    "nationality": "Haitian",
+    "cities": [
+      "Port-au-Prince",
+      "Carrefour",
+      "Delmas",
+      "Pétion-Ville",
+      "Port-de-Paix"
+    ]
+  },
+  {
+    "code": "DO",
+    "name": "Dominican Republic",
+    "continent": "North America",
+    "nationality": "Dominican",
+    "cities": [
+      "Santo Domingo",
+      "Santiago",
+      "Santo Domingo Oeste",
+      "Santo Domingo Este",
+      "Higuey"
+    ]
+  },
+  {
+    "code": "GT",
+    "name": "Guatemala",
+    "continent": "North America",
+    "nationality": "Guatemalan",
+    "cities": [
+      "Guatemala City",
+      "Mixco",
+      "Villa Nueva",
+      "Petapa",
+      "San Juan Sacatepéquez"
+    ]
+  },
+  {
+    "code": "HN",
+    "name": "Honduras",
+    "continent": "North America",
+    "nationality": "Honduran",
+    "cities": [
+      "Tegucigalpa",
+      "San Pedro Sula",
+      "Choloma",
+      "La Ceiba",
+      "El Progreso"
+    ]
+  },
+  {
+    "code": "SV",
+    "name": "El Salvador",
+    "continent": "North America",
+    "nationality": "Salvadoran",
+    "cities": [
+      "San Salvador",
+      "Santa Ana",
+      "San Miguel",
+      "Mejicanos",
+      "Soyapango"
+    ]
+  },
+  {
+    "code": "NI",
+    "name": "Nicaragua",
+    "continent": "North America",
+    "nationality": "Nicaraguan",
+    "cities": [
+      "Managua",
+      "León",
+      "Masaya",
+      "Chinandega",
+      "Granada"
+    ]
+  },
+  {
+    "code": "CR",
+    "name": "Costa Rica",
+    "continent": "North America",
+    "nationality": "Costa Rican",
+    "cities": [
+      "San José",
+      "Puerto Viejo",
+      "Liberia",
+      "San Carlos",
+      "Alajuela"
+    ]
+  },
+  {
+    "code": "PA",
+    "name": "Panama",
+    "continent": "North America",
+    "nationality": "Panamanian",
+    "cities": [
+      "Panama City",
+      "Colón",
+      "David",
+      "La Chorrera",
+      "Santiago"
+    ]
   }
 ]

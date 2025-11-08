@@ -204,25 +204,28 @@ export class AppointmentService {
     });
 
     // notify based on status change and updater role
-    if (existing.status !== updated.status) {
-      await this.appointmentsNotifications.notifyStatusUpdate(
-        id,
-        existing.status,
-        updated.status,
-        existing.bookedById,
-        user,
-      );
-    } else {
-      // general update notification to the booked user
-      await this.notifications.notify(existing.bookedById, 'appointment', {
-        title: 'Appointment Updated',
-        message: `Your appointment has been updated.`,
-        link: `/${id}`,
-        json: {
-          appointmentId: id,
-          bookedById: existing.bookedById,
-        },
-      });
+    // Only notify if the updater is not the same as the booked user
+    if (user.userId !== existing.bookedById) {
+      if (existing.status !== updated.status) {
+        await this.appointmentsNotifications.notifyStatusUpdate(
+          id,
+          existing.status,
+          updated.status,
+          existing.bookedById,
+          user,
+        );
+      } else {
+        // general update notification to the booked user
+        await this.notifications.notify(existing.bookedById, 'appointment', {
+          title: 'Appointment Updated',
+          message: `Your appointment has been updated.`,
+          link: `/${id}`,
+          json: {
+            appointmentId: id,
+            bookedById: existing.bookedById,
+          },
+        });
+      }
     }
 
     return updated;

@@ -36,7 +36,7 @@ export class ContractsNotificationsService {
         ...notificationForAdmin,
         type: NotificationType.contract,
         targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/${investorId}`,
+        link: `/${contractId}`,
         json: jsonPayload,
       });
     else
@@ -44,7 +44,7 @@ export class ContractsNotificationsService {
         ...notificationForInvestor,
         type: NotificationType.contract,
         targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/${investorId}`,
+        link: `/${contractId}`,
         json: jsonPayload,
       });
   }
