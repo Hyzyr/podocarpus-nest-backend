@@ -176,6 +176,11 @@ export class PublicPropertyDto {
   @IsString({ each: true })
   images: string[];
 
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  assets: string[];
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
 
@@ -278,7 +283,7 @@ export const PublicPropertySchema = z
     city: z.string().nullable().optional(),
     country: z.string().nullable().optional(),
     images: z.array(z.string()).optional(),
-  isEnabled: z.boolean(),
+    isEnabled: z.boolean(),
     netRoiMin: z.number().nullable().optional(),
     netRoiMax: z.number().nullable().optional(),
     isTaxFreeZone: z.boolean().nullable().optional(),
