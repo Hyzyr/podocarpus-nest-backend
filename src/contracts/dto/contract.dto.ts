@@ -276,10 +276,13 @@ export const EmiratesIdSchema = z.object({
   isCitizenChild: z.boolean().optional(),
   nationality: z.string().trim().optional(),
   idNumber: z.string().trim().optional(),
+  unifiedNumber: z.string().trim().optional(),
+  fileNumber: z.string().trim().optional(),
+  placeOfBirth: z.string().trim().optional(),
   dob: z.string().datetime().optional(), // ISO string
   expiryDate: z.string().datetime().optional(), // ISO string
   gender: z.enum(['Male', 'Female']).optional(),
-});
+}).passthrough();
 
 /**
  * Passport schema - matches UserKycProfile.passport structure
@@ -328,7 +331,9 @@ export const ContactInfoSchema = z.object({
 export const AddressSchema = z.object({
   countryOfResidence: z.string().trim().optional(),
   city: z.string().trim().optional(),
+  cityArabic: z.string().trim().optional(),
   street: z.string().trim().optional(),
+  streetArabic: z.string().trim().optional(),
   buildingName: z.string().trim().optional(),
   apartmentNo: z.string().trim().optional(),
   poBox: z.string().trim().optional(),
