@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum NotificationType {
@@ -48,6 +49,28 @@ enum ContractStatus {
   canceled // canceled before activation
 }
 
+enum ChangeSetStatus {
+  draft
+  submitted
+  approved
+  rejected
+  applied
+  cancelled
+}
+
+enum SignatureRole {
+  investor
+  broker
+  admin
+}
+
+enum SignatureStatus {
+  pending
+  signed
+  declined
+  revoked
+}
+
 enum EventStatus {
   DRAFT
   UPCOMING
@@ -85,11 +108,12 @@ model AppUser {
   adminProfile    AdminProfile?
   appointments    Appointment[]
 
-  propertyStatuses  UserPropertyStatus[]
-  eventStatuses     UserEventStatus[]
-  activityLogs      ActivityLog[]
-  notifications     Notification[]
+  propertyStatuses        UserPropertyStatus[]
+  eventStatuses           UserEventStatus[]
+  activityLogs            ActivityLog[]
+  notifications           Notification[]
   globalNotificationViews GlobalNotificationView[]
+  userKycProfile          UserKycProfile?
 }
 
 model InvestorProfile {
@@ -123,6 +147,25 @@ model AdminProfile {
   userId     String  @id
   department String?
   user       AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// -------------------- NEW (1:1) USER KYC PROFILE --------------------
+model UserKycProfile {
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  buyerType        String? // Resident / NonResident / Company / ...
+  emiratesId       Json?   @db.Json // { nameEn, nameAr, idNumber, dob, expiryDate, ... }
+  passport         Json?   @db.Json // { number, nationality, issueDate, expiryDate, ... }
+  workInfo         Json?   @db.Json
+  contactInfo      Json?   @db.Json // { preferredLanguage, domestic:{}, abroad:{} }
+  address          Json?   @db.Json
+  emergencyContact Json?   @db.Json
+  documents        Json?   @db.Json // { emiratesIdCopy: "s3://...", ... }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Property {
@@ -210,7 +253,7 @@ model TenantLease {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  property   Property                @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property   Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   statistics InvestmentStatistics[]
 
   @@index([propertyId])
@@ -243,43 +286,130 @@ model Appointment {
 }
 
 model Contract {
-  id           String         @id @default(uuid())
+  id           String   @id @default(uuid())
   propertyId   String
   investorId   String
   brokerId     String?
   contractCode String
   contractLink String?
   filesUrl     String[]
-  
-  // Contract dates and financial terms
-  signedDate          DateTime?
-  contractStart       DateTime?
-  contractEnd         DateTime?
-  contractValue       Float? // Total investment amount
-  depositPaid         Float? // Initial deposit paid by investor
-  investorPaymentMethod String? // How investor pays (e.g., "Bank Transfer", "Installments")
-  paymentSchedule     String? // e.g., "Monthly", "Quarterly", "Annual"
-  
-  // Risk assessment
-  vacancyRiskLevel String? // "Low", "Medium", "High"
-  
+
+  // Flexible & future-proof fields
+  terms    Json? @db.Json // optional: clauses, schedules, etc.
+  metadata Json? @db.Json // optional: currency, tags, UI hints
+  formData Json? @db.Json // 🔑 full dynamic form payload (buyers, IDs, docs…)
+
+  // Core dates & finance
+  signedDate            DateTime?
+  contractStart         DateTime?
+  contractEnd           DateTime?
+  contractValue         Float?
+  depositPaid           Float?
+  investorPaymentMethod String?
+  paymentSchedule       String?
+  vacancyRiskLevel      String?
+
   status ContractStatus @default(pending)
   notes  String?
-  
+
+  // Versioning
+  version          Int     @default(1) // optimistic concurrency
+  currentVersionId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  investor   InvestorProfile          @relation(fields: [investorId], references: [userId], onDelete: Cascade)
-  broker     BrokerProfile?           @relation(fields: [brokerId], references: [userId], onDelete: SetNull)
-  property   Property                 @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  // Relations (existing)
+  investor   InvestorProfile        @relation(fields: [investorId], references: [userId], onDelete: Cascade)
+  broker     BrokerProfile?         @relation(fields: [brokerId], references: [userId], onDelete: SetNull)
+  property   Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   statistics InvestmentStatistics[]
+
+  // New relations
+  versions   ContractVersion[]
+  changeSets ContractChangeSet[]
+  signatures ContractSignature[]
+  timeline   ContractEvent[]
+
+  @@index([status, updatedAt])
+  @@index([propertyId])
+  @@index([investorId])
+}
+
+// -------------------- NEW MODELS --------------------
+model ContractVersion {
+  id            String   @id @default(uuid())
+  contractId    String
+  versionNumber Int
+  snapshot      Json     @db.Json // full immutable snapshot
+  createdById   String?
+  createdAt     DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@unique([contractId, versionNumber])
+  @@index([contractId, createdAt])
+}
+
+model ContractChangeSet {
+  id          String          @id @default(uuid())
+  contractId  String
+  baseVersion Int // for optimistic lock
+  patch       Json            @db.Json // JSON Merge Patch (RFC 7386)
+  reason      String?
+  status      ChangeSetStatus @default(draft)
+
+  requestedById String?
+  reviewedById  String?
+  approvedById  String?
+
+  submittedAt DateTime?
+  reviewedAt  DateTime?
+  approvedAt  DateTime?
+  appliedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId, status])
+  @@index([contractId, baseVersion])
+}
+
+model ContractSignature {
+  id         String          @id @default(uuid())
+  contractId String
+  role       SignatureRole
+  signerId   String?
+  status     SignatureStatus @default(pending)
+  signedAt   DateTime?
+  evidence   Json?           @db.Json // IP, device, provider payload…
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId, role, status])
+}
+
+model ContractEvent {
+  id         String   @id @default(uuid())
+  contractId String
+  type       String // "changeset_submitted" | "applied" | "signature_signed" | ...
+  data       Json?    @db.Json
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId, createdAt])
+  @@index([type])
 }
 
 model InvestmentStatistics {
   id            String  @id @default(uuid())
   contractId    String
   tenantLeaseId String? // Which tenant was active this month
-  month         Int     // 1-12
+  month         Int // 1-12
   year          Int
 
   // Income
@@ -401,21 +531,21 @@ model Notification {
 // Global Notifications: One notification, many users (reverse inbox pattern)
 // Used for system-wide announcements, maintenance alerts, feature releases, etc.
 model GlobalNotification {
-  id          String                  @id @default(uuid())
+  id          String           @id @default(uuid())
   title       String
   message     String
-  type        NotificationType        @default(system)
+  type        NotificationType @default(system)
   targetRoles UserRole[] // Which roles should see this
   link        String? // Optional deep link
-  priority    String                  @default("normal") // "low", "normal", "high", "critical"
+  priority    String           @default("normal") // "low", "normal", "high", "critical"
   icon        String? // emoji or icon identifier
   json        Json? // Additional metadata
-  startsAt    DateTime                @default(now())
+  startsAt    DateTime         @default(now())
   expiresAt   DateTime? // Optional: when notification expires and is hidden
-  isActive    Boolean                 @default(true)
+  isActive    Boolean          @default(true)
   createdBy   String? // Admin user who created it
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   // Relations
   views GlobalNotificationView[]
@@ -427,14 +557,14 @@ model GlobalNotification {
 // Many-to-many: Tracks which users have viewed each global notification
 // This is the "view" or "seen" tracking - use inverse query pattern
 model GlobalNotificationView {
-  id                    String   @id @default(uuid())
-  userId                String
-  globalNotificationId  String
-  viewedAt              DateTime @default(now())
-  dismissed             Boolean  @default(false) // User explicitly dismissed it
+  id                   String   @id @default(uuid())
+  userId               String
+  globalNotificationId String
+  viewedAt             DateTime @default(now())
+  dismissed            Boolean  @default(false) // User explicitly dismissed it
 
-  user                AppUser             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  globalNotification  GlobalNotification  @relation(fields: [globalNotificationId], references: [id], onDelete: Cascade)
+  user               AppUser            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  globalNotification GlobalNotification @relation(fields: [globalNotificationId], references: [id], onDelete: Cascade)
 
   // Ensure each user is tracked only once per notification
   @@unique([userId, globalNotificationId])

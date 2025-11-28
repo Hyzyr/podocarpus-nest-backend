@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
-  ContractDto,
-  CreateContractDto,
   UpdateContractDto,
+  CreateContractWithFormDataDto,
+  KycAutofillDataDto,
+  ContractFormDataSchema,
 } from '../dto/contract.dto';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { PropertiesService } from 'src/properties/services/properties.service';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { ContractsNotificationsService } from './contracts.notifications.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ContractsService {
@@ -19,16 +21,49 @@ export class ContractsService {
     private readonly contractsNotifications: ContractsNotificationsService,
   ) {}
 
-  async createContract(currentUserId: string, dto: CreateContractDto) {
+  async createContract(currentUserId: string, dto: CreateContractWithFormDataDto) {
     const propertyId = dto.propertyId;
     const property = await this.prisma.property.findUnique({
       where: { id: propertyId },
     });
     if (!property)
       throw new NotFoundException(`Property ${propertyId} not found`);
+
+    // Validate formData if provided
+    if (dto.formData) {
+      const validation = ContractFormDataSchema.safeParse(dto.formData);
+      if (!validation.success) {
+        throw new Error(
+          `Invalid form data: ${validation.error.issues.map((e) => e.message).join(', ')}`,
+        );
+      }
+    }
+
     const contract = await this.prisma.contract.create({
-      data: { ...dto },
+      data: {
+        propertyId: dto.propertyId,
+        investorId: dto.investorId,
+        brokerId: dto.brokerId,
+        contractCode: dto.contractCode,
+        contractLink: dto.contractLink,
+        filesUrl: dto.filesUrl || [],
+        signedDate: dto.signedDate,
+        contractStart: dto.contractStart,
+        contractEnd: dto.contractEnd,
+        contractValue: dto.contractValue,
+        depositPaid: dto.depositPaid,
+        investorPaymentMethod: dto.investorPaymentMethod,
+        paymentSchedule: dto.paymentSchedule,
+        vacancyRiskLevel: dto.vacancyRiskLevel,
+        status: dto.status || 'pending',
+        notes: dto.notes,
+        // JSON fields
+        formData: dto.formData as Prisma.InputJsonValue,
+        terms: dto.terms as Prisma.InputJsonValue,
+        metadata: dto.metadata as Prisma.InputJsonValue,
+      },
     });
+
     await this.contractsNotifications.notifyNewContract(
       currentUserId,
       contract.investorId,
@@ -111,5 +146,86 @@ export class ContractsService {
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);
 
     return this.prisma.contract.delete({ where: { id } });
+  }
+
+  // ============================================================================
+  // KYC AUTOFILL METHODS
+  // ============================================================================
+
+  /**
+   * Get KYC data for autofilling contract forms
+   * @param userId - The user ID to fetch KYC data for
+   * @returns KYC profile data formatted for contract form autofill
+   */
+  async getKycAutofillData(userId: string): Promise<KycAutofillDataDto | null> {
+    const kycProfile = await this.prisma.userKycProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!kycProfile) {
+      return null;
+    }
+
+    // Transform Prisma JSON fields to typed objects
+    const autofillData: KycAutofillDataDto = {
+      userId: kycProfile.userId,
+      kycProfileId: kycProfile.id,
+      buyerType: kycProfile.buyerType || undefined,
+      emiratesId: kycProfile.emiratesId as any,
+      passport: kycProfile.passport as any,
+      workInfo: kycProfile.workInfo as any,
+      contactInfo: kycProfile.contactInfo as any,
+      address: kycProfile.address as any,
+      emergencyContact: kycProfile.emergencyContact as any,
+      documents: kycProfile.documents as any,
+    };
+
+    return autofillData;
+  }
+
+
+  /**
+   * Update KYC profile from contract form data
+   * Allows saving contract form data back to user's KYC profile for future autofill
+   */
+  async saveFormDataToKyc(userId: string, formData: any) {
+    // Check if user has existing KYC profile
+    let kycProfile = await this.prisma.userKycProfile.findUnique({
+      where: { userId },
+    });
+
+    const buyer = formData.buyers?.[0] || formData.buyer1;
+    if (!buyer) {
+      throw new Error('No buyer data provided in form data');
+    }
+
+    const kycData = {
+      buyerType: buyer.buyerType,
+      emiratesId: buyer.emiratesId as Prisma.InputJsonValue,
+      passport: buyer.passport as Prisma.InputJsonValue,
+      workInfo: buyer.workInfo as Prisma.InputJsonValue,
+      contactInfo: buyer.contactInfo as Prisma.InputJsonValue,
+      address: buyer.address as Prisma.InputJsonValue,
+      emergencyContact: buyer.emergencyContact as Prisma.InputJsonValue,
+      documents: buyer.documents as Prisma.InputJsonValue,
+    };
+
+    if (kycProfile) {
+      // Update existing profile
+      kycProfile = await this.prisma.userKycProfile.update({
+        where: { userId },
+        data: kycData,
+      });
+    } else {
+      // Create new profile
+      kycProfile = await this.prisma.userKycProfile.create({
+        data: {
+          userId,
+          ...kycData,
+        },
+      });
+    }
+
+    return kycProfile;
   }
 }
