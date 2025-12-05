@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
-import { AdminUserDto } from './dto/user.get.dto';
+import { AdminUserDto } from '../dto/user.get.dto';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { UserRole } from '@prisma/client';
 
