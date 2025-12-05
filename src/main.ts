@@ -65,7 +65,12 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
+  // Setup Swagger UI at /swagger
   SwaggerModule.setup('swagger', app, document);
+
+  // NOTE: SwaggerModule.setup already exposes the OpenAPI JSON at /swagger-json for the
+  // Fastify/Express adapter. Removing a manual registration to avoid duplicated routes.
 
   await app.listen(PORT, '0.0.0.0');
   console.log(`✅ Server listening on http://localhost:${PORT}`);

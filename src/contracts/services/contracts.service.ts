@@ -11,6 +11,7 @@ import { PropertiesService } from 'src/properties/services/properties.service';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { ContractsNotificationsService } from './contracts.notifications.service';
 import { Prisma } from '@prisma/client';
+import { ensureNestedBuyer } from '../utils/buyer-transformer.util';
 
 @Injectable()
 export class ContractsService {
@@ -29,9 +30,19 @@ export class ContractsService {
     if (!property)
       throw new NotFoundException(`Property ${propertyId} not found`);
 
+    // Transform formData if provided (convert flat buyer to nested if needed)
+    let normalizedFormData = dto.formData;
+    if (dto.formData && dto.formData.buyer) {
+      // Auto-detect and convert flat buyer format to nested
+      normalizedFormData = {
+        ...dto.formData,
+        buyer: ensureNestedBuyer(dto.formData.buyer),
+      };
+    }
+
     // Validate formData if provided
-    if (dto.formData) {
-      const validation = ContractFormDataSchema.safeParse(dto.formData);
+    if (normalizedFormData) {
+      const validation = ContractFormDataSchema.safeParse(normalizedFormData);
       if (!validation.success) {
         throw new Error(
           `Invalid form data: ${validation.error.issues.map((e) => e.message).join(', ')}`,
@@ -57,8 +68,8 @@ export class ContractsService {
         vacancyRiskLevel: dto.vacancyRiskLevel,
         status: dto.status || 'pending',
         notes: dto.notes,
-        // JSON fields
-        formData: dto.formData as Prisma.InputJsonValue,
+        // JSON fields - use normalized formData with nested buyer
+        formData: normalizedFormData as Prisma.InputJsonValue,
         terms: dto.terms as Prisma.InputJsonValue,
         metadata: dto.metadata as Prisma.InputJsonValue,
       },
@@ -189,42 +200,37 @@ export class ContractsService {
    * Allows saving contract form data back to user's KYC profile for future autofill
    */
   async saveFormDataToKyc(userId: string, formData: any) {
-    // Check if user has existing KYC profile
-    let kycProfile = await this.prisma.userKycProfile.findUnique({
-      where: { userId },
-    });
-
-    const buyer = formData.buyers?.[0] || formData.buyer1;
+    const buyer = formData.buyer;
     if (!buyer) {
       throw new Error('No buyer data provided in form data');
     }
 
     const kycData = {
-      buyerType: buyer.buyerType,
-      emiratesId: buyer.emiratesId as Prisma.InputJsonValue,
-      passport: buyer.passport as Prisma.InputJsonValue,
-      workInfo: buyer.workInfo as Prisma.InputJsonValue,
-      contactInfo: buyer.contactInfo as Prisma.InputJsonValue,
-      address: buyer.address as Prisma.InputJsonValue,
-      emergencyContact: buyer.emergencyContact as Prisma.InputJsonValue,
-      documents: buyer.documents as Prisma.InputJsonValue,
+      buyerType: buyer.buyerType || null,
+      emiratesId: buyer.emiratesId || Prisma.JsonNull,
+      passport: buyer.passport || Prisma.JsonNull,
+      workInfo: buyer.workInfo || Prisma.JsonNull,
+      contactInfo: buyer.contactInfo || Prisma.JsonNull,
+      address: buyer.address || Prisma.JsonNull,
+      emergencyContact: buyer.emergencyContact || Prisma.JsonNull,
+      documents: Prisma.JsonNull,
     };
 
-    if (kycProfile) {
-      // Update existing profile
-      kycProfile = await this.prisma.userKycProfile.update({
-        where: { userId },
-        data: kycData,
-      });
-    } else {
-      // Create new profile
-      kycProfile = await this.prisma.userKycProfile.create({
-        data: {
-          userId,
-          ...kycData,
-        },
-      });
-    }
+    const kycProfile = await this.prisma.userKycProfile.upsert({
+      where: { userId },
+      update: kycData,
+      create: {
+        userId,
+        buyerType: kycData.buyerType,
+        emiratesId: kycData.emiratesId,
+        passport: kycData.passport,
+        workInfo: kycData.workInfo,
+        contactInfo: kycData.contactInfo,
+        address: kycData.address,
+        emergencyContact: kycData.emergencyContact,
+        documents: kycData.documents,
+      },
+    });
 
     return kycProfile;
   }
