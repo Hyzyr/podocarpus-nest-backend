@@ -46,6 +46,11 @@ export class PublicUserDto {
   @IsString()
   nationality: string;
 
+  @ApiPropertyOptional({ example: 'https://example.com/photos/user123.jpg' })
+  @IsOptional()
+  @IsString()
+  profilePhotoUrl?: string;
+
   @ApiProperty({ enum: UserRole, example: UserRole.investor })
   @IsEnum(UserRole)
   role: UserRole;
@@ -96,6 +101,7 @@ export const PublicUserSchema = z
       .optional(),
     recidence: z.string().nullable().optional(),
     nationality: z.string().nullable().optional(),
+    profilePhotoUrl: z.string().url().nullable().optional(),
     role: z.nativeEnum(UserRole),
     createdAt: z.union([z.string().datetime(), z.date()]),
     updatedAt: z.union([z.string().datetime(), z.date()]),

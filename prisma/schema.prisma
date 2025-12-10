@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum NotificationType {
@@ -91,11 +92,12 @@ model AppUser {
   updatedAt    DateTime @updatedAt
 
   // onboarding
-  firstName   String?
-  lastName    String?
-  phone       String?
-  nationality String?
-  recidence   String?
+  firstName       String?
+  lastName        String?
+  phone           String?
+  nationality     String?
+  recidence       String?
+  profilePhotoUrl String?
 
   resetToken          String?
   resetTokenExpiry    DateTime?
