@@ -14,7 +14,7 @@ const baseCookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
-  domain: WEBSITE_DOMAIN,
+  domain: process.env.NODE_ENV === 'production' ? WEBSITE_DOMAIN : undefined,
 };
 
 export const setAuthCookies = (
