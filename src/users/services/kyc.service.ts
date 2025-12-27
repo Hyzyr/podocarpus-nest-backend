@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
-import { KycAutofillDataDto } from 'src/contracts/dto/contract.dto';
+import { KycAutofillDataDto, ContractFormData } from 'src/contracts/dto/contract.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class KycService {
 
   /**
    * Retrieve KYC profile data for autofilling contract forms
-   * Returns all KYC fields (personal info, IDs, documents, etc.)
+   * Maps UserKycProfile fields to the new ContractFormData structure
    */
   async getKycAutofillData(
     userId: string,
@@ -22,18 +22,57 @@ export class KycService {
       return null;
     }
 
-    // Transform Prisma JSON fields to typed objects
+    // Map KYC identity data to contract form structure
+    const emiratesId = kycProfile.emiratesId as any;
+    const passport = kycProfile.passport as any;
+    const documents = kycProfile.documents as any;
+
     const autofillData: KycAutofillDataDto = {
       userId: kycProfile.userId,
       kycProfileId: kycProfile.id,
-      buyerType: kycProfile.buyerType || undefined,
-      emiratesId: (kycProfile.emiratesId as any) || undefined,
-      passport: (kycProfile.passport as any) || undefined,
-      workInfo: (kycProfile.workInfo as any) || undefined,
-      contactInfo: (kycProfile.contactInfo as any) || undefined,
-      address: (kycProfile.address as any) || undefined,
-      emergencyContact: (kycProfile.emergencyContact as any) || undefined,
-      documents: (kycProfile.documents as any) || undefined,
+      
+      // Contract Details - buyerType not stored in KYC (contract-specific)
+      contractDetails: undefined,
+      
+      // Buyer Details - will be filled manually (not stored in KYC)
+      buyerDetails: undefined,
+      
+      // Emirates ID section - from KYC
+      emiratesId: emiratesId ? {
+        nameEn: emiratesId.nameEn,
+        nameAr: emiratesId.nameAr,
+        isCitizenChild: emiratesId.isCitizenChild,
+        nationality: emiratesId.nationality,
+        gender: emiratesId.gender,
+        idNumber: emiratesId.idNumber,
+        expiryDate: emiratesId.expiryDate,
+        unifiedNumber: emiratesId.unifiedNumber,
+        fileNumber: emiratesId.fileNumber,
+        dateOfBirth: emiratesId.dateOfBirth,
+        placeOfBirth: emiratesId.placeOfBirth,
+      } : undefined,
+      
+      // Passport section - from KYC
+      passportId: passport ? {
+        number: passport.number,
+        passportType: passport.passportType,
+        nationality: passport.nationality,
+        issuePlace: passport.issuePlace,
+        issueDate: passport.issueDate,
+        expiryDate: passport.expiryDate,
+        dateOfBirth: passport.dateOfBirth,
+        placeOfBirth: passport.placeOfBirth,
+      } : undefined,
+      
+      // Documents section - from KYC
+      documents: documents ? {
+        emiratesIdCopy: documents.emiratesIdCopy,
+        passportCopy: documents.passportCopy,
+        visaCopy: documents.visaCopy,
+        utilityBill: documents.utilityBill,
+        bankStatement: documents.bankStatement,
+        personalPhoto: documents.personalPhoto,
+      } : undefined,
     };
 
     return autofillData;
@@ -41,24 +80,21 @@ export class KycService {
 
   /**
    * Update KYC profile from contract form data
-   * Allows saving contract form data back to user's KYC profile for future autofill
-   * Supports both individual and company buyer data
+   * Only saves identity & verification documents (not contact/address/employment)
    */
-  async saveFormDataToKyc(userId: string, formData: any) {
-    const buyer = formData.buyer;
-    if (!buyer) {
-      throw new Error('No buyer data provided in form data');
-    }
+  async saveFormDataToKyc(userId: string, formData: ContractFormData) {
+    const { emiratesId, passportId, documents } = formData;
 
+    // Only save KYC-relevant identity & verification data (no contract-specific fields)
     const kycData = {
-      buyerType: buyer.buyerType || null,
-      emiratesId: buyer.emiratesId || Prisma.JsonNull,
-      passport: buyer.passport || Prisma.JsonNull,
-      workInfo: buyer.workInfo || Prisma.JsonNull,
-      contactInfo: buyer.contactInfo || Prisma.JsonNull,
-      address: buyer.address || Prisma.JsonNull,
-      emergencyContact: buyer.emergencyContact || Prisma.JsonNull,
-      documents: Prisma.JsonNull,
+      // Emirates ID - identity document
+      emiratesId: emiratesId ? (emiratesId as Prisma.InputJsonValue) : Prisma.JsonNull,
+      
+      // Passport - identity document
+      passport: passportId ? (passportId as Prisma.InputJsonValue) : Prisma.JsonNull,
+      
+      // Documents - verification files
+      documents: documents ? (documents as Prisma.InputJsonValue) : Prisma.JsonNull,
     };
 
     const kycProfile = await this.prisma.userKycProfile.upsert({
@@ -66,14 +102,7 @@ export class KycService {
       update: kycData,
       create: {
         userId,
-        buyerType: kycData.buyerType,
-        emiratesId: kycData.emiratesId,
-        passport: kycData.passport,
-        workInfo: kycData.workInfo,
-        contactInfo: kycData.contactInfo,
-        address: kycData.address,
-        emergencyContact: kycData.emergencyContact,
-        documents: kycData.documents,
+        ...kycData,
       },
     });
 

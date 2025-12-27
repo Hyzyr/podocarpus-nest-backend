@@ -268,166 +268,113 @@ export class UpdateContractDto extends PartialType(CreateContractDto) {}
 // ============================================================================
 
 /**
- * Emirates ID schema - matches UserKycProfile.emiratesId structure
+ * Contract Details Schema - Top-level contract information
+ */
+export const ContractDetailsSchema = z.object({
+  isLeadGreenList: z.boolean().optional(), // Is lead through Green List?
+  buyerType: z.enum(['Resident', 'NonResident', 'Company']).optional(),
+  representationType: z.string().trim().optional(), // Who will represent at registration
+  preferredLanguage: z.string().trim().optional(), // Contact Preferred Language
+}).passthrough();
+
+/**
+ * Buyer Details Schema - Consolidated buyer information
+ * Includes social info, employment, address, contact info, and emergency contact
+ */
+export const BuyerDetailsSchema = z.object({
+  // Social & Employment
+  isSpecialNeeds: z.boolean().optional(), // Is determined Ones (Special Needs)?
+  currentJob: z.string().trim().optional(),
+  
+  // Address
+  country: z.string().trim().optional(), // Country of Residence
+  city: z.string().trim().optional(), // City (English)
+  cityAr: z.string().trim().optional(), // City (Arabic)
+  street: z.string().trim().optional(), // Street (English)
+  streetAr: z.string().trim().optional(), // Street (Arabic)
+  address: z.string().trim().optional(), // Full address
+  
+  // Contact - Domestic
+  phoneDomestic: z.string().trim().optional(),
+  mobileDomestic: z.string().trim().optional(),
+  emailDomestic: z.string().email().optional(),
+  extCodeDomestic: z.string().trim().optional(),
+  
+  // Contact - Abroad
+  phoneAbroad: z.string().trim().optional(),
+  mobileAbroad: z.string().trim().optional(),
+  emailAbroad: z.string().email().optional(),
+  
+  // Emergency Contact
+  contactNameEn: z.string().trim().optional(),
+  contactNameAr: z.string().trim().optional(),
+  relationType: z.string().trim().optional(),
+  mobileEmergency: z.string().trim().optional(),
+  emailEmergency: z.string().email().optional(),
+}).passthrough();
+
+/**
+ * Emirates ID Schema - Clean structure matching form
  */
 export const EmiratesIdSchema = z.object({
-  nameEn: z.string().trim().min(1).optional(),
+  nameEn: z.string().trim().optional(),
   nameAr: z.string().trim().optional(),
   isCitizenChild: z.boolean().optional(),
   nationality: z.string().trim().optional(),
+  gender: z.string().trim().optional(),
   idNumber: z.string().trim().optional(),
+  expiryDate: z.string().optional(), // Date string
   unifiedNumber: z.string().trim().optional(),
   fileNumber: z.string().trim().optional(),
+  dateOfBirth: z.string().optional(), // Date string
   placeOfBirth: z.string().trim().optional(),
-  dob: z.string().datetime().optional(), // ISO string
-  expiryDate: z.string().datetime().optional(), // ISO string
-  gender: z.enum(['Male', 'Female']).optional(),
 }).passthrough();
 
 /**
- * Passport schema - matches UserKycProfile.passport structure
+ * Passport Schema - Clean structure matching form
  */
 export const PassportSchema = z.object({
   number: z.string().trim().optional(),
+  passportType: z.string().trim().optional(),
   nationality: z.string().trim().optional(),
-  issueDate: z.string().datetime().optional(),
-  expiryDate: z.string().datetime().optional(),
-  placeOfIssue: z.string().trim().optional(),
-  type: z.string().trim().optional(), // "Regular", "Diplomatic", etc.
-  dob: z.string().datetime().optional(),
-});
-
-/**
- * Work information schema - matches UserKycProfile.workInfo structure
- */
-export const WorkInfoSchema = z.object({
-  currentJob: z.string().trim().optional(),
-}).passthrough(); // Allow additional fields if needed in future
-
-/**
- * Contact information schema - matches UserKycProfile.contactInfo structure
- * Now supports both flat (for UI) and nested (for backward compatibility)
- */
-export const ContactInfoSchema = z.object({
-  preferredLanguage: z.string().trim().optional(),
-  // Flat fields for easier UI binding
-  mobile: z.string().trim().optional(),
-  phone: z.string().trim().optional(), // secondary phone
-  email: z.string().email().optional(),
-  // Keep nested for backward compatibility
-  domestic: z.object({
-    phone: z.string().trim().optional(),
-    email: z.string().email().optional(),
-    mobile: z.string().trim().optional(),
-  }).partial().optional(),
-  abroad: z.object({
-    phone: z.string().trim().optional(),
-    email: z.string().email().optional(),
-    mobile: z.string().trim().optional(),
-  }).partial().optional(),
+  issuePlace: z.string().trim().optional(),
+  issueDate: z.string().optional(), // Date string
+  expiryDate: z.string().optional(), // Date string
+  dateOfBirth: z.string().optional(), // Date string
+  placeOfBirth: z.string().trim().optional(),
 }).passthrough();
 
 /**
- * Address schema - matches UserKycProfile.address structure
+ * Documents Schema - Specific document types
  */
-export const AddressSchema = z.object({
-  countryOfResidence: z.string().trim().optional(),
-  city: z.string().trim().optional(),
-  cityArabic: z.string().trim().optional(),
-  street: z.string().trim().optional(),
-  streetArabic: z.string().trim().optional(),
-  buildingName: z.string().trim().optional(),
-  apartmentNo: z.string().trim().optional(),
-  poBox: z.string().trim().optional(),
-  zipCode: z.string().trim().optional(),
+export const DocumentsSchema = z.object({
+  emiratesIdCopy: z.string().optional(), // File URL
+  passportCopy: z.string().optional(), // File URL
+  visaCopy: z.string().optional(), // File URL
+  utilityBill: z.string().optional(), // File URL
+  bankStatement: z.string().optional(), // File URL
+  personalPhoto: z.string().optional(), // File URL
 }).passthrough();
 
 /**
- * Emergency contact schema - matches UserKycProfile.emergencyContact structure
- */
-export const EmergencyContactSchema = z.object({
-  nameEn: z.string().trim().optional(),
-  nameAr: z.string().trim().optional(),
-  relationType: z.string().trim().optional(), // "Spouse", "Parent", "Sibling", etc.
-  mobile: z.string().trim().optional(),
-  email: z.string().email().optional(),
-  phone: z.string().trim().optional(),
-}).passthrough();
-
-/**
- * Documents schema - stores file URLs
- */
-export const DocumentsSchema = z.record(z.string(), z.string().url()).optional();
-
-/**
- * Buyer/investor schema for contract form - matches form fields exactly
- */
-export const BuyerSchema = z.object({
-  buyerType: z.enum(['Resident', 'NonResident', 'Company']).optional(),
-  emiratesId: EmiratesIdSchema.optional(),
-  passport: PassportSchema.optional(),
-  workInfo: WorkInfoSchema.optional(),
-  contactInfo: ContactInfoSchema.optional(),
-  address: AddressSchema.optional(),
-  emergencyContact: EmergencyContactSchema.optional(),
-}).passthrough();
-
-/**
- * Complete contract form data schema - single buyer only
+ * Complete Contract Form Data Schema
  * This is stored in Contract.formData as JSON
  */
 export const ContractFormDataSchema = z.object({
-  leadSource: z.string().trim().optional(), // "Green List", "First Time Home Buyer"
-  buyer: BuyerSchema.optional(),
-  contractLanguage: z.string().optional(), // "English", "Arabic", "Both"
-  socialInfo: z.object({
-    isDeterminedOnePeopleWithSpecialNeeds: z.boolean().optional(),
-  }).passthrough().optional(),
-}).passthrough();
-
-/**
- * Schema for contract terms (Contract.terms JSON field)
- */
-export const ContractTermsSchema = z.object({
-  clauses: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    content: z.string(),
-    order: z.number().optional(),
-  })).optional(),
-  schedules: z.array(z.object({
-    type: z.string(), // "payment", "milestone", "inspection"
-    date: z.string().datetime(),
-    description: z.string(),
-    amount: z.number().optional(),
-  })).optional(),
-  specialConditions: z.string().optional(),
-  legalNotes: z.string().optional(),
-}).passthrough();
-
-/**
- * Schema for contract metadata (Contract.metadata JSON field)
- */
-export const ContractMetadataSchema = z.object({
-  currency: z.string().default('AED'),
-  tags: z.array(z.string()).optional(),
-  uiHints: z.record(z.string(), z.any()).optional(),
-  internalNotes: z.string().optional(),
-  source: z.string().optional(), // "web", "mobile", "admin-panel"
-  version: z.string().optional(),
+  contractDetails: ContractDetailsSchema.optional(),
+  buyerDetails: BuyerDetailsSchema.optional(),
+  emiratesId: EmiratesIdSchema.optional(),
+  passportId: PassportSchema.optional(),
+  documents: DocumentsSchema.optional(),
 }).passthrough();
 
 // Type exports for TypeScript
+export type ContractDetails = z.infer<typeof ContractDetailsSchema>;
+export type BuyerDetails = z.infer<typeof BuyerDetailsSchema>;
 export type EmiratesId = z.infer<typeof EmiratesIdSchema>;
 export type Passport = z.infer<typeof PassportSchema>;
-export type WorkInfo = z.infer<typeof WorkInfoSchema>;
-export type ContactInfo = z.infer<typeof ContactInfoSchema>;
-export type Address = z.infer<typeof AddressSchema>;
-export type EmergencyContact = z.infer<typeof EmergencyContactSchema>;
-export type Buyer = z.infer<typeof BuyerSchema>;
+export type Documents = z.infer<typeof DocumentsSchema>;
 export type ContractFormData = z.infer<typeof ContractFormDataSchema>;
-export type ContractTerms = z.infer<typeof ContractTermsSchema>;
-export type ContractMetadata = z.infer<typeof ContractMetadataSchema>;
 
 // ============================================================================
 // ENHANCED CREATE CONTRACT DTO WITH FORM DATA
@@ -435,71 +382,40 @@ export type ContractMetadata = z.infer<typeof ContractMetadataSchema>;
 
 export class CreateContractWithFormDataDto extends CreateContractDto {
   @ApiPropertyOptional({
-    description: 'Complete form data including buyer information. Buyer can be in flat format (from UI) or nested format (stored in DB). The API auto-converts flat to nested.',
-    examples: {
-      nested: {
-        summary: 'Nested format (stored in DB)',
-        value: {
-          leadSource: 'Green List',
-          buyer: {
-            buyerType: 'Resident',
-            emiratesId: {
-              nameEn: 'John Doe',
-              idNumber: '784-1995-1234567-1',
-              nationality: 'Emirati',
-            },
-            contactInfo: {
-              mobile: '+971501234567',
-              email: 'john@example.com'
-            }
-          }
-        }
+    description: 'Complete contract form data with new structure',
+    example: {
+      contractDetails: {
+        isLeadGreenList: true,
+        buyerType: 'Resident',
+        representationType: 'Self',
+        preferredLanguage: 'English'
       },
-      flat: {
-        summary: 'Flat format (from UI form)',
-        value: {
-          leadSource: 'Green List',
-          buyer: {
-            buyerType: 'Resident',
-            fullNameEn: 'John Doe',
-            emiratesId: '784-1995-1234567-1',
-            nationality: 'Emirati',
-            mobile: '+971501234567',
-            email: 'john@example.com',
-            city: 'Dubai',
-            street: 'Sheikh Zayed Road'
-          }
-        }
+      buyerDetails: {
+        isSpecialNeeds: false,
+        currentJob: 'Software Engineer',
+        country: 'United Arab Emirates',
+        city: 'Dubai',
+        mobileDomestic: '+971501234567',
+        emailDomestic: 'john@example.com'
+      },
+      emiratesId: {
+        nameEn: 'John Doe',
+        idNumber: '784-1995-1234567-1',
+        nationality: 'Emirati'
+      },
+      passportId: {
+        number: 'A1234567',
+        nationality: 'American'
+      },
+      documents: {
+        emiratesIdCopy: 'https://cdn.example.com/emirates-id.pdf',
+        passportCopy: 'https://cdn.example.com/passport.pdf'
       }
     }
   })
   @IsOptional()
   @IsObject()
-  formData?: ContractFormData | { buyer: BuyerForm; [key: string]: any };
-
-  @ApiPropertyOptional({
-    description: 'Contract terms, clauses, and schedules',
-    example: {
-      clauses: [],
-      schedules: [],
-      specialConditions: 'Property must be vacant within 30 days'
-    }
-  })
-  @IsOptional()
-  @IsObject()
-  terms?: ContractTerms;
-
-  @ApiPropertyOptional({
-    description: 'Additional metadata (currency, tags, UI hints)',
-    example: {
-      currency: 'AED',
-      tags: ['residential', 'dubai'],
-      source: 'web'
-    }
-  })
-  @IsOptional()
-  @IsObject()
-  metadata?: ContractMetadata;
+  formData?: ContractFormData;
 
   @ApiPropertyOptional({
     description: 'Array of file URLs (documents, contracts, etc.)',
@@ -512,11 +428,11 @@ export class CreateContractWithFormDataDto extends CreateContractDto {
 }
 
 // ============================================================================
-// KYC AUTOFILL DTOs
+// KYC AUTOFILL DTOs - Returns data from UserKycProfile to autofill contract form
 // ============================================================================
 
 /**
- * Response DTO for KYC autofill data
+ * Response DTO for KYC autofill data - mapped to new contract form structure
  */
 export class KycAutofillDataDto {
   @ApiProperty({ example: 'uuid' })
@@ -525,239 +441,18 @@ export class KycAutofillDataDto {
   @ApiProperty({ example: 'uuid' })
   kycProfileId: string;
 
-  @ApiPropertyOptional({ example: 'Resident' })
-  buyerType?: string;
+  @ApiPropertyOptional({ description: 'Contract details section' })
+  contractDetails?: ContractDetails;
 
-  @ApiPropertyOptional({
-    description: 'Emirates ID information',
-    example: {
-      nameEn: 'John Doe',
-      idNumber: '784-1995-1234567-1',
-      nationality: 'Emirati',
-      expiryDate: '2025-12-31T00:00:00.000Z'
-    }
-  })
+  @ApiPropertyOptional({ description: 'Buyer details section' })
+  buyerDetails?: BuyerDetails;
+
+  @ApiPropertyOptional({ description: 'Emirates ID information' })
   emiratesId?: EmiratesId;
 
-  @ApiPropertyOptional({
-    description: 'Passport information',
-    example: {
-      number: 'A1234567',
-      nationality: 'American',
-      expiryDate: '2030-12-31T00:00:00.000Z'
-    }
-  })
-  passport?: Passport;
-
-  @ApiPropertyOptional({ description: 'Work information' })
-  workInfo?: WorkInfo;
-
-  @ApiPropertyOptional({ description: 'Contact information' })
-  contactInfo?: ContactInfo;
-
-  @ApiPropertyOptional({ description: 'Address information' })
-  address?: Address;
-
-  @ApiPropertyOptional({ description: 'Emergency contact' })
-  emergencyContact?: EmergencyContact;
+  @ApiPropertyOptional({ description: 'Passport information' })
+  passportId?: Passport;
 
   @ApiPropertyOptional({ description: 'Document URLs' })
-  documents?: Record<string, string>;
+  documents?: Documents;
 }
-
-// ============================================================================
-// FLAT DTOs FOR UI FORM BINDING
-// ============================================================================
-
-/**
- * Flat buyer DTO that matches your UI structure exactly
- * Use this for API requests from the frontend form
- */
-export class BuyerFormDto {
-  // Basic Info
-  @ApiPropertyOptional({ enum: ['Resident', 'NonResident', 'Company'] })
-  @IsOptional()
-  @IsString()
-  buyerType?: string;
-
-  @ApiPropertyOptional({ example: 'John Doe' })
-  @IsOptional()
-  @IsString()
-  fullNameEn?: string;
-
-  @ApiPropertyOptional({ example: 'جون دو' })
-  @IsOptional()
-  @IsString()
-  fullNameAr?: string;
-
-  @ApiPropertyOptional({ example: 'Emirati' })
-  @IsOptional()
-  @IsString()
-  nationality?: string;
-
-  @ApiPropertyOptional({ example: false })
-  @IsOptional()
-  isCitizenChild?: boolean;
-
-  @ApiPropertyOptional({ enum: ['Male', 'Female'] })
-  @IsOptional()
-  @IsString()
-  gender?: string;
-
-  // Identification
-  @ApiPropertyOptional({ example: '784-1995-1234567-1' })
-  @IsOptional()
-  @IsString()
-  emiratesId?: string;
-
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  emiratesIdExpiry?: string;
-
-  @ApiPropertyOptional({ example: 'A1234567' })
-  @IsOptional()
-  @IsString()
-  passportNumber?: string;
-
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  passportIssueDate?: string;
-
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  passportExpiryDate?: string;
-
-  @ApiPropertyOptional({ example: 'American' })
-  @IsOptional()
-  @IsString()
-  passportNationality?: string;
-
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  dateOfBirth?: string;
-
-  // Contact Information
-  @ApiPropertyOptional({ example: '+971501234567' })
-  @IsOptional()
-  @IsString()
-  mobile?: string;
-
-  @ApiPropertyOptional({ example: '+97143001234' })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiPropertyOptional({ example: 'john@example.com' })
-  @IsOptional()
-  @IsString()
-  email?: string;
-
-  @ApiPropertyOptional({ example: 'United Arab Emirates' })
-  @IsOptional()
-  @IsString()
-  country?: string;
-
-  @ApiPropertyOptional({ example: 'Dubai' })
-  @IsOptional()
-  @IsString()
-  city?: string;
-
-  // Employment / Work Info
-  @ApiPropertyOptional({ example: 'Software Engineer' })
-  @IsOptional()
-  @IsString()
-  currentJob?: string;
-
-  // Address
-  @ApiPropertyOptional({ example: 'Sheikh Zayed Road' })
-  @IsOptional()
-  @IsString()
-  street?: string;
-
-  @ApiPropertyOptional({ example: 'دبي' })
-  @IsOptional()
-  @IsString()
-  cityArabic?: string;
-
-  @ApiPropertyOptional({ example: 'Burj Khalifa' })
-  @IsOptional()
-  @IsString()
-  buildingName?: string;
-
-  @ApiPropertyOptional({ example: '501' })
-  @IsOptional()
-  @IsString()
-  apartmentNo?: string;
-
-  @ApiPropertyOptional({ example: '12345' })
-  @IsOptional()
-  @IsString()
-  zipCode?: string;
-
-  @ApiPropertyOptional({ example: 'P.O. Box 123456' })
-  @IsOptional()
-  @IsString()
-  poBox?: string;
-
-  // Emergency Contact (keep as nested object)
-  @ApiPropertyOptional({
-    type: Object,
-    example: {
-      nameEn: 'Jane Doe',
-      mobile: '+971501234568',
-      relationType: 'Spouse'
-    }
-  })
-  @IsOptional()
-  @IsObject()
-  emergencyContact?: EmergencyContact;
-}
-
-/**
- * Zod schema for flat buyer form validation
- */
-export const BuyerFormSchema = z.object({
-  // Basic Info
-  buyerType: z.enum(['Resident', 'NonResident', 'Company']).optional(),
-  fullNameEn: z.string().trim().optional(),
-  fullNameAr: z.string().trim().optional(),
-  nationality: z.string().trim().optional(),
-  isCitizenChild: z.boolean().optional(),
-  gender: z.enum(['Male', 'Female']).optional(),
-
-  // Identification
-  emiratesId: z.string().trim().optional(),
-  emiratesIdExpiry: z.string().optional(),
-  passportNumber: z.string().trim().optional(),
-  passportIssueDate: z.string().optional(),
-  passportExpiryDate: z.string().optional(),
-  passportNationality: z.string().trim().optional(),
-  dateOfBirth: z.string().optional(),
-
-  // Contact Information
-  mobile: z.string().trim().optional(),
-  phone: z.string().trim().optional(),
-  email: z.string().email().optional(),
-  country: z.string().trim().optional(),
-  city: z.string().trim().optional(),
-
-  // Employment
-  currentJob: z.string().trim().optional(),
-
-  // Address
-  street: z.string().trim().optional(),
-  cityArabic: z.string().trim().optional(),
-  buildingName: z.string().trim().optional(),
-  apartmentNo: z.string().trim().optional(),
-  zipCode: z.string().trim().optional(),
-  poBox: z.string().trim().optional(),
-
-  // Emergency Contact
-  emergencyContact: EmergencyContactSchema.optional(),
-}).passthrough();
-
-export type BuyerForm = z.infer<typeof BuyerFormSchema>;

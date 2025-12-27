@@ -7,7 +7,7 @@ import {
   Query,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
@@ -23,12 +23,46 @@ export class KycController {
   @Get('autofill')
   @ApiOperation({
     summary: 'Get KYC data for contract form autofill',
-    description: 'Retrieves user KYC profile data to pre-populate contract creation forms',
+    description: 'Retrieves user KYC profile data pre-mapped to the new contract form structure (contractDetails, buyerDetails, emiratesId, passportId, documents)',
+  })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    description: 'User ID to fetch KYC data for (admin only)',
+    type: String,
   })
   @ApiResponse({
     status: 200,
     description: 'KYC autofill data retrieved successfully.',
     type: KycAutofillDataDto,
+    example: {
+      userId: 'uuid-123',
+      kycProfileId: 'uuid-456',
+      contractDetails: {
+        buyerType: 'Resident',
+        preferredLanguage: 'English'
+      },
+      buyerDetails: {
+        currentJob: 'Software Engineer',
+        country: 'United Arab Emirates',
+        city: 'Dubai',
+        mobileDomestic: '+971501234567',
+        emailDomestic: 'john@example.com'
+      },
+      emiratesId: {
+        nameEn: 'John Doe',
+        idNumber: '784-1995-1234567-1',
+        nationality: 'Emirati'
+      },
+      passportId: {
+        number: 'A1234567',
+        nationality: 'American'
+      },
+      documents: {
+        emiratesIdCopy: 'https://cdn.example.com/emirates-id.pdf',
+        passportCopy: 'https://cdn.example.com/passport.pdf'
+      }
+    }
   })
   @ApiResponse({
     status: 404,
@@ -58,12 +92,20 @@ export class KycController {
   @Post('save-from-form')
   @ApiOperation({
     summary: 'Save contract form data to KYC profile',
-    description:
-      'Updates user KYC profile with data from contract form for future autofill',
+    description: 'Updates user KYC profile with data from contract form for future autofill. Expects the new ContractFormData structure.',
   })
   @ApiResponse({
     status: 200,
     description: 'KYC profile updated successfully.',
+    example: {
+      id: 'uuid-123',
+      userId: 'uuid-456',
+      buyerType: 'Resident',
+      emiratesId: { nameEn: 'John Doe', idNumber: '784-1995-1234567-1' },
+      passport: { number: 'A1234567' },
+      createdAt: '2025-12-27T00:00:00.000Z',
+      updatedAt: '2025-12-27T00:00:00.000Z'
+    }
   })
   @ApiResponse({ status: 400, description: 'Invalid form data.' })
   async saveFormDataToKyc(

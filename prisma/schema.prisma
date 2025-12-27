@@ -150,18 +150,18 @@ model AdminProfile {
   user       AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// -------------------- NEW (1:1) USER KYC PROFILE --------------------
+// -------------------- USER KYC PROFILE - Identity & Verification --------------------
+// Stores user identity documents for verification and contract autofill
 model UserKycProfile {
-  id               String  @id @default(uuid())
-  userId           String  @unique
-  buyerType        String? // Resident / NonResident / Company / ...
-  emiratesId       Json?   @db.Json // { nameEn, nameAr, idNumber, dob, expiryDate, ... }
-  passport         Json?   @db.Json // { number, nationality, issueDate, expiryDate, ... }
-  workInfo         Json?   @db.Json
-  contactInfo      Json?   @db.Json // { preferredLanguage, domestic:{}, abroad:{} }
-  address          Json?   @db.Json
-  emergencyContact Json?   @db.Json
-  documents        Json?   @db.Json // { emiratesIdCopy: "s3://...", ... }
+  id     String @id @default(uuid())
+  userId String @unique
+  
+  // Identity Documents (used for contract autofill)
+  emiratesId Json? @db.Json // { nameEn, nameAr, idNumber, nationality, gender, expiryDate, unifiedNumber, fileNumber, dateOfBirth, placeOfBirth, isCitizenChild }
+  passport   Json? @db.Json // { number, passportType, nationality, issuePlace, issueDate, expiryDate, dateOfBirth, placeOfBirth }
+  
+  // Verification Documents (used for contract autofill)
+  documents Json? @db.Json // { emiratesIdCopy, passportCopy, visaCopy, utilityBill, bankStatement, personalPhoto }
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -295,10 +295,8 @@ model Contract {
   contractLink String?
   filesUrl     String[]
 
-  // Flexible & future-proof fields
-  terms    Json? @db.Json // optional: clauses, schedules, etc.
-  metadata Json? @db.Json // optional: currency, tags, UI hints
-  formData Json? @db.Json // 🔑 full dynamic form payload (buyers, IDs, docs…)
+  // Single JSON field for all contract form data
+  formData Json? @db.Json // { contractDetails, buyerDetails, emiratesId, passportId, documents }
 
   // Core dates & finance
   signedDate            DateTime?

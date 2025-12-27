@@ -32,12 +32,41 @@ export class ContractsController {
   @Post()
   @ApiOperation({
     summary: 'Create a new contract',
-    description: 'Create a contract with optional form data (buyer info, documents, etc.)'
+    description: `Create a contract with the new clean formData structure:
+    - contractDetails: isLeadGreenList, buyerType, representationType, preferredLanguage
+    - buyerDetails: contact info, address, employment, emergency contact (all flat fields)
+    - emiratesId: full Emirates ID information
+    - passportId: full passport information
+    - documents: specific document URLs (emiratesIdCopy, passportCopy, visaCopy, etc.)`
   })
   @ApiResponse({
     status: 201,
     description: 'Contract created successfully.',
     type: ContractDto,
+    example: {
+      id: 'uuid-123',
+      propertyId: 'uuid-456',
+      investorId: 'uuid-789',
+      contractCode: 'CN-2025-001',
+      status: 'pending',
+      formData: {
+        contractDetails: {
+          isLeadGreenList: true,
+          buyerType: 'Resident',
+          representationType: 'Self',
+          preferredLanguage: 'English'
+        },
+        buyerDetails: {
+          currentJob: 'Software Engineer',
+          city: 'Dubai',
+          mobileDomestic: '+971501234567'
+        },
+        emiratesId: {
+          nameEn: 'John Doe',
+          idNumber: '784-1995-1234567-1'
+        }
+      }
+    }
   })
   @ApiResponse({ status: 404, description: 'Property not found.' })
   @ApiResponse({ status: 400, description: 'Invalid form data.' })

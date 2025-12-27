@@ -10,7 +10,6 @@ import { PropertiesService } from 'src/properties/services/properties.service';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { ContractsNotificationsService } from './contracts.notifications.service';
 import { Prisma } from '@prisma/client';
-import { ensureNestedBuyer } from '../utils/buyer-transformer.util';
 
 @Injectable()
 export class ContractsService {
@@ -29,19 +28,9 @@ export class ContractsService {
     if (!property)
       throw new NotFoundException(`Property ${propertyId} not found`);
 
-    // Transform formData if provided (convert flat buyer to nested if needed)
-    let normalizedFormData = dto.formData;
-    if (dto.formData && dto.formData.buyer) {
-      // Auto-detect and convert flat buyer format to nested
-      normalizedFormData = {
-        ...dto.formData,
-        buyer: ensureNestedBuyer(dto.formData.buyer),
-      };
-    }
-
-    // Validate formData if provided
-    if (normalizedFormData) {
-      const validation = ContractFormDataSchema.safeParse(normalizedFormData);
+    // Validate formData if provided using the new structure
+    if (dto.formData) {
+      const validation = ContractFormDataSchema.safeParse(dto.formData);
       if (!validation.success) {
         throw new Error(
           `Invalid form data: ${validation.error.issues.map((e) => e.message).join(', ')}`,
@@ -67,10 +56,8 @@ export class ContractsService {
         vacancyRiskLevel: dto.vacancyRiskLevel,
         status: dto.status || 'pending',
         notes: dto.notes,
-        // JSON fields - use normalized formData with nested buyer
-        formData: normalizedFormData as Prisma.InputJsonValue,
-        terms: dto.terms as Prisma.InputJsonValue,
-        metadata: dto.metadata as Prisma.InputJsonValue,
+        // JSON fields - store the new clean structure
+        formData: dto.formData as Prisma.InputJsonValue,
       },
     });
 
@@ -83,6 +70,7 @@ export class ContractsService {
 
     return contract;
   }
+  
   async getAll(userId: string) {
     return this.prisma.contract.findMany({
       where: { investorId: userId },
@@ -104,6 +92,7 @@ export class ContractsService {
     if (!contract) throw new NotFoundException(`Contract ${id} not found`);
     return contract;
   }
+  
   async update(currentUser: CurrentUser, id: string, dto: UpdateContractDto) {
     const existing = await this.prisma.contract.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);
