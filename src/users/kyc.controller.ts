@@ -12,7 +12,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { KycService } from './services/kyc.service';
-import { KycAutofillDataDto } from 'src/contracts/dto/contract.dto';
+import { KycAutofillDataDto } from 'src/contracts/dto/contract-form.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('users/kyc')

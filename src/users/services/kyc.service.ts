@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
-import { KycAutofillDataDto, ContractFormData } from 'src/contracts/dto/contract.dto';
+import { KycAutofillDataDto, ContractFormData } from 'src/contracts/dto/contract-form.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

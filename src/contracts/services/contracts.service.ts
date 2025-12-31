@@ -3,8 +3,8 @@ import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
   UpdateContractDto,
   CreateContractWithFormDataDto,
-  ContractFormDataSchema,
 } from '../dto/contract.dto';
+import { ContractFormDataSchema } from '../dto/contract-form.dto';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { PropertiesService } from 'src/properties/services/properties.service';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
