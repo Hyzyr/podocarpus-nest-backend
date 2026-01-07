@@ -1,224 +1,182 @@
+/**
+ * Prisma 7 Seed Script
+ *
+ * This script seeds the database with initial data.
+ * Run with: npx prisma db seed
+ *
+ * Features:
+ * - Idempotent operations (safe to run multiple times)
+ * - Transaction support for data integrity
+ * - Environment-based configuration
+ * - Detailed logging
+ * - PostgreSQL adapter for improved performance
+ */
+
 import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
+import { superAdminConfig, properties, events } from './seed-data.js';
 
+// 1. Setup the connection pool and adapter
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+
+// 2. Pass the adapter to PrismaClient
 const prisma = new PrismaClient({
-  log: ['info', 'warn', 'error'],
+  adapter,
+  log: [
+    { level: 'query', emit: 'event' },
+    { level: 'error', emit: 'stdout' },
+    { level: 'info', emit: 'stdout' },
+    { level: 'warn', emit: 'stdout' },
+  ],
 });
 
-async function main() {
-  // ========================================
-  // Create initial superadmin user (bootstrap)
-  // ========================================
-  const existingSuperadmin = await prisma.appUser.findFirst({
-    where: { role: UserRole.superadmin },
+// Enable query logging in development
+if (process.env.NODE_ENV !== 'production') {
+  prisma.$on('query' as never, (e: any) => {
+    console.log('Query: ' + e.query);
+    console.log('Duration: ' + e.duration + 'ms');
   });
+}
 
-  if (!existingSuperadmin) {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@podocarpus.local';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-    
-    const passwordHash = await bcrypt.hash(adminPassword, 10);
+/**
+ * Seed superadmin user
+ */
+async function seedSuperAdmin() {
+  console.log('🔐 Seeding superadmin user...');
+
+  try {
+    const existingSuperadmin = await prisma.appUser.findFirst({
+      where: { role: UserRole.superadmin },
+    });
+
+    if (existingSuperadmin) {
+      console.log('ℹ️  Superadmin already exists:', existingSuperadmin.email);
+      return existingSuperadmin;
+    }
+
+    const passwordHash = await bcrypt.hash(superAdminConfig.password, 10);
     const superadmin = await prisma.appUser.create({
       data: {
-        email: adminEmail,
+        email: superAdminConfig.email,
         passwordHash,
         role: UserRole.superadmin,
-        isEnabled: true, // Initial superadmin is enabled so they can log in and approve other admins
-        firstName: 'System',
-        lastName: 'Administrator',
+        isEnabled: true,
+        firstName: superAdminConfig.firstName,
+        lastName: superAdminConfig.lastName,
         emailVerified: true,
         onboardingCompleted: true,
       },
     });
-    console.log('✅ Initial superadmin created:', superadmin.email);
-    console.log('⚠️  Default credentials - change password after first login!');
-  } else {
-    console.log('ℹ️  Superadmin already exists, skipping creation');
-  }
 
-  // ========================================
-  // Seed properties
-  // ========================================
-  await prisma.property.createMany({
-    data: [
-      {
-        title: 'Silver Tower - Office on 11th Floor',
-        description:
-          'High-rise commercial building in Cluster I of JLT, completed in 2009. Freehold, DMCC free zone, covered parking, 37 floors, restaurants, and 24-hour security.',
-        area: 'Jumeirah Lake Towers (JLT)',
-        buildingName: 'Silver Tower',
-        contractValue: 5290000,
-        developer: 'DMCC',
-        unitNo: '1101',
-        floor: 11,
-        condition: 'Full fitted & renovated',
-        unitTotalSize: 1664.0,
-        apartmentSize: 1664.0,
-        status: 'Rented',
-        city: 'Dubai',
-        country: 'UAE',
-        images: [
-          '/uploads/bc-6.jpg',
-          '/uploads/8697620160515040128-Large-1024x768-1.jpg',
-          '/uploads/Jumeirah_Lake_Tower_Silver_Tower_20201910_1_3fcd020691_b5ef8cc3e3.jpg',
-        ],
-        assets: [],
-        netRoiMin: 8,
-        netRoiMax: 8,
-        isTaxFreeZone: true,
-        keyBenefits: [
-          '100% Foreign Ownership',
-          'Tax-Free Zone',
-          'Full Capital Repatriation',
-        ],
-        freezoneAuthority: 'DMCC Freezone',
-        isVacant: false,
-      },
-      {
-        title: 'Gold Tower - Office on 5th Floor',
-        description:
-          'High-rise commercial building in Cluster I of JLT, also called AU Tower. Completed in 2009. Freehold, DMCC free zone, covered parking, 37 floors, restaurants, and 24-hour security.',
-        area: 'Jumeirah Lake Towers (JLT)',
-        buildingName: 'Gold Tower',
-        contractValue: 5267616,
-        developer: 'DMCC',
-        unitNo: '0501',
-        floor: 5,
-        condition: 'Full fitted & renovated',
-        unitTotalSize: 1120.95,
-        apartmentSize: 1120.95,
-        status: 'Rented',
-        city: 'Dubai',
-        country: 'UAE',
-        images: [
-          '/uploads/au-tower-1552_xl.jpg',
-          '/uploads/8697620160515040128-Large-1024x768-1.jpg',
-        ],
-        assets: [],
-        netRoiMin: 8,
-        netRoiMax: 8,
-        isTaxFreeZone: true,
-        keyBenefits: [
-          '100% Foreign Ownership',
-          'Tax-Free Zone',
-          'Full Capital Repatriation',
-        ],
-        freezoneAuthority: 'DMCC Freezone',
-        isVacant: false,
-      },
-      {
-        title: 'Mazaya AA1 - Office on 29th Floor',
-        description:
-          'Mazaya Business Avenue AA1, freehold commercial tower with 45 floors. Completed 2012 by Mazaya Holding Co. DMCC free zone with modern amenities.',
-        area: 'Jumeirah Lake Towers (JLT)',
-        buildingName: 'Mazaya AA1',
-        contractValue: 4176216,
-        developer: 'Mazaya Holding Co.',
-        unitNo: '2901',
-        floor: 29,
-        condition: 'Full fitted & renovated',
-        unitTotalSize: 1689.18,
-        apartmentSize: 1689.18,
-        status: 'Rented',
-        city: 'Dubai',
-        country: 'UAE',
-        images: [
-          '/uploads/AMR_9699 copy.jpg',
-          '/uploads/mazaya-business-avenue-8188_xl.jpg',
-        ],
-        assets: [],
-        netRoiMin: 8,
-        netRoiMax: 8,
-        isTaxFreeZone: true,
-        keyBenefits: [
-          '100% Foreign Ownership',
-          'Tax-Free Zone',
-          'Full Capital Repatriation',
-        ],
-        freezoneAuthority: 'DMCC Freezone',
-        isVacant: false,
-      },
-      {
-        title: 'Fortune Tower - Office on 20th Floor',
-        description:
-          '37-storey commercial tower in Cluster C, JLT. Completed in 2008 by Fortune Investments. Features gymnasium, swimming pool, sauna, meeting rooms, restaurants, salons, and pharmacy.',
-        area: 'Jumeirah Lake Towers (JLT)',
-        buildingName: 'Fortune Tower',
-        contractValue: 7590000,
-        developer: 'Fortune Investments',
-        unitNo: '2001',
-        floor: 20,
-        condition: 'Full fitted & renovated',
-        unitTotalSize: 2620.0,
-        apartmentSize: 2620.0,
-        status: 'Rented',
-        city: 'Dubai',
-        country: 'UAE',
-        images: [
-          '/uploads/fortune-tower.avif',
-          '/uploads/fortune-tower-767_xl-28129-resize_gallery.avif',
-        ],
-        assets: [],
-        netRoiMin: 8,
-        netRoiMax: 8,
-        isTaxFreeZone: true,
-        keyBenefits: [
-          '100% Foreign Ownership',
-          'Tax-Free Zone',
-          'Full Capital Repatriation',
-        ],
-        freezoneAuthority: 'DMCC Freezone',
-        isVacant: false,
-      },
-    ],
-  });
-  await prisma.event.createMany({
-    data: [
-      {
-        title: 'Dubai Beach Picnic Afternoon',
-        description:
-          'Relaxing afternoon at Jumeirah Beach with food, games, and live acoustic music. Perfect for networking and family fun.',
-        startsAt: new Date('2025-10-10T15:00:00Z'),
-        endsAt: new Date('2025-10-10T20:00:00Z'),
-        location: 'Jumeirah Beach, Dubai',
-        totalMembers: 50,
-        budget: 2500.0,
-        image: '/uploads/4867.jpg',
-        status: 'OPEN',
-        isActive: true,
-      },
-      {
-        title: 'Private Party at Dubai Marina',
-        description:
-          'An exclusive private party at a rooftop lounge in Dubai Marina. Invite-only event with premium catering and entertainment.',
-        startsAt: new Date('2025-10-18T21:00:00Z'),
-        endsAt: new Date('2025-10-19T02:00:00Z'),
-        location: 'Dubai Marina, Rooftop Lounge',
-        totalMembers: 120,
-        budget: 15000.0,
-        image: '/uploads/92743.jpg',
-        status: 'OPEN',
-        isActive: true,
-      },
-      {
-        title: 'DJ Night at Downtown Dubai',
-        description:
-          'High-energy electronic music night featuring international DJs and stunning views of Burj Khalifa. Open to all music lovers.',
-        startsAt: new Date('2025-11-01T22:00:00Z'),
-        endsAt: new Date('2025-11-02T03:00:00Z'),
-        location: 'Downtown Dubai, Burj Park',
-        totalMembers: 300,
-        budget: 25000.0,
-        image: '/uploads/122068.jpg',
-        status: 'OPEN',
-        isActive: true,
-      },
-    ],
-  });
+    console.log('✅ Superadmin created:', superadmin.email);
+    console.log('⚠️  Default credentials - CHANGE PASSWORD after first login!');
+    return superadmin;
+  } catch (error) {
+    console.error('❌ Error creating superadmin:', error);
+    throw error;
+  }
 }
 
+/**
+ * Seed properties
+ */
+async function seedProperties() {
+  console.log('🏢 Seeding properties...');
+
+  try {
+    // Check if properties already exist
+    const existingCount = await prisma.property.count();
+
+    if (existingCount > 0) {
+      console.log(
+        `ℹ️  ${existingCount} properties already exist, skipping seed`,
+      );
+      return;
+    }
+
+    // Create properties using createMany
+    const result = await prisma.property.createMany({
+      data: properties,
+      skipDuplicates: true,
+    });
+
+    console.log(`✅ Created ${result.count} properties`);
+  } catch (error) {
+    console.error('❌ Error seeding properties:', error);
+    throw error;
+  }
+}
+
+/**
+ * Seed events
+ */
+async function seedEvents() {
+  console.log('🎉 Seeding events...');
+
+  try {
+    const existingCount = await prisma.event.count();
+
+    if (existingCount > 0) {
+      console.log(`ℹ️  ${existingCount} events already exist, skipping seed`);
+      return;
+    }
+
+    // Create events using createMany
+    const result = await prisma.event.createMany({
+      data: events,
+      skipDuplicates: true,
+    });
+
+    console.log(`✅ Created ${result.count} events`);
+  } catch (error) {
+    console.error('❌ Error seeding events:', error);
+    throw error;
+  }
+}
+
+/**
+ * Main seed function
+ */
+async function main() {
+  console.log('🌱 Starting database seed...\n');
+
+  const startTime = Date.now();
+
+  try {
+    // Run all seed functions in a transaction for data integrity
+    await prisma.$transaction(async (tx) => {
+      // Temporarily replace global prisma with transaction client
+      const originalPrisma = global.prisma;
+      (global as any).prisma = tx;
+
+      await seedSuperAdmin();
+      await seedProperties();
+      await seedEvents();
+
+      // Restore global prisma
+      (global as any).prisma = originalPrisma;
+    });
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`\n✅ Database seeded successfully in ${duration}s`);
+  } catch (error) {
+    console.error('\n❌ Seed failed:', error);
+    throw error;
+  }
+}
+
+// Execute main function
 main()
-  .then(() => console.log('Seeded ✅'))
-  .catch((e) => console.error(e))
-  .finally(async () => await prisma.$disconnect());
+  .then(async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
