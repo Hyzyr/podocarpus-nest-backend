@@ -1,12 +1,9 @@
 import { PrismaClient, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config';
 
 const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
+  log: ['info', 'warn', 'error'],
 });
 
 async function main() {
