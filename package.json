@@ -98,6 +98,10 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
+  "overrides": {
+    "@aws-sdk/client-sesv2": "^3.700.0",
+    "@smithy/smithy-client": "^3.5.0"
+  },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   }
