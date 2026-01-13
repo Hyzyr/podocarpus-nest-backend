@@ -95,9 +95,39 @@ export class ContractsService {
   async update(currentUser: CurrentUser, id: string, dto: UpdateContractDto) {
     const existing = await this.prisma.contract.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);
+
+    // Validate formData if provided
+    if (dto.formData) {
+      const validation = ContractFormDataSchema.safeParse(dto.formData);
+      if (!validation.success) {
+        throw new Error(
+          `Invalid form data: ${validation.error.issues.map((e) => e.message).join(', ')}`,
+        );
+      }
+    }
+
+    // Build update data object
+    const updateData: any = {};
+    if (dto.brokerId !== undefined) updateData.brokerId = dto.brokerId;
+    if (dto.contractCode !== undefined) updateData.contractCode = dto.contractCode;
+    if (dto.contractLink !== undefined) updateData.contractLink = dto.contractLink;
+    if (dto.fileUrl !== undefined) updateData.fileUrl = dto.fileUrl;
+    if (dto.filesUrl !== undefined) updateData.filesUrl = dto.filesUrl;
+    if (dto.signedDate !== undefined) updateData.signedDate = dto.signedDate;
+    if (dto.contractStart !== undefined) updateData.contractStart = dto.contractStart;
+    if (dto.contractEnd !== undefined) updateData.contractEnd = dto.contractEnd;
+    if (dto.contractValue !== undefined) updateData.contractValue = dto.contractValue;
+    if (dto.depositPaid !== undefined) updateData.depositPaid = dto.depositPaid;
+    if (dto.investorPaymentMethod !== undefined) updateData.investorPaymentMethod = dto.investorPaymentMethod;
+    if (dto.paymentSchedule !== undefined) updateData.paymentSchedule = dto.paymentSchedule;
+    if (dto.vacancyRiskLevel !== undefined) updateData.vacancyRiskLevel = dto.vacancyRiskLevel;
+    if (dto.status !== undefined) updateData.status = dto.status;
+    if (dto.notes !== undefined) updateData.notes = dto.notes;
+    if (dto.formData !== undefined) updateData.formData = dto.formData as Prisma.InputJsonValue;
+
     const newContract = await this.prisma.contract.update({
       where: { id },
-      data: dto,
+      data: updateData,
     });
 
     // Handle status changes and notifications
@@ -122,15 +152,12 @@ export class ContractsService {
       );
     } else {
       // If status didn't change but other fields did, send general update notification
-      // Only notify if updates are done by someone other than the investor
-      if (currentUser.id !== existing.investorId) {
-        await this.contractsNotifications.notifyGeneralUpdate(
-          currentUser,
-          existing.id,
-          existing.propertyId,
-          existing.investorId,
-        );
-      }
+      await this.contractsNotifications.notifyGeneralUpdate(
+        currentUser,
+        existing.id,
+        existing.propertyId,
+        existing.investorId,
+      );
     }
 
     return newContract;

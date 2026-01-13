@@ -336,7 +336,45 @@ export class CreateContractDto {
   notes?: string | null;
 }
 
-export class UpdateContractDto extends PartialType(CreateContractDto) {}
+export class UpdateContractDto extends PartialType(CreateContractDto) {
+  @ApiPropertyOptional({
+    description: 'Complete contract form data with structured sections',
+    type: () => ContractFormDataDto,
+    example: {
+      contractDetails: {
+        isLeadGreenList: true,
+        buyerType: 'Resident',
+        representationType: 'Self',
+        preferredLanguage: 'English'
+      },
+      buyerDetails: {
+        isSpecialNeeds: false,
+        currentJob: 'Software Engineer',
+        country: 'United Arab Emirates',
+        city: 'Dubai',
+        mobileDomestic: '+971501234567',
+        emailDomestic: 'john@example.com'
+      },
+      emiratesId: {
+        nameEn: 'John Doe',
+        idNumber: '784-1995-1234567-1',
+        nationality: 'Emirati'
+      }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  formData?: ContractFormData;
+
+  @ApiPropertyOptional({
+    description: 'Array of file URLs (documents, contracts, etc.)',
+    example: ['https://cdn.example.com/contract.pdf', 'https://cdn.example.com/id.pdf']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  filesUrl?: string[];
+}
 
 export class CreateContractWithFormDataDto extends CreateContractDto {
   @ApiPropertyOptional({

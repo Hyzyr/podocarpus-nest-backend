@@ -120,13 +120,22 @@ export class ContractsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'superadmin', 'investor')
   @Patch(':id')
-  @ApiOperation({ summary: 'Update an existing contract [AdminOnly]' })
+  @ApiOperation({ 
+    summary: 'Update an existing contract',
+    description: `Update contract details including:
+    - Basic contract information (dates, values, payment details)
+    - Contract status
+    - Form data (Buyer Details, Emirates ID, Passport, Documents, etc.)
+    - File URLs
+    All fields are optional - only provide the fields you want to update.`
+  })
   @ApiResponse({
     status: 200,
     description: 'Contract updated successfully.',
     type: ContractDto,
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
+  @ApiResponse({ status: 400, description: 'Invalid form data.' })
   async update(
     @CurrentUser() user: CurrentUser,
     @Param() { id }: ContractIdParamDto,
