@@ -79,7 +79,6 @@ export class ContractsService {
   }
 
   async findOne(id: string) {
-    console.log('Finding contract with id:', id);
     const contract = await this.prisma.contract.findUnique({
       where: { id },
       include: {
@@ -121,6 +120,17 @@ export class ContractsService {
         existing.investorId,
         newContract.status,
       );
+    } else {
+      // If status didn't change but other fields did, send general update notification
+      // Only notify if updates are done by someone other than the investor
+      if (currentUser.id !== existing.investorId) {
+        await this.contractsNotifications.notifyGeneralUpdate(
+          currentUser,
+          existing.id,
+          existing.propertyId,
+          existing.investorId,
+        );
+      }
     }
 
     return newContract;
@@ -140,9 +150,17 @@ export class ContractsService {
     });
   }
 
-  async remove(id: string) {
+  async remove(currentUser: CurrentUser, id: string) {
     const existing = await this.prisma.contract.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Contract ${id} not found`);
+
+    // Send notification before deleting
+    await this.contractsNotifications.notifyDeletion(
+      currentUser,
+      existing.id,
+      existing.propertyId,
+      existing.investorId,
+    );
 
     return this.prisma.contract.delete({ where: { id } });
   }

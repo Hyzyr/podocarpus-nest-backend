@@ -114,7 +114,6 @@ export class ContractsController {
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
   async findOne(@Param() { id }: ContractIdParamDto) {
-    console.log('Finding contract with id:', id);
     return this.contractsService.findOne(id);
   }
 
@@ -144,7 +143,10 @@ export class ContractsController {
     description: 'Contract deleted successfully.',
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
-  async remove(@Param() { id }: ContractIdParamDto) {
-    return this.contractsService.remove(id);
+  async remove(
+    @CurrentUser() user: CurrentUser,
+    @Param() { id }: ContractIdParamDto,
+  ) {
+    return this.contractsService.remove(user, id);
   }
 }

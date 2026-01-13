@@ -142,6 +142,57 @@ export class GlobalNotificationsService {
   }
 
   /**
+   * Mark all active global notifications as viewed for a user
+   * Used when user clicks "mark all as read"
+   */
+  async markAllAsViewed(user: CurrentUser) {
+    const now = new Date();
+
+    // Get all active global notifications for this user's role
+    const notifications = await this.prisma.globalNotification.findMany({
+      where: {
+        isActive: true,
+        startsAt: { lte: now },
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gte: now } },
+        ],
+      },
+      select: { id: true, targetRoles: true },
+    });
+
+    // Filter by role - only mark those relevant to user
+    const relevantNotifications = notifications.filter((notif) => {
+      if (notif.targetRoles.length === 0) return true;
+      return notif.targetRoles.includes(user.role);
+    });
+
+    // Mark each as viewed (upsert to avoid duplicates)
+    const viewPromises = relevantNotifications.map((notif) =>
+      this.prisma.globalNotificationView.upsert({
+        where: {
+          userId_globalNotificationId: {
+            userId: user.userId,
+            globalNotificationId: notif.id,
+          },
+        },
+        create: {
+          userId: user.userId,
+          globalNotificationId: notif.id,
+          viewedAt: new Date(),
+          dismissed: false,
+        },
+        update: {
+          viewedAt: new Date(),
+        },
+      }),
+    );
+
+    await Promise.all(viewPromises);
+    return relevantNotifications.length;
+  }
+
+  /**
    * Get statistics for a specific notification
    * Admin/superadmin only
    */

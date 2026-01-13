@@ -7,10 +7,14 @@ import {
 } from './notifications.dto';
 import { NotificationType, UserRole } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { GlobalNotificationsService } from '../global-notifications/global-notifications.service';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private globalNotifications: GlobalNotificationsService,
+  ) {}
 
   async create(dto: CreateNotificationDto) {
     return this.prisma.notification.create({ data: dto });
@@ -31,11 +35,16 @@ export class NotificationsService {
 
     return updated.count > 0;
   }
-  async markAllAsRead(userId: string) {
+  async markAllAsRead(user: CurrentUser) {
+    // Mark all user-specific notifications as read
     await this.prisma.notification.updateMany({
-      where: { userId },
+      where: { userId: user.userId, isGlobal: { not: true } },
       data: { status: 'read', readAt: new Date() },
     });
+
+    // Mark all global notifications as viewed for this user
+    await this.globalNotifications.markAllAsViewed(user);
+
     return true;
   }
 

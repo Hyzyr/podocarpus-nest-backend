@@ -87,6 +87,6 @@ export class NotificationsController {
     type: MarkAsReadResponseDto,
   })
   markAllAsRead(@CurrentUser() user: CurrentUser) {
-    return this.notificationsService.markAllAsRead(user.userId);
+    return this.notificationsService.markAllAsRead(user);
   }
 }
