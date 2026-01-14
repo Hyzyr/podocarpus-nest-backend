@@ -55,7 +55,7 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false, // Allow extra properties to be stripped instead of throwing errors
     }),
   );
 

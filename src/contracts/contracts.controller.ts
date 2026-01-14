@@ -122,7 +122,7 @@ export class ContractsController {
   @Patch(':id')
   @ApiOperation({ 
     summary: 'Update an existing contract',
-    description: `Update contract details including:
+    description: `Update contract details including:f
     - Basic contract information (dates, values, payment details)
     - Contract status
     - Form data (Buyer Details, Emirates ID, Passport, Documents, etc.)
