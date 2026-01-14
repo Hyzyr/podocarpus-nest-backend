@@ -12,7 +12,14 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { KycService } from './services/kyc.service';
-import { KycAutofillDataDto } from 'src/contracts/dto/contract-form.dto';
+import { KycAutofillDataDto, ContractFormDataDto } from 'src/contracts/dto/contract-form.dto';
+import { IsObject } from 'class-validator';
+
+// DTO for save form data endpoint
+class SaveFormDataDto {
+  @IsObject()
+  formData: ContractFormDataDto;
+}
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('users/kyc')
@@ -110,7 +117,7 @@ export class KycController {
   @ApiResponse({ status: 400, description: 'Invalid form data.' })
   async saveFormDataToKyc(
     @CurrentUser() user: CurrentUser,
-    @Body() body: { formData: any },
+    @Body() body: SaveFormDataDto,
   ) {
     return this.kycService.saveFormDataToKyc(user.userId, body.formData);
   }
