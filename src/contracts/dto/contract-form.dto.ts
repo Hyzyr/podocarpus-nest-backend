@@ -9,10 +9,10 @@ import { z } from 'zod';
  * Contract Details Schema - Top-level contract information
  */
 export const ContractDetailsSchema = z.object({
-  isLeadGreenList: z.boolean().optional(), // Is lead through Green List?
-  buyerType: z.enum(['Resident', 'NonResident', 'Company']).optional(),
-  representationType: z.string().trim().optional(), // Who will represent at registration
-  preferredLanguage: z.string().trim().optional(), // Contact Preferred Language
+  isLeadGreenList: z.boolean(), // Is lead through Green List?
+  buyerType: z.enum(['Resident', 'NonResident', 'Company']),
+  representationType: z.string().trim(), // Who will represent at registration
+  preferredLanguage: z.string().trim(), // Contact Preferred Language
 }).passthrough();
 
 /**
@@ -22,10 +22,10 @@ export const ContractDetailsSchema = z.object({
 export const BuyerDetailsSchema = z.object({
   // Social & Employment
   isSpecialNeeds: z.boolean().optional(), // Is determined Ones (Special Needs)?
-  currentJob: z.string().trim().optional(),
+  currentJob: z.string().trim(),
   
   // Address
-  country: z.string().trim().optional(), // Country of Residence
+  country: z.string().trim(), // Country of Residence
   city: z.string().trim().optional(), // City (English)
   cityAr: z.string().trim().optional(), // City (Arabic)
   street: z.string().trim().optional(), // Street (English)
@@ -35,8 +35,8 @@ export const BuyerDetailsSchema = z.object({
   // Contact - Domestic
   phoneDomestic: z.string().trim().optional(),
   mobileDomestic: z.string().trim().optional(),
-  emailDomestic: z.string().email().optional(),
-  extCodeDomestic: z.string().trim().optional(),
+  emailDomestic: z.string().email(),
+  extCodeDomestic: z.string().trim(),
   
   // Contact - Abroad
   phoneAbroad: z.string().trim().optional(),
@@ -55,40 +55,40 @@ export const BuyerDetailsSchema = z.object({
  * Emirates ID Schema - Clean structure matching form
  */
 export const EmiratesIdSchema = z.object({
-  nameEn: z.string().trim().optional(),
-  nameAr: z.string().trim().optional(),
-  isCitizenChild: z.boolean().optional(),
-  nationality: z.string().trim().optional(),
-  gender: z.string().trim().optional(),
-  idNumber: z.string().trim().optional(),
-  expiryDate: z.string().optional(), // Date string
+  nameEn: z.string().trim(),
+  nameAr: z.string().trim(),
+  isCitizenChild: z.boolean(),
+  nationality: z.string().trim(),
+  gender: z.string().trim(),
+  idNumber: z.string().trim(),
+  expiryDate: z.string(), // Date string
   unifiedNumber: z.string().trim().optional(),
   fileNumber: z.string().trim().optional(),
-  dateOfBirth: z.string().optional(), // Date string
-  placeOfBirth: z.string().trim().optional(),
+  dateOfBirth: z.string(), // Date string
+  placeOfBirth: z.string().trim(),
 }).passthrough();
 
 /**
  * Passport Schema - Clean structure matching form
  */
 export const PassportSchema = z.object({
-  number: z.string().trim().optional(),
-  passportType: z.string().trim().optional(),
-  nationality: z.string().trim().optional(),
-  issuePlace: z.string().trim().optional(),
-  issueDate: z.string().optional(), // Date string
-  expiryDate: z.string().optional(), // Date string
-  dateOfBirth: z.string().optional(), // Date string
-  placeOfBirth: z.string().trim().optional(),
+  number: z.string().trim(),
+  passportType: z.string().trim(),
+  nationality: z.string().trim(),
+  issuePlace: z.string().trim(),
+  issueDate: z.string(), // Date string
+  expiryDate: z.string(), // Date string
+  dateOfBirth: z.string(), // Date string
+  placeOfBirth: z.string().trim(),
 }).passthrough();
 
 /**
  * Documents Schema - Specific document types
  */
 export const DocumentsSchema = z.object({
-  emiratesIdCopy: z.string().optional(), // File URL
+  emiratesIdCopy: z.string(), // File URL
   passportCopy: z.string().optional(), // File URL
-  visaCopy: z.string().optional(), // File URL
+  visaCopy: z.string(), // File URL
   utilityBill: z.string().optional(), // File URL
   bankStatement: z.string().optional(), // File URL
   personalPhoto: z.string().optional(), // File URL
@@ -125,17 +125,17 @@ export type ContractFormData = z.infer<typeof ContractFormDataSchema>;
  * Contract Details DTO for Swagger documentation
  */
 export class ContractDetailsDto {
-  @ApiPropertyOptional({ example: true, description: 'Is lead through Green List?' })
-  isLeadGreenList?: boolean;
+  @ApiProperty({ example: true, description: 'Is lead through Green List?' })
+  isLeadGreenList: boolean;
 
-  @ApiPropertyOptional({ enum: ['Resident', 'NonResident', 'Company'], example: 'Resident' })
-  buyerType?: string;
+  @ApiProperty({ enum: ['Resident', 'NonResident', 'Company'], example: 'Resident' })
+  buyerType: 'Resident' | 'NonResident' | 'Company';
 
-  @ApiPropertyOptional({ example: 'Self', description: 'Who will represent at registration' })
-  representationType?: string;
+  @ApiProperty({ example: 'Self', description: 'Who will represent at registration' })
+  representationType: string;
 
-  @ApiPropertyOptional({ example: 'English', description: 'Preferred contact language' })
-  preferredLanguage?: string;
+  @ApiProperty({ example: 'English', description: 'Preferred contact language' })
+  preferredLanguage: string;
 }
 
 /**
@@ -145,11 +145,11 @@ export class BuyerDetailsDto {
   @ApiPropertyOptional({ example: false, description: 'Is person with special needs?' })
   isSpecialNeeds?: boolean;
 
-  @ApiPropertyOptional({ example: 'Software Engineer' })
-  currentJob?: string;
+  @ApiProperty({ example: 'Software Engineer' })
+  currentJob: string;
 
-  @ApiPropertyOptional({ example: 'United Arab Emirates' })
-  country?: string;
+  @ApiProperty({ example: 'United Arab Emirates' })
+  country: string;
 
   @ApiPropertyOptional({ example: 'Dubai' })
   city?: string;
@@ -172,11 +172,11 @@ export class BuyerDetailsDto {
   @ApiPropertyOptional({ example: '+971501234567' })
   mobileDomestic?: string;
 
-  @ApiPropertyOptional({ example: 'john@example.com' })
-  emailDomestic?: string;
+  @ApiProperty({ example: 'john@example.com' })
+  emailDomestic: string;
 
-  @ApiPropertyOptional({ example: '123' })
-  extCodeDomestic?: string;
+  @ApiProperty({ example: '123' })
+  extCodeDomestic: string;
 
   @ApiPropertyOptional({ example: '+12125551234' })
   phoneAbroad?: string;
@@ -207,26 +207,26 @@ export class BuyerDetailsDto {
  * Emirates ID DTO for Swagger documentation
  */
 export class EmiratesIdDto {
-  @ApiPropertyOptional({ example: 'John Doe' })
-  nameEn?: string;
+  @ApiProperty({ example: 'John Doe' })
+  nameEn: string;
 
-  @ApiPropertyOptional({ example: 'جون دو' })
-  nameAr?: string;
+  @ApiProperty({ example: 'جون دو' })
+  nameAr: string;
 
-  @ApiPropertyOptional({ example: false })
-  isCitizenChild?: boolean;
+  @ApiProperty({ example: false })
+  isCitizenChild: boolean;
 
-  @ApiPropertyOptional({ example: 'Emirati' })
-  nationality?: string;
+  @ApiProperty({ example: 'Emirati' })
+  nationality: string;
 
-  @ApiPropertyOptional({ example: 'Male' })
-  gender?: string;
+  @ApiProperty({ example: 'Male' })
+  gender: string;
 
-  @ApiPropertyOptional({ example: '784-1995-1234567-1' })
-  idNumber?: string;
+  @ApiProperty({ example: '784-1995-1234567-1' })
+  idNumber: string;
 
-  @ApiPropertyOptional({ example: '2030-12-31' })
-  expiryDate?: string;
+  @ApiProperty({ example: '2030-12-31' })
+  expiryDate: string;
 
   @ApiPropertyOptional({ example: '123456789' })
   unifiedNumber?: string;
@@ -234,54 +234,54 @@ export class EmiratesIdDto {
   @ApiPropertyOptional({ example: 'FILE-2025-001' })
   fileNumber?: string;
 
-  @ApiPropertyOptional({ example: '1995-01-15' })
-  dateOfBirth?: string;
+  @ApiProperty({ example: '1995-01-15' })
+  dateOfBirth: string;
 
-  @ApiPropertyOptional({ example: 'Dubai' })
-  placeOfBirth?: string;
+  @ApiProperty({ example: 'Dubai' })
+  placeOfBirth: string;
 }
 
 /**
  * Passport DTO for Swagger documentation
  */
 export class PassportDto {
-  @ApiPropertyOptional({ example: 'A1234567' })
-  number?: string;
+  @ApiProperty({ example: 'A1234567' })
+  number: string;
 
-  @ApiPropertyOptional({ example: 'Ordinary' })
-  passportType?: string;
+  @ApiProperty({ example: 'Ordinary' })
+  passportType: string;
 
-  @ApiPropertyOptional({ example: 'American' })
-  nationality?: string;
+  @ApiProperty({ example: 'American' })
+  nationality: string;
 
-  @ApiPropertyOptional({ example: 'New York' })
-  issuePlace?: string;
+  @ApiProperty({ example: 'New York' })
+  issuePlace: string;
 
-  @ApiPropertyOptional({ example: '2020-01-01' })
-  issueDate?: string;
+  @ApiProperty({ example: '2020-01-01' })
+  issueDate: string;
 
-  @ApiPropertyOptional({ example: '2030-01-01' })
-  expiryDate?: string;
+  @ApiProperty({ example: '2030-01-01' })
+  expiryDate: string;
 
-  @ApiPropertyOptional({ example: '1995-01-15' })
-  dateOfBirth?: string;
+  @ApiProperty({ example: '1995-01-15' })
+  dateOfBirth: string;
 
-  @ApiPropertyOptional({ example: 'New York' })
-  placeOfBirth?: string;
+  @ApiProperty({ example: 'New York' })
+  placeOfBirth: string;
 }
 
 /**
  * Documents DTO for Swagger documentation
  */
 export class DocumentsDto {
-  @ApiPropertyOptional({ example: 'https://cdn.example.com/emirates-id.pdf' })
-  emiratesIdCopy?: string;
+  @ApiProperty({ example: 'https://cdn.example.com/emirates-id.pdf' })
+  emiratesIdCopy: string;
 
   @ApiPropertyOptional({ example: 'https://cdn.example.com/passport.pdf' })
   passportCopy?: string;
 
-  @ApiPropertyOptional({ example: 'https://cdn.example.com/visa.pdf' })
-  visaCopy?: string;
+  @ApiProperty({ example: 'https://cdn.example.com/visa.pdf' })
+  visaCopy: string;
 
   @ApiPropertyOptional({ example: 'https://cdn.example.com/utility.pdf' })
   utilityBill?: string;
