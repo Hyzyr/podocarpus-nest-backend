@@ -14,7 +14,6 @@ import { InvestorPropertyDto } from 'src/investments/dto/investments.dto';
 import { InvestorProfileWithUserDto } from 'src/users/dto/investorProfile.dto';
 import { 
   ContractFormDataDto,
-  ContractFormDataSchema,
 } from './contract-form.dto';
 import type { ContractFormData } from './contract-form.dto';
 

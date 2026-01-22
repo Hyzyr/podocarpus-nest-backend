@@ -163,6 +163,9 @@ model UserKycProfile {
   // Verification Documents (used for contract autofill)
   documents Json? @db.Json // { emiratesIdCopy, passportCopy, visaCopy, utilityBill, bankStatement, personalPhoto }
 
+  // Buyer Details (reusable across contracts for autofill)
+  buyerDetails Json? @db.Json // { isSpecialNeeds, currentJob, country, city, address, mobileDomestic, emailDomestic, emergency contacts, etc }
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -106,10 +106,12 @@ export class AuthService {
       user: authUserParser.parse(user),
     };
   }
+  
   async logout(reply: FastifyReply) {
     console.log('logout');
     removeAuthCookies(reply);
   }
+
   async getCurrentUser(req: FastifyRequest): Promise<AuthResponseDto> {
     const { accessToken } = getAuthCookies(req);
     if (!accessToken) throw new UnauthorizedException();
@@ -120,6 +122,13 @@ export class AuthService {
 
       const user = await this.prisma.appUser.findUnique({
         where: { id: `${payload.sub}` },
+        include: {
+          investorProfile: {
+            include: {
+              preferences: true,
+            },
+          },
+        },
       });
 
       if (!user) throw new UnauthorizedException();

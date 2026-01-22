@@ -30,7 +30,14 @@ export class KycController {
   @Get('autofill')
   @ApiOperation({
     summary: 'Get KYC data for contract form autofill',
-    description: 'Retrieves user KYC profile data pre-mapped to the new contract form structure (contractDetails, buyerDetails, emiratesId, passportId, documents)',
+    description: `Retrieves user data pre-mapped to contract form structure. Returns complete form data with:
+    - User profile data (name, email, phone, nationality, residence) as fallback
+    - Stored KYC identity documents (Emirates ID, Passport)
+    - Stored buyer details (job, address, emergency contacts) - reusable across contracts
+    - Verification document URLs
+    - Default values for contract-specific fields (buyerType, lead source, etc.)
+    
+    Buyer details are saved and reused across contracts to avoid re-entering the same information.`,
   })
   @ApiQuery({
     name: 'userId',
@@ -40,40 +47,62 @@ export class KycController {
   })
   @ApiResponse({
     status: 200,
-    description: 'KYC autofill data retrieved successfully.',
+    description: 'KYC autofill data retrieved successfully. All fields are populated with either stored KYC data, user profile data, or default values.',
     type: KycAutofillDataDto,
     example: {
-      userId: 'uuid-123',
-      kycProfileId: 'uuid-456',
+      userId: '17bcfe16-fca7-4059-a4a0-144dea44934a',
+      kycProfileId: 'ee3611c8-6d6f-488b-a845-80cefbfd9599',
       contractDetails: {
+        isLeadGreenList: false,
         buyerType: 'Resident',
+        representationType: 'Self',
         preferredLanguage: 'English'
       },
       buyerDetails: {
-        currentJob: 'Software Engineer',
+        isSpecialNeeds: false,
+        currentJob: '',
         country: 'United Arab Emirates',
-        city: 'Dubai',
+        city: '',
+        emailDomestic: 'john.doe@example.com',
         mobileDomestic: '+971501234567',
-        emailDomestic: 'john@example.com'
+        extCodeDomestic: ''
       },
       emiratesId: {
         nameEn: 'John Doe',
+        nameAr: 'جون دو',
+        isCitizenChild: false,
+        nationality: 'Emirati',
+        gender: 'Male',
         idNumber: '784-1995-1234567-1',
-        nationality: 'Emirati'
+        expiryDate: '2030-12-31',
+        unifiedNumber: '123456789',
+        fileNumber: 'FILE-2025-001',
+        dateOfBirth: '1995-01-15',
+        placeOfBirth: 'Dubai'
       },
       passportId: {
         number: 'A1234567',
-        nationality: 'American'
+        passportType: 'Ordinary',
+        nationality: 'American',
+        issuePlace: 'New York',
+        issueDate: '2020-01-01',
+        expiryDate: '2030-01-01',
+        dateOfBirth: '1995-01-15',
+        placeOfBirth: 'New York'
       },
       documents: {
         emiratesIdCopy: 'https://cdn.example.com/emirates-id.pdf',
-        passportCopy: 'https://cdn.example.com/passport.pdf'
+        passportCopy: 'https://cdn.example.com/passport.pdf',
+        visaCopy: 'https://cdn.example.com/visa.pdf',
+        utilityBill: '',
+        bankStatement: '',
+        personalPhoto: 'https://cdn.example.com/profile.jpg'
       }
     }
   })
   @ApiResponse({
     status: 404,
-    description: 'KYC profile not found for this user.',
+    description: 'User not found.',
   })
   async getKycAutofillData(
     @CurrentUser() user: CurrentUser,
@@ -88,7 +117,7 @@ export class KycController {
     const kycData = await this.kycService.getKycAutofillData(targetUserId);
 
     if (!kycData) {
-      throw new NotFoundException('KYC profile not found for this user');
+      throw new NotFoundException('User not found');
     }
 
     return kycData;
@@ -99,7 +128,12 @@ export class KycController {
   @Post('save-from-form')
   @ApiOperation({
     summary: 'Save contract form data to KYC profile',
-    description: 'Updates user KYC profile with data from contract form for future autofill. Expects the new ContractFormData structure.',
+    description: `Updates user KYC profile with data from contract form for future autofill. Saves:
+    - Identity documents (Emirates ID, Passport)
+    - Verification documents (Emirates ID copy, passport copy, visa, etc.)
+    - Buyer details (job, address, emergency contacts) - reusable across contracts
+    
+    Contract-specific fields (buyerType, lead source) are NOT saved as they vary per contract.`,
   })
   @ApiResponse({
     status: 200,
@@ -107,9 +141,10 @@ export class KycController {
     example: {
       id: 'uuid-123',
       userId: 'uuid-456',
-      buyerType: 'Resident',
       emiratesId: { nameEn: 'John Doe', idNumber: '784-1995-1234567-1' },
       passport: { number: 'A1234567' },
+      buyerDetails: { currentJob: 'Software Engineer', country: 'United Arab Emirates', city: 'Dubai' },
+      documents: { emiratesIdCopy: 'https://cdn.example.com/id.pdf' },
       createdAt: '2025-12-27T00:00:00.000Z',
       updatedAt: '2025-12-27T00:00:00.000Z'
     }

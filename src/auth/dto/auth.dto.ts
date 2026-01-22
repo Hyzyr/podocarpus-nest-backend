@@ -9,12 +9,16 @@ import {
   MinLength,
 } from 'class-validator';
 import { PublicUserDto } from 'src/users/dto/user.get.dto';
+import { InvestorProfileDto } from 'src/users/dto/investorProfile.dto';
 import z from 'zod';
 
 // Get shorter user information
 export const authUserParser: z.ZodType<AuthUserDto> = z.any();
 
-export class AuthUserDto extends PublicUserDto {} 
+export class AuthUserDto extends PublicUserDto {
+  @ApiPropertyOptional({ type: () => InvestorProfileDto })
+  investorProfile?: InvestorProfileDto | null;
+} 
 
 export class LoginBodyDto {
   @ApiProperty({ example: 'john.doe@example.com' })
