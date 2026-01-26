@@ -20,9 +20,13 @@ export class NotificationsService {
     return this.prisma.notification.create({ data: dto });
   }
   async getRelatedNotifications({ userId, role }: CurrentUser) {
+    // Only return user-specific notifications
+    // Global notifications are now handled by the GlobalNotification model
+    // and queried via /global-notifications endpoint
     return this.prisma.notification.findMany({
       where: {
-        OR: [{ userId }, { isGlobal: true, targetRoles: { has: role } }],
+        userId,
+        isGlobal: { not: true }, // Exclude old-style global notifications
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -38,7 +42,7 @@ export class NotificationsService {
   async markAllAsRead(user: CurrentUser) {
     // Mark all user-specific notifications as read
     await this.prisma.notification.updateMany({
-      where: { userId: user.userId, isGlobal: { not: true } },
+      where: { userId: user.userId },
       data: { status: 'read', readAt: new Date() },
     });
 

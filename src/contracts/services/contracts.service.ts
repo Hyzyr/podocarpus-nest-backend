@@ -66,6 +66,7 @@ export class ContractsService {
       contract.investorId,
       contract.id,
       propertyId,
+      contract.status,
     );
 
     return contract;
@@ -168,6 +169,9 @@ export class ContractsService {
   // Admin only
   async findAll() {
     return this.prisma.contract.findMany({
+      where: {
+        status: { not: 'draft' },
+      },
       include: {
         property: true,
         investor: {

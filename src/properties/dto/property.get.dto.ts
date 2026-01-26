@@ -15,6 +15,7 @@ import {
 } from 'src/appointments/dto/appointments.dto';
 import { ContractDto } from 'src/contracts/dto/contract.dto';
 import { InvestorProfileDto } from 'src/users/dto/investorProfile.dto';
+import { FileAttachmentDto, FileAttachmentSchema } from '../../common/dto/file-attachment.dto';
 import z from 'zod';
 
 //  for public use only
@@ -151,6 +152,14 @@ export class PublicPropertyDto {
   isTaxFreeZone?: boolean;
 
   @ApiPropertyOptional({
+    description: 'Indicates if the property is currently vacant',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isVacant?: boolean;
+
+  @ApiPropertyOptional({
     description: 'Key benefits (e.g., 100% Ownership, Tax-Free, Repatriation)',
     example: [
       '100% Foreign Ownership',
@@ -180,6 +189,12 @@ export class PublicPropertyDto {
   @IsArray()
   @IsString({ each: true })
   assets: string[];
+
+  @ApiPropertyOptional({ type: [FileAttachmentDto] })
+  @IsOptional()
+  @IsArray()
+  @Type(() => FileAttachmentDto)
+  documents?: FileAttachmentDto[];
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
@@ -262,6 +277,7 @@ export class AdminPropertyWithRelationsDto extends AdminPropertyDto {
   // userStatuses?: UserPropertyStatusDto[];
 }
 
+
 export const PublicPropertySchema = z
   .object({
     id: z.string(),
@@ -283,6 +299,9 @@ export const PublicPropertySchema = z
     city: z.string().nullable().optional(),
     country: z.string().nullable().optional(),
     images: z.array(z.string()).optional(),
+    assets: z.array(z.string()).optional(),
+    documents: z.array(FileAttachmentSchema).optional(),
+    isVacant: z.boolean().optional(),
     isEnabled: z.boolean(),
     netRoiMin: z.number().nullable().optional(),
     netRoiMax: z.number().nullable().optional(),

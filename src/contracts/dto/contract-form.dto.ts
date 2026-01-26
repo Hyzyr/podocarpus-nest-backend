@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { z } from 'zod';
+import { FileAttachmentDto, FileAttachmentSchema } from '../../common/dto/file-attachment.dto';
+import { Type } from 'class-transformer';
+import { ValidateNested, IsOptional } from 'class-validator';
 
 // ============================================================================
 // ZOD SCHEMAS FOR CONTRACT FORM DATA
@@ -86,12 +89,12 @@ export const PassportSchema = z.object({
  * Documents Schema - Specific document types
  */
 export const DocumentsSchema = z.object({
-  emiratesIdCopy: z.string(), // File URL
-  passportCopy: z.string().optional(), // File URL
-  visaCopy: z.string(), // File URL
-  utilityBill: z.string().optional(), // File URL
-  bankStatement: z.string().optional(), // File URL
-  personalPhoto: z.string().optional(), // File URL
+  emiratesIdCopy: FileAttachmentSchema,
+  passportCopy: FileAttachmentSchema.optional(),
+  visaCopy: FileAttachmentSchema,
+  utilityBill: FileAttachmentSchema.optional(),
+  bankStatement: FileAttachmentSchema.optional(),
+  personalPhoto: FileAttachmentSchema.optional(),
 }).passthrough();
 
 /**
@@ -99,11 +102,11 @@ export const DocumentsSchema = z.object({
  * This is stored in Contract.formData as JSON
  */
 export const ContractFormDataSchema = z.object({
-  contractDetails: ContractDetailsSchema.optional(),
-  buyerDetails: BuyerDetailsSchema.optional(),
-  emiratesId: EmiratesIdSchema.optional(),
-  passportId: PassportSchema.optional(),
-  documents: DocumentsSchema.optional(),
+  contractDetails: ContractDetailsSchema.partial().optional(),
+  buyerDetails: BuyerDetailsSchema.partial().optional(),
+  emiratesId: EmiratesIdSchema.partial().optional(),
+  passportId: PassportSchema.partial().optional(),
+  documents: DocumentsSchema.partial().optional(),
 }).passthrough();
 
 // ============================================================================
@@ -274,23 +277,39 @@ export class PassportDto {
  * Documents DTO for Swagger documentation
  */
 export class DocumentsDto {
-  @ApiProperty({ example: 'https://cdn.example.com/emirates-id.pdf' })
-  emiratesIdCopy: string;
+  @ApiProperty({ type: FileAttachmentDto })
+  @ValidateNested()
+  @Type(() => FileAttachmentDto)
+  emiratesIdCopy: FileAttachmentDto;
 
-  @ApiPropertyOptional({ example: 'https://cdn.example.com/passport.pdf' })
-  passportCopy?: string;
+  @ApiPropertyOptional({ type: FileAttachmentDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FileAttachmentDto)
+  passportCopy?: FileAttachmentDto;
 
-  @ApiProperty({ example: 'https://cdn.example.com/visa.pdf' })
-  visaCopy: string;
+  @ApiProperty({ type: FileAttachmentDto })
+  @ValidateNested()
+  @Type(() => FileAttachmentDto)
+  visaCopy: FileAttachmentDto;
 
-  @ApiPropertyOptional({ example: 'https://cdn.example.com/utility.pdf' })
-  utilityBill?: string;
+  @ApiPropertyOptional({ type: FileAttachmentDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FileAttachmentDto)
+  utilityBill?: FileAttachmentDto;
 
-  @ApiPropertyOptional({ example: 'https://cdn.example.com/bank.pdf' })
-  bankStatement?: string;
+  @ApiPropertyOptional({ type: FileAttachmentDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FileAttachmentDto)
+  bankStatement?: FileAttachmentDto;
 
-  @ApiPropertyOptional({ example: 'https://cdn.example.com/photo.jpg' })
-  personalPhoto?: string;
+  @ApiPropertyOptional({ type: FileAttachmentDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FileAttachmentDto)
+  personalPhoto?: FileAttachmentDto;
 }
 
 /**

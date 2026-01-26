@@ -31,7 +31,13 @@ export class ContractsNotificationsService {
     investorId: string,
     contractId: string,
     propertyId: string,
+    status?: string,
   ): Promise<void> {
+    // Don't notify admins for draft contracts
+    if (status === 'draft') {
+      return;
+    }
+
     // structured ids included in json payload so admin UI can build the correct route
     const jsonPayload = { investorId, propertyId, contractId };
 

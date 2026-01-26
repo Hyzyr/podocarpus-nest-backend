@@ -73,6 +73,11 @@ export class FindAllPropertiesQueryDto {
   @Type(() => Number)
   maxSize?: number;
 
+  @ApiPropertyOptional({ description: 'Filter by vacancy status' })
+  @IsOptional()
+  @Type(() => Boolean)
+  isVacant?: boolean;
+
   @ApiPropertyOptional({ description: 'True/false - filter by enabled status' })
   @IsOptional()
   @Type(() => Boolean)

@@ -161,7 +161,7 @@ model UserKycProfile {
   passport   Json? @db.Json // { number, passportType, nationality, issuePlace, issueDate, expiryDate, dateOfBirth, placeOfBirth }
   
   // Verification Documents (used for contract autofill)
-  documents Json? @db.Json // { emiratesIdCopy, passportCopy, visaCopy, utilityBill, bankStatement, personalPhoto }
+  documents Json? @db.Json // { emiratesIdCopy: FileAttachment, passportCopy: FileAttachment, ... }
 
   // Buyer Details (reusable across contracts for autofill)
   buyerDetails Json? @db.Json // { isSpecialNeeds, currentJob, country, city, address, mobileDomestic, emailDomestic, emergency contacts, etc }
@@ -192,7 +192,7 @@ model Property {
   city              String?
   country           String?
   images            String[]
-  assets            String[]
+  assets            String[] // Property features/amenities (e.g., ["Gym", "Pool", "Parking"])
   // `isEnabled` controls whether the property is visible/available to users.
   // Set to false to hide the property without deleting contract/investment data.
   isEnabled         Boolean  @default(true)
@@ -221,6 +221,7 @@ model Property {
   userStatuses      UserPropertyStatus[]
   contracts         Contract[]
   tenantLeases      TenantLease[]
+  documents         Json                 @default("[]") // File attachments with metadata (e.g., [{name, url, sizeMb, isPro}])
 }
 
 model GovernmentLease {

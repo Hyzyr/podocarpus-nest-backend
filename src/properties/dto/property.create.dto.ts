@@ -4,11 +4,12 @@ import {
   IsString,
   IsOptional,
   IsInt,
-  IsDateString,
   IsBoolean,
   IsArray,
   IsNumber,
+  ValidateNested,
 } from 'class-validator';
+import { FileAttachmentDto } from '../../common/dto/file-attachment.dto';
 
 export class ContractIdParamDto {
   @ApiProperty({ description: 'Contract ID' })
@@ -169,6 +170,18 @@ export class CreatePropertyDto {
   @IsArray()
   @IsString({ each: true })
   images: string[];
+
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  assets: string[];
+
+  @ApiPropertyOptional({ type: [FileAttachmentDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => FileAttachmentDto)
+  documents?: FileAttachmentDto[];
 
   @ApiProperty({
     required: false,

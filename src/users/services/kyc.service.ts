@@ -112,14 +112,19 @@ export class KycService {
       },
       
       // Documents section - from KYC or fallback to profile photo
-      documents: {
-        emiratesIdCopy: documents?.emiratesIdCopy || '',
-        passportCopy: documents?.passportCopy || '',
-        visaCopy: documents?.visaCopy || '',
-        utilityBill: documents?.utilityBill || '',
-        bankStatement: documents?.bankStatement || '',
-        personalPhoto: documents?.personalPhoto || user.profilePhotoUrl || '',
-      },
+      // Only include if we have actual document data
+      documents: documents ? {
+        emiratesIdCopy: documents.emiratesIdCopy,
+        passportCopy: documents.passportCopy,
+        visaCopy: documents.visaCopy,
+        utilityBill: documents.utilityBill,
+        bankStatement: documents.bankStatement,
+        personalPhoto: documents.personalPhoto || (user.profilePhotoUrl ? {
+          name: 'profile-photo',
+          url: user.profilePhotoUrl,
+          sizeMb: 0,
+        } : undefined),
+      } : undefined,
     };
 
     return autofillData;
@@ -133,18 +138,19 @@ export class KycService {
     const { emiratesId, passportId, documents, buyerDetails } = formData;
 
     // Save reusable data for future autofill (excluding contract-specific fields)
+    // We use JSON.parse(JSON.stringify()) to ensure class instances are converted to plain objects for Prisma
     const kycData = {
       // Emirates ID - identity document
-      emiratesId: emiratesId ? (emiratesId as Prisma.InputJsonValue) : Prisma.JsonNull,
+      emiratesId: emiratesId ? JSON.parse(JSON.stringify(emiratesId)) : undefined,
       
       // Passport - identity document
-      passport: passportId ? (passportId as Prisma.InputJsonValue) : Prisma.JsonNull,
+      passport: passportId ? JSON.parse(JSON.stringify(passportId)) : undefined,
       
-      // Documents - verification files
-      documents: documents ? (documents as Prisma.InputJsonValue) : Prisma.JsonNull,
+      // Documents - verification files (now using FileAttachment structure)
+      documents: documents ? JSON.parse(JSON.stringify(documents)) : undefined,
       
       // Buyer Details - reusable contact/address/employment info
-      buyerDetails: buyerDetails ? (buyerDetails as Prisma.InputJsonValue) : Prisma.JsonNull,
+      buyerDetails: buyerDetails ? JSON.parse(JSON.stringify(buyerDetails)) : undefined,
     };
 
     const kycProfile = await this.prisma.userKycProfile.upsert({

@@ -91,12 +91,12 @@ export class KycController {
         placeOfBirth: 'New York'
       },
       documents: {
-        emiratesIdCopy: 'https://cdn.example.com/emirates-id.pdf',
-        passportCopy: 'https://cdn.example.com/passport.pdf',
-        visaCopy: 'https://cdn.example.com/visa.pdf',
-        utilityBill: '',
-        bankStatement: '',
-        personalPhoto: 'https://cdn.example.com/profile.jpg'
+        emiratesIdCopy: { name: 'emirates_id.pdf', url: 'https://cdn.example.com/emirates-id.pdf', sizeMb: 1.5, mimeType: 'application/pdf' },
+        passportCopy: { name: 'passport.pdf', url: 'https://cdn.example.com/passport.pdf', sizeMb: 2.1, mimeType: 'application/pdf' },
+        visaCopy: { name: 'visa.pdf', url: 'https://cdn.example.com/visa.pdf', sizeMb: 1.2, mimeType: 'application/pdf' },
+        utilityBill: null,
+        bankStatement: null,
+        personalPhoto: { name: 'photo.jpg', url: 'https://cdn.example.com/profile.jpg', sizeMb: 0.5, mimeType: 'image/jpeg' }
       }
     }
   })

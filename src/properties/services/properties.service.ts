@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { CreatePropertyDto } from '../dto/property.create.dto';
 import { UpdatePropertyDto } from '../dto/property.update.dto';
@@ -134,8 +135,12 @@ export class PropertiesService {
     return property;
   }
   async create(dto: CreatePropertyDto) {
+    const { documents, ...rest } = dto;
     const property = await this.prisma.property.create({
-      data: dto,
+      data: {
+        ...rest,
+        documents: documents ? JSON.parse(JSON.stringify(documents)) : undefined,
+      },
     });
 
     if (dto.status !== 'draft')
@@ -146,9 +151,15 @@ export class PropertiesService {
     return property;
   }
   async update(id: string, dto: UpdatePropertyDto) {
+    const { documents, ...rest } = dto;
     const property = await this.prisma.property.update({
       where: { id },
-      data: dto,
+      data: {
+        ...rest,
+        ...(documents !== undefined && { 
+          documents: JSON.parse(JSON.stringify(documents)) 
+        }),
+      },
     });
     return property;
   }
