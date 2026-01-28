@@ -295,8 +295,6 @@ model Contract {
   propertyId   String
   investorId   String
   brokerId     String?
-  contractCode String
-  contractLink String?
   filesUrl     String[]
 
   // Single JSON field for all contract form data

@@ -6,7 +6,7 @@ import { createWriteStream, promises as fs } from 'fs';
 import { UPLOADS_URL } from 'src/common/constants';
 
 export type UploadCategory = 'users' | 'events' | 'properties';
-export type UploadSubcategory = 'profile' | 'banners' | 'images' | 'files';
+export type UploadSubcategory = 'profile' | 'documents' | 'banners' | 'images' | 'files';
 
 @Injectable()
 export class StorageService {

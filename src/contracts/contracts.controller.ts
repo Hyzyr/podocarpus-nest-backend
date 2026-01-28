@@ -19,6 +19,10 @@ import {
   ContractWithRelations,
   UpdateContractDto,
   CreateContractWithFormDataDto,
+  StoreDraftDto,
+  UpdateDraftDto,
+  PublishContractDto,
+  AdminUpdateContractDto,
 } from './dto/contract.dto';
 import { ContractIdParamDto } from 'src/properties/dto/property.create.dto';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
@@ -47,7 +51,6 @@ export class ContractsController {
       id: 'uuid-123',
       propertyId: 'uuid-456',
       investorId: 'uuid-789',
-      contractCode: 'CN-2025-001',
       status: 'pending',
       formData: {
         contractDetails: {
@@ -118,16 +121,22 @@ export class ContractsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'superadmin', 'investor')
+  @Roles('admin', 'superadmin')
   @Patch(':id')
   @ApiOperation({ 
-    summary: 'Update an existing contract',
-    description: `Update contract details including:f
-    - Basic contract information (dates, values, payment details)
-    - Contract status
-    - Form data (Buyer Details, Emirates ID, Passport, Documents, etc.)
-    - File URLs
-    All fields are optional - only provide the fields you want to update.`
+    summary: 'Update contract (Admin only - administrative fields)',
+    description: `Admin/Agent can update ONLY administrative fields:
+    - status (pending → active, rejected, suspended)
+    - brokerId (assign broker)
+    - notes (internal notes)
+    - contractStart/contractEnd (dates after approval)
+    - contractValue/depositPaid (confirm financial values)
+    - paymentSchedule/investorPaymentMethod/vacancyRiskLevel
+    - signedDate/fileUrl (after signing)
+    
+    ⚠️ Admins CANNOT modify:
+    - formData (legal investor data: buyerDetails, emiratesId, passportId, documents)
+    - Only the investor can edit formData via draft endpoints`
   })
   @ApiResponse({
     status: 200,
@@ -135,23 +144,108 @@ export class ContractsController {
     type: ContractDto,
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
-  @ApiResponse({ status: 400, description: 'Invalid form data.' })
-  async update(
+  @ApiResponse({ status: 403, description: 'Forbidden - cannot modify legal data.' })
+  async adminUpdate(
     @CurrentUser() user: CurrentUser,
     @Param() { id }: ContractIdParamDto,
-    @Body() dto: UpdateContractDto,
+    @Body() dto: AdminUpdateContractDto,
   ) {
-    return this.contractsService.update(user, id, dto);
+    return this.contractsService.adminUpdate(user, id, dto);
   }
+
+  // ============================================================================
+  // Draft Management Endpoints
+  // ============================================================================
+
+  @Post('draft')
+  @ApiOperation({
+    summary: 'Create a new contract draft',
+    description: `Create a contract draft with minimal validation. Investors can save incomplete contracts and continue later.
+    - No strict validation on formData
+    - Status is automatically set to 'draft'
+    - Can be updated later with updateDraft endpoint`
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Draft created successfully.',
+    type: ContractDto,
+  })
+  @ApiResponse({ status: 404, description: 'Property or investor not found.' })
+  async storeDraft(
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: StoreDraftDto,
+  ) {
+    return this.contractsService.storeDraft(user.userId, dto);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'superadmin')
+  @Roles('admin', 'superadmin', 'investor')
+  @Patch('draft/:id')
+  @ApiOperation({
+    summary: 'Update a draft contract',
+    description: `Update an existing draft contract. Only works for contracts with status 'draft'.
+    - Investors can only update their own drafts
+    - Admins can update any draft
+    - FormData is merged with existing data
+    - No strict validation required`
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft updated successfully.',
+    type: ContractDto,
+  })
+  @ApiResponse({ status: 404, description: 'Contract not found.' })
+  @ApiResponse({ status: 400, description: 'Contract is not a draft.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not your draft.' })
+  async updateDraft(
+    @CurrentUser() user: CurrentUser,
+    @Param() { id }: ContractIdParamDto,
+    @Body() dto: UpdateDraftDto,
+  ) {
+    return this.contractsService.updateDraft(user, id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin', 'investor')
+  @Post('publish/:id')
+  @ApiOperation({
+    summary: 'Publish a draft contract',
+    description: `Publish a draft contract (change status from 'draft' to 'pending').
+    - Requires full validation of formData
+    - Investors can publish their own drafts
+    - Admins can publish any draft
+    - Optional: merge additional data before publishing
+    - Admin will review and approve/reject the pending contract`
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Contract published successfully. Status changed to pending.',
+    type: ContractDto,
+  })
+  @ApiResponse({ status: 404, description: 'Contract not found.' })
+  @ApiResponse({ status: 400, description: 'Contract is already published or validation failed.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not your draft.' })
+  async publishContract(
+    @CurrentUser() user: CurrentUser,
+    @Param() { id }: ContractIdParamDto,
+    @Body() dto?: PublishContractDto,
+  ) {
+    return this.contractsService.publishContract(user, id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin', 'investor')
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a contract [AdminOnly]' })
+  @ApiOperation({ 
+    summary: 'Delete a contract',
+    description: 'Admins can delete any contract. Investors can only delete their own contracts if the status is draft or pending.'
+  })
   @ApiResponse({
     status: 200,
     description: 'Contract deleted successfully.',
   })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - check ownership or contract status.' })
   async remove(
     @CurrentUser() user: CurrentUser,
     @Param() { id }: ContractIdParamDto,

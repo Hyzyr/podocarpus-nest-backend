@@ -38,20 +38,20 @@ export const BuyerDetailsSchema = z.object({
   // Contact - Domestic
   phoneDomestic: z.string().trim().optional(),
   mobileDomestic: z.string().trim().optional(),
-  emailDomestic: z.string().email(),
+  emailDomestic: z.string().email().or(z.literal('')),
   extCodeDomestic: z.string().trim(),
   
   // Contact - Abroad
   phoneAbroad: z.string().trim().optional(),
   mobileAbroad: z.string().trim().optional(),
-  emailAbroad: z.string().email().optional(),
+  emailAbroad: z.string().email().or(z.literal('')).optional(),
   
   // Emergency Contact
   contactNameEn: z.string().trim().optional(),
   contactNameAr: z.string().trim().optional(),
   relationType: z.string().trim().optional(),
   mobileEmergency: z.string().trim().optional(),
-  emailEmergency: z.string().email().optional(),
+  emailEmergency: z.string().email().or(z.literal('')).optional(),
 }).passthrough();
 
 /**

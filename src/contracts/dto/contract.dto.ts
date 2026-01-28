@@ -32,16 +32,6 @@ export class ContractDto {
   @IsOptional()
   brokerId?: string | null;
 
-  @ApiProperty({ example: 'CN-2025-001', description: 'Unique contract code' })
-  contractCode: string;
-
-  @ApiPropertyOptional({
-    example: 'https://example.com/contract.pdf',
-    description: 'Link to contract file',
-  })
-  @IsOptional()
-  contractLink?: string | null;
-
   @ApiPropertyOptional({
     example: 'https://cdn.example.com/uploads/file.pdf',
     description: 'Uploaded file URL',
@@ -246,15 +236,6 @@ export class CreateContractDto {
   @IsUUID()
   brokerId?: string | null;
 
-  @ApiProperty({ example: 'CN-2025-001' })
-  @IsString()
-  contractCode: string;
-
-  @ApiPropertyOptional({ example: 'https://example.com/contract.pdf' })
-  @IsOptional()
-  @IsString()
-  contractLink?: string | null;
-
   @ApiPropertyOptional({ example: 'https://cdn.example.com/uploads/file.pdf' })
   @IsOptional()
   @IsString()
@@ -421,4 +402,280 @@ export class CreateContractWithFormDataDto extends CreateContractDto {
   @IsArray()
   @IsString({ each: true })
   filesUrl?: string[];
+}
+
+// ============================================================================
+// Draft Management DTOs
+// ============================================================================
+
+export class StoreDraftDto {
+  @ApiProperty({ example: 'uuid', description: 'Property ID' })
+  @IsUUID()
+  propertyId: string;
+
+  @ApiProperty({ example: 'uuid', description: 'Investor ID' })
+  @IsUUID()
+  investorId: string;
+
+  @ApiPropertyOptional({ example: 'uuid', description: 'Broker ID' })
+  @IsOptional()
+  @IsUUID()
+  brokerId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Partial contract form data (can be incomplete for drafts)',
+    type: () => ContractFormDataDto,
+    example: {
+      buyerDetails: {
+        currentJob: 'Software Engineer',
+        emailDomestic: 'john@example.com'
+      }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  formData?: ContractFormData;
+
+  @ApiPropertyOptional({
+    description: 'Array of file URLs',
+    example: ['https://cdn.example.com/draft-doc.pdf']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  filesUrl?: string[];
+
+  @ApiPropertyOptional({
+    type: String,
+    example: 'Draft notes or comments'
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string | null;
+}
+
+export class UpdateDraftDto {
+  @ApiPropertyOptional({ example: 'uuid', description: 'Broker ID' })
+  @IsOptional()
+  @IsUUID()
+  brokerId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Partial contract form data updates',
+    type: () => ContractFormDataDto,
+    example: {
+      buyerDetails: {
+        mobileDomestic: '+971501234567'
+      },
+      emiratesId: {
+        idNumber: '784-1995-1234567-1'
+      }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  formData?: ContractFormData;
+
+  @ApiPropertyOptional({
+    description: 'Array of file URLs',
+    example: ['https://cdn.example.com/contract.pdf']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  filesUrl?: string[];
+
+  @ApiPropertyOptional({ example: 'https://cdn.example.com/uploads/file.pdf' })
+  @IsOptional()
+  @IsString()
+  fileUrl?: string | null;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  signedDate?: Date | null;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  contractStart?: Date | null;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  contractEnd?: Date | null;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @Type(() => Number)
+  contractValue?: number | null;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @Type(() => Number)
+  depositPaid?: number | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  investorPaymentMethod?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  paymentSchedule?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  vacancyRiskLevel?: string | null;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  notes?: string | null;
+}
+
+export class PublishContractDto {
+  @ApiPropertyOptional({
+    description: 'Optional additional data to merge before publishing',
+    type: () => ContractFormDataDto,
+    example: {
+      documents: {
+        bankStatement: 'https://cdn.example.com/bank.pdf'
+      }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  formData?: ContractFormData;
+
+  @ApiPropertyOptional({
+    description: 'Additional files to add before publishing',
+    example: ['https://cdn.example.com/final-contract.pdf']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  filesUrl?: string[];
+}
+
+// ============================================================================
+// Admin Update DTO - Limited fields for agents/admins
+// ============================================================================
+
+/**
+ * Admin Update DTO - Restricted to administrative fields only.
+ * 
+ * Admins/Agents CANNOT edit:
+ * - formData (legal investor data: contractDetails, buyerDetails, emiratesId, passportId, documents)
+ * 
+ * Admins/Agents CAN edit:
+ * - status (pending → active, rejected, suspended, etc.)
+ * - brokerId (assign/reassign broker)
+ * - notes (internal notes)
+ * - contractStart/contractEnd (set dates after approval)
+ * - contractValue/depositPaid (confirm financial values)
+ * - paymentSchedule/investorPaymentMethod/vacancyRiskLevel (administrative details)
+ */
+export class AdminUpdateContractDto {
+  @ApiPropertyOptional({
+    enum: ContractStatus,
+    description: 'Contract status. Admins can change pending → active, rejected, suspended, etc.',
+    example: 'active',
+  })
+  @IsOptional()
+  @IsEnum(ContractStatus)
+  status?: ContractStatus;
+
+  @ApiPropertyOptional({ 
+    example: 'uuid', 
+    description: 'Assign or reassign a broker to this contract' 
+  })
+  @IsOptional()
+  @IsUUID()
+  brokerId?: string | null;
+
+  @ApiPropertyOptional({
+    type: String,
+    example: 'Contract reviewed and approved by admin',
+    description: 'Internal notes for administrators'
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string | null;
+
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'Contract start date (set by admin after approval)',
+  })
+  @IsOptional()
+  @IsDateString()
+  contractStart?: Date | null;
+
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'Contract end date (set by admin after approval)',
+  })
+  @IsOptional()
+  @IsDateString()
+  contractEnd?: Date | null;
+
+  @ApiPropertyOptional({
+    type: Number,
+    example: 500000,
+    description: 'Confirmed contract value',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  contractValue?: number | null;
+
+  @ApiPropertyOptional({
+    type: Number,
+    example: 50000,
+    description: 'Confirmed deposit amount',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  depositPaid?: number | null;
+
+  @ApiPropertyOptional({
+    example: 'Bank Transfer',
+    description: 'Payment method (Bank Transfer, Installments, etc.)',
+  })
+  @IsOptional()
+  @IsString()
+  investorPaymentMethod?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Monthly',
+    description: 'Payment schedule (Monthly, Quarterly, Annual)',
+  })
+  @IsOptional()
+  @IsString()
+  paymentSchedule?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Low',
+    description: 'Vacancy risk assessment (Low, Medium, High)',
+  })
+  @IsOptional()
+  @IsString()
+  vacancyRiskLevel?: string | null;
+
+  @ApiPropertyOptional({ 
+    example: 'https://cdn.example.com/signed-contract.pdf',
+    description: 'Signed contract file URL (set by admin after signing)'
+  })
+  @IsOptional()
+  @IsString()
+  fileUrl?: string | null;
+
+  @ApiPropertyOptional({ 
+    format: 'date-time',
+    description: 'Date the contract was signed (set by admin)'
+  })
+  @IsOptional()
+  @IsDateString()
+  signedDate?: Date | null;
 }
