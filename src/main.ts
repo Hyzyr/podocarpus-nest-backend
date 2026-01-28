@@ -26,21 +26,26 @@ async function bootstrap() {
 
   // Register plugins
   // >>> file management
+  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(multipart, {
     limits: {
       fileSize: 6 * 1024 * 1024, // 6 MB per file
     },
   });
+  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(fastifyStatic, {
     root: join(process.cwd(), UPLOADS_URL.replaceAll('/', '')), // local uploads folder
     prefix: `${UPLOADS_URL}/`, // URL prefix
   });
 
   // >>> cookies & cors management
+  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register<FastifyCookieOptions>(cookie, {
     secret: COOKIE_SECRET,
   });
+  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(helmet);
+  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(cors, {
     origin: ['http://localhost:3000'],
     credentials: true,
