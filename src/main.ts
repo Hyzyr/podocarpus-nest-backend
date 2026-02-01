@@ -47,7 +47,11 @@ async function bootstrap() {
   await app.register(helmet);
   // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(cors, {
-    origin: ['http://localhost:3000'],
+     origin: [
+      'http://localhost:3000',
+      'https://pdcps.co',
+      'https://www.pdcps.co',
+    ],
     credentials: true,
   });
 
