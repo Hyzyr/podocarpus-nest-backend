@@ -57,6 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
 uploads/*
+uploads-seed/*
 .todo
 .github/prompts/*
 *.prompt.md
