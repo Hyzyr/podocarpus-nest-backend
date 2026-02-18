@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
+  IsOptional,
   IsPhoneNumber,
   IsString,
   MinLength,
@@ -116,4 +117,36 @@ export class OnboardStep2Dto {
   @ApiProperty({ type: Boolean, example: false })
   @IsBoolean()
   interestedInEvents: boolean;
+}
+
+export class UpdateProfileDto {
+  @ApiPropertyOptional({ type: String, example: 'John' })
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional({ type: String, example: 'Smith' })
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiPropertyOptional({ type: String, example: '+701352652365' })
+  @IsPhoneNumber()
+  @IsOptional()
+  phone?: string;
+
+  @ApiPropertyOptional({ type: String, example: 'UAE, Dubai' })
+  @IsString()
+  @IsOptional()
+  recidence?: string;
+
+  @ApiPropertyOptional({ type: String, example: 'American' })
+  @IsString()
+  @IsOptional()
+  nationality?: string;
+
+  @ApiPropertyOptional({ type: String, example: 'https://example.com/photos/user123.jpg' })
+  @IsString()
+  @IsOptional()
+  profilePhotoUrl?: string;
 }

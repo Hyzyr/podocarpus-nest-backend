@@ -27,6 +27,7 @@ import {
   authUserParser,
   OnboardStep1Dto,
   OnboardStep2Dto,
+  UpdateProfileDto,
 } from '../dto/auth.dto';
 
 @Injectable()
@@ -263,5 +264,25 @@ export class AuthService {
     else throw new UnauthorizedException('Only Investors Allowed');
 
     return { status: 'success', message: 'Step 2 saved successfully' };
+  }
+
+  async updateProfile(user: CurrentUser, dto: UpdateProfileDto) {
+    const { userId } = user;
+
+    const updatedUser = await this.prisma.appUser.update({
+      where: { id: userId.toString() },
+      data: dto,
+      include: {
+        investorProfile: {
+          include: {
+            preferences: true,
+          },
+        },
+      },
+    });
+
+    return {
+      user: authUserParser.parse(updatedUser),
+    };
   }
 }

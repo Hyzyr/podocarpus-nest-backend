@@ -61,3 +61,4 @@ uploads-seed/*
 .todo
 .github/prompts/*
 *.prompt.md
+git-activity-report-*

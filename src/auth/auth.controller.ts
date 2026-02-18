@@ -2,13 +2,14 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
-import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CommonResponse } from 'src/common/types/common.dto';
@@ -21,8 +22,10 @@ import {
   RegisterBodyDto,
   RequestPasswordResetDto,
   ResetPasswordDto,
+  UpdateProfileDto,
 } from './dto/auth.dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private auth: AuthService) {}
@@ -139,5 +142,25 @@ export class AuthController {
     @Body() dto: OnboardStep2Dto,
   ) {
     return this.auth.onboardStep2(user, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Update current user profile',
+    description: 'Update profile information for the currently logged-in user, including profile photo URL'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async updateProfile(
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.auth.updateProfile(user, dto);
   }
 }
