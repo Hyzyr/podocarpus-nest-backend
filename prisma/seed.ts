@@ -42,100 +42,85 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Type alias for the transaction client
+type TxClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
 /**
  * Seed superadmin user
  */
-async function seedSuperAdmin() {
+async function seedSuperAdmin(tx: TxClient) {
   console.log('🔐 Seeding superadmin user...');
 
-  try {
-    const existingSuperadmin = await prisma.appUser.findFirst({
-      where: { role: UserRole.superadmin },
-    });
+  const existingSuperadmin = await tx.appUser.findFirst({
+    where: { role: UserRole.superadmin },
+  });
 
-    if (existingSuperadmin) {
-      console.log('ℹ️  Superadmin already exists:', existingSuperadmin.email);
-      return existingSuperadmin;
-    }
-
-    const passwordHash = await bcrypt.hash(superAdminConfig.password, 10);
-    const superadmin = await prisma.appUser.create({
-      data: {
-        email: superAdminConfig.email,
-        passwordHash,
-        role: UserRole.superadmin,
-        isEnabled: true,
-        firstName: superAdminConfig.firstName,
-        lastName: superAdminConfig.lastName,
-        emailVerified: true,
-        onboardingCompleted: true,
-      },
-    });
-
-    console.log('✅ Superadmin created:', superadmin.email);
-    console.log('⚠️  Default credentials - CHANGE PASSWORD after first login!');
-    return superadmin;
-  } catch (error) {
-    console.error('❌ Error creating superadmin:', error);
-    throw error;
+  if (existingSuperadmin) {
+    console.log('ℹ️  Superadmin already exists:', existingSuperadmin.email);
+    return existingSuperadmin;
   }
+
+  const passwordHash = await bcrypt.hash(superAdminConfig.password, 10);
+  const superadmin = await tx.appUser.create({
+    data: {
+      email: superAdminConfig.email,
+      passwordHash,
+      role: UserRole.superadmin,
+      isEnabled: true,
+      firstName: superAdminConfig.firstName,
+      lastName: superAdminConfig.lastName,
+      emailVerified: true,
+      onboardingCompleted: true,
+    },
+  });
+
+  console.log('✅ Superadmin created:', superadmin.email);
+  console.log('⚠️  Default credentials - CHANGE PASSWORD after first login!');
+  return superadmin;
 }
 
 /**
  * Seed properties
  */
-async function seedProperties() {
+async function seedProperties(tx: TxClient) {
   console.log('🏢 Seeding properties...');
 
-  try {
-    // Check if properties already exist
-    const existingCount = await prisma.property.count();
+  const existingCount = await tx.property.count();
 
-    if (existingCount > 0) {
-      console.log(
-        `ℹ️  ${existingCount} properties already exist, skipping seed`,
-      );
-      return;
-    }
-
-    // Create properties using createMany
-    const result = await prisma.property.createMany({
-      data: properties,
-      skipDuplicates: true,
-    });
-
-    console.log(`✅ Created ${result.count} properties`);
-  } catch (error) {
-    console.error('❌ Error seeding properties:', error);
-    throw error;
+  if (existingCount > 0) {
+    console.log(
+      `ℹ️  ${existingCount} properties already exist, skipping seed`,
+    );
+    return;
   }
+
+  const result = await tx.property.createMany({
+    data: properties,
+    skipDuplicates: true,
+  });
+
+  console.log(`✅ Created ${result.count} properties`);
 }
 
 /**
  * Seed events
  */
-async function seedEvents() {
+async function seedEvents(tx: TxClient) {
   console.log('🎉 Seeding events...');
 
-  try {
-    const existingCount = await prisma.event.count();
+  const existingCount = await tx.event.count();
 
-    if (existingCount > 0) {
-      console.log(`ℹ️  ${existingCount} events already exist, skipping seed`);
-      return;
-    }
-
-    // Create events using createMany
-    const result = await prisma.event.createMany({
-      data: events,
-      skipDuplicates: true,
-    });
-
-    console.log(`✅ Created ${result.count} events`);
-  } catch (error) {
-    console.error('❌ Error seeding events:', error);
-    throw error;
+  if (existingCount > 0) {
+    console.log(`ℹ️  ${existingCount} events already exist, skipping seed`);
+    return;
   }
+
+  const result = await tx.event.createMany({
+    data: events,
+    skipDuplicates: true,
+  });
+
+  console.log(`✅ Created ${result.count} events`);
 }
 
 /**
@@ -147,18 +132,10 @@ async function main() {
   const startTime = Date.now();
 
   try {
-    // Run all seed functions in a transaction for data integrity
     await prisma.$transaction(async (tx) => {
-      // Temporarily replace global prisma with transaction client
-      const originalPrisma = global.prisma;
-      (global as any).prisma = tx;
-
-      await seedSuperAdmin();
-      await seedProperties();
-      await seedEvents();
-
-      // Restore global prisma
-      (global as any).prisma = originalPrisma;
+      await seedSuperAdmin(tx);
+      await seedProperties(tx);
+      await seedEvents(tx);
     });
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);

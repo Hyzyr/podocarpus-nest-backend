@@ -100,7 +100,7 @@ export class ContractsService {
     }
 
     // 2. Build admin update data (explicitly exclude formData)
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (dto.status !== undefined) updateData.status = dto.status;
     if (dto.brokerId !== undefined) updateData.brokerId = dto.brokerId;
     if (dto.notes !== undefined) updateData.notes = dto.notes;
@@ -221,16 +221,16 @@ export class ContractsService {
     }
 
     // 4. Merge formData if provided (deep merge)
-    let mergedFormData = existing.formData as any;
+    let mergedFormData: Prisma.InputJsonValue | null = existing.formData as Prisma.InputJsonValue;
     if (dto.formData) {
       mergedFormData = {
         ...(existing.formData as object || {}),
         ...dto.formData,
-      };
+      } as Prisma.InputJsonValue;
     }
 
     // 5. Build update data
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (dto.brokerId !== undefined) updateData.brokerId = dto.brokerId;
     if (dto.fileUrl !== undefined) updateData.fileUrl = dto.fileUrl;
     if (dto.filesUrl !== undefined) updateData.filesUrl = dto.filesUrl;
@@ -279,14 +279,14 @@ export class ContractsService {
     }
 
     // 4. Merge any additional data provided
-    let finalFormData = existing.formData as any;
+    let finalFormData: Prisma.InputJsonValue | null = existing.formData as Prisma.InputJsonValue;
     let finalFilesUrl = existing.filesUrl;
 
     if (dto?.formData) {
       finalFormData = {
         ...(existing.formData as object || {}),
         ...dto.formData,
-      };
+      } as Prisma.InputJsonValue;
     }
 
     if (dto?.filesUrl) {

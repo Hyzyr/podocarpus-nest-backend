@@ -44,6 +44,15 @@ export class CreateTenantLeaseDto {
   monthlyRent: number;
 
   @ApiPropertyOptional({
+    description: 'Annual rent amount (total for the year)',
+    example: 60000,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  annualRent?: number;
+
+  @ApiPropertyOptional({
     description: 'Payment method',
     example: 'Bank Transfer',
   })

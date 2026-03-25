@@ -84,6 +84,10 @@ async function bootstrap() {
   // NOTE: SwaggerModule.setup already exposes the OpenAPI JSON at /swagger-json for the
   // Fastify/Express adapter. Removing a manual registration to avoid duplicated routes.
 
+  // Health check (outside /api prefix — accessible at GET /health)
+  const fastify = app.getHttpAdapter().getInstance();
+  fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+
   await app.listen(PORT, '0.0.0.0');
   console.log(`✅ Server listening on http://localhost:${PORT}`);
 }

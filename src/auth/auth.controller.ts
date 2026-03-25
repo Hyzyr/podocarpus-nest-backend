@@ -14,6 +14,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CommonResponse } from 'src/common/types/common.dto';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { Throttle } from '@nestjs/throttler';
 import {
   AuthResponseDto,
   LoginBodyDto,
@@ -31,6 +32,7 @@ export class AuthController {
   constructor(private auth: AuthService) {}
 
   @Post('register')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: 201,
@@ -45,6 +47,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({
     status: 200,
@@ -95,6 +98,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
   @ApiOperation({ summary: 'Request a password reset email' })
   @ApiResponse({
     status: 200,
@@ -105,6 +109,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({ summary: 'Reset password using token' })
   @ApiResponse({
     status: 200,

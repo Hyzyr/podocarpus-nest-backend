@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Property Seed Data — 29 Properties</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; font-size: 13px; background: #f0f2f5; color: #222; }
+    header {
+      background: #1a2a3a; color: #fff; padding: 14px 20px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    header h1 { font-size: 18px; font-weight: 700; }
+    header span { font-size: 12px; opacity: .7; }
+    .toolbar {
+      background: #fff; border-bottom: 1px solid #ddd;
+      padding: 8px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    }
+    .toolbar label { font-size: 12px; color: #555; }
+    .toolbar input, .toolbar select {
+      border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 12px;
+    }
+    .toolbar input { width: 200px; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .badge-vacant   { background: #fde8e8; color: #c0392b; }
+    .badge-rented   { background: #e8f8ee; color: #27ae60; }
+    .badge-dmcc     { background: #eaf4ff; color: #2980b9; }
+
+    .wrap { overflow-x: auto; padding: 16px; }
+    table { border-collapse: collapse; min-width: 1600px; width: 100%; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    thead tr { background: #1a2a3a; color: #fff; }
+    thead th { padding: 9px 10px; text-align: left; font-size: 12px; font-weight: 600; white-space: nowrap; position: sticky; top: 0; }
+    thead th.num { width: 38px; text-align: center; }
+    tbody tr { border-bottom: 1px solid #eee; transition: background .15s; }
+    tbody tr:hover { background: #f7f9fc; }
+    tbody tr.vacant-row { background: #fffaf9; }
+    td { padding: 7px 10px; vertical-align: top; }
+    td.num { text-align: center; color: #888; font-size: 12px; }
+    .title-cell { font-weight: 600; }
+    .sub { font-size: 11px; color: #666; margin-top: 2px; }
+    .roi { font-weight: 700; color: #2a7a2a; }
+    .roi-null { color: #aaa; }
+    .price { font-weight: 600; }
+
+    /* editable cells highlight */
+    [contenteditable="true"] {
+      outline: none; cursor: text;
+      border-bottom: 1px dashed #bbb;
+      min-width: 50px; display: inline-block;
+    }
+    [contenteditable="true"]:focus {
+      border-bottom: 2px solid #2980b9;
+      background: #eaf4ff;
+    }
+    .edit-hint { font-size: 10px; color: #aaa; margin-top: 4px; }
+
+    .filter-match { background: #fffacd !important; }
+
+    footer { text-align: center; padding: 20px; color: #888; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Property Seed Data</h1>
+  <span>29 properties — Source: Assets 15.12.2025.csv</span>
+  <span style="margin-left:auto; font-size:11px;">Click any cell with dashed underline to edit &nbsp;|&nbsp; Changes are visual only — copy values back to seed-data.ts</span>
+</header>
+
+<div class="toolbar">
+  <label>Filter: <input type="text" id="filterInput" placeholder="Search title, building, area…" oninput="applyFilter()" /></label>
+  <label>Area:
+    <select id="areaFilter" onchange="applyFilter()">
+      <option value="">All areas</option>
+      <option>Dubai Marina</option>
+      <option>Al Furjan</option>
+      <option>Jumeirah Village Triangle (JVT)</option>
+      <option>Jumeirah Lake Towers (JLT)</option>
+    </select>
+  </label>
+  <label>Status:
+    <select id="statusFilter" onchange="applyFilter()">
+      <option value="">All</option>
+      <option value="Rented">Rented</option>
+      <option value="Vacant">Vacant</option>
+    </select>
+  </label>
+  <span id="count" style="font-size:12px;color:#555;"></span>
+</div>
+
+<div class="wrap">
+<table id="propTable">
+  <thead>
+    <tr>
+      <th class="num">#</th>
+      <th>Title</th>
+      <th>Building</th>
+      <th>Unit No</th>
+      <th>Floor</th>
+      <th>Area / Location</th>
+      <th>Condition / Furnishing</th>
+      <th>Size (sqft)</th>
+      <th>SC Rate/sqft</th>
+      <th>SC Total (yr)</th>
+      <th>Purchase Price (AED)</th>
+      <th>Net ROI %</th>
+      <th>Status</th>
+      <th>Tax-Free Zone?</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody id="tbody">
+  </tbody>
+</table>
+</div>
+
+<footer>Double-click a cell to edit. Changes are <strong>visual only</strong> — update <code>prisma/seed-data.ts</code> accordingly.</footer>
+
+<script>
+const properties = [
+  {
+    no: 1, title: "Marina Pinnacle - Unit 5105", building: "Marina Pinnacle",
+    unitNo: "5105", floor: 51, area: "Dubai Marina",
+    condition: "Furnished & balcony",
+    unitTotalSize: 1583.26, serviceChargePerSqft: 17.28, serviceChargeTotal: 24760.34,
+    contractValue: 1850000, netRoi: null, status: "Vacant", isTaxFreeZone: false,
+    description: "Furnished apartment with balcony in Marina Pinnacle, Dubai Marina.",
+  },
+  {
+    no: 2, title: "Marina Pinnacle - Unit 5904", building: "Marina Pinnacle",
+    unitNo: "5904", floor: 59, area: "Dubai Marina",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 1583.26, serviceChargePerSqft: 17.28, serviceChargeTotal: 24760.34,
+    contractValue: 1940000, netRoi: null, status: "Vacant", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Marina Pinnacle, Dubai Marina.",
+  },
+  {
+    no: 3, title: "Prime Residency 3 - Unit 320", building: "Prime Residency 3",
+    unitNo: "320", floor: 3, area: "Al Furjan",
+    condition: "Fully fitted kitchen & balcony",
+    unitTotalSize: 401.49, serviceChargePerSqft: 10.50, serviceChargeTotal: 4215.65,
+    contractValue: 456569, netRoi: null, status: "Rented", isTaxFreeZone: false,
+    description: "Fully fitted kitchen with balcony in Prime Residency 3, Al Furjan.",
+  },
+  {
+    no: 4, title: "Al Jawhara - Unit 1107", building: "Al Jawhara",
+    unitNo: "1107", floor: 11, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 457.25, serviceChargePerSqft: 15.23, serviceChargeTotal: 6093.52,
+    contractValue: 450000, netRoi: 8.42, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 5, title: "Al Jawhara - Unit 1307", building: "Al Jawhara",
+    unitNo: "1307", floor: 13, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 460.37, serviceChargePerSqft: 15.23, serviceChargeTotal: 6103.27,
+    contractValue: 450000, netRoi: 8.64, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 6, title: "Al Jawhara - Unit 2010", building: "Al Jawhara",
+    unitNo: "2010", floor: 20, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Furnished & balcony",
+    unitTotalSize: 436.48, serviceChargePerSqft: 15.23, serviceChargeTotal: 5749.17,
+    contractValue: 450000, netRoi: 8.72, status: "Rented", isTaxFreeZone: false,
+    description: "Furnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 7, title: "Al Jawhara - Unit 1608", building: "Al Jawhara",
+    unitNo: "1608", floor: 16, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 467.05, serviceChargePerSqft: 15.23, serviceChargeTotal: 6242.62,
+    contractValue: 450000, netRoi: 5.19, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 8, title: "Al Jawhara - Unit 1207", building: "Al Jawhara",
+    unitNo: "1207", floor: 12, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 460.59, serviceChargePerSqft: 15.23, serviceChargeTotal: 6106.62,
+    contractValue: 450000, netRoi: 5.87, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 9, title: "Al Jawhara - Unit 1405", building: "Al Jawhara",
+    unitNo: "1405", floor: 14, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 466.83, serviceChargePerSqft: 15.23, serviceChargeTotal: 6241.10,
+    contractValue: 450000, netRoi: 8.39, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 10, title: "Al Jawhara - Unit 1205", building: "Al Jawhara",
+    unitNo: "1205", floor: 12, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 466.29, serviceChargePerSqft: 15.23, serviceChargeTotal: 6239.43,
+    contractValue: 450000, netRoi: 8.39, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 11, title: "Al Jawhara - Unit 907", building: "Al Jawhara",
+    unitNo: "907", floor: 9, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 457.03, serviceChargePerSqft: 15.23, serviceChargeTotal: 6090.17,
+    contractValue: 450000, netRoi: 8.42, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 12, title: "Al Jawhara - Unit 1408", building: "Al Jawhara",
+    unitNo: "1408", floor: 14, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 467.05, serviceChargePerSqft: 15.23, serviceChargeTotal: 6242.62,
+    contractValue: 450000, netRoi: 3.13, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 13, title: "Al Jawhara - Unit 1308", building: "Al Jawhara",
+    unitNo: "1308", floor: 13, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 467.69, serviceChargePerSqft: 15.23, serviceChargeTotal: 6245.98,
+    contractValue: 450000, netRoi: null, status: "Vacant", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 14, title: "Al Jawhara - Unit 1108", building: "Al Jawhara",
+    unitNo: "1108", floor: 11, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 467.05, serviceChargePerSqft: 15.23, serviceChargeTotal: 6242.62,
+    contractValue: 450000, netRoi: 3.44, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 15, title: "Al Jawhara - Unit 1110", building: "Al Jawhara",
+    unitNo: "1110", floor: 11, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Furnished & balcony",
+    unitTotalSize: 448.10, serviceChargePerSqft: 15.23, serviceChargeTotal: 5785.27,
+    contractValue: 450000, netRoi: 8.71, status: "Rented", isTaxFreeZone: false,
+    description: "Furnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 16, title: "Al Jawhara - Unit 1208", building: "Al Jawhara",
+    unitNo: "1208", floor: 12, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Furnished & balcony",
+    unitTotalSize: 469.74, serviceChargePerSqft: 15.23, serviceChargeTotal: 6252.52,
+    contractValue: 450000, netRoi: 8.61, status: "Rented", isTaxFreeZone: false,
+    description: "Furnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 17, title: "Al Jawhara - Unit 1007", building: "Al Jawhara",
+    unitNo: "1007", floor: 10, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 460.37, serviceChargePerSqft: 15.23, serviceChargeTotal: 6103.27,
+    contractValue: 450000, netRoi: 8.42, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 18, title: "Al Jawhara - Unit 1508", building: "Al Jawhara",
+    unitNo: "1508", floor: 15, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Furnished & balcony",
+    unitTotalSize: 469.74, serviceChargePerSqft: 15.23, serviceChargeTotal: 6252.52,
+    contractValue: 450000, netRoi: null, status: "Vacant", isTaxFreeZone: false,
+    description: "Furnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 19, title: "Al Jawhara - Unit 1310", building: "Al Jawhara",
+    unitNo: "1310", floor: 13, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 444.66, serviceChargePerSqft: 15.23, serviceChargeTotal: 5772.17,
+    contractValue: 450000, netRoi: 2.42, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 20, title: "Al Jawhara - Unit 1305", building: "Al Jawhara",
+    unitNo: "1305", floor: 13, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Semi furnished & balcony",
+    unitTotalSize: 466.29, serviceChargePerSqft: 15.23, serviceChargeTotal: 6239.43,
+    contractValue: 450000, netRoi: 8.61, status: "Rented", isTaxFreeZone: false,
+    description: "Semi-furnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 21, title: "Al Jawhara - Unit 1105", building: "Al Jawhara",
+    unitNo: "1105", floor: 11, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 466.83, serviceChargePerSqft: 15.23, serviceChargeTotal: 6241.10,
+    contractValue: 450000, netRoi: 3.36, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 22, title: "Al Jawhara - Unit 1210", building: "Al Jawhara",
+    unitNo: "1210", floor: 12, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Unfurnished & balcony",
+    unitTotalSize: 444.33, serviceChargePerSqft: 15.23, serviceChargeTotal: 5772.17,
+    contractValue: 450000, netRoi: 8.72, status: "Rented", isTaxFreeZone: false,
+    description: "Unfurnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 23, title: "Al Jawhara - Unit 1505", building: "Al Jawhara",
+    unitNo: "1505", floor: 15, area: "Jumeirah Village Triangle (JVT)",
+    condition: "Furnished & balcony",
+    unitTotalSize: 469.52, serviceChargePerSqft: 15.23, serviceChargeTotal: 6250.85,
+    contractValue: 450000, netRoi: 8.61, status: "Rented", isTaxFreeZone: false,
+    description: "Furnished apartment with balcony in Al Jawhara, JVT.",
+  },
+  {
+    no: 24, title: "Gold Tower - Unit 5A (B3-05-01)", building: "Gold Tower",
+    unitNo: "B3-05-01", floor: 5, area: "Jumeirah Lake Towers (JLT)",
+    condition: "Furnished",
+    unitTotalSize: 1120.95, serviceChargePerSqft: 19.17, serviceChargeTotal: 21488.61,
+    contractValue: 4100000, netRoi: 18.22, status: "Rented", isTaxFreeZone: true,
+    description: "Furnished commercial unit in Gold Tower, JLT/DMCC Freezone.",
+  },
+  {
+    no: 25, title: "Mazaya - Unit 2905", building: "Mazaya",
+    unitNo: "2905", floor: 29, area: "Jumeirah Lake Towers (JLT)",
+    condition: "Furnished",
+    unitTotalSize: 1689.18, serviceChargePerSqft: 13.08, serviceChargeTotal: 22094.47,
+    contractValue: 3250000, netRoi: 30.94, status: "Rented", isTaxFreeZone: true,
+    description: "Furnished commercial unit on the 29th floor of Mazaya Business Avenue, JLT/DMCC.",
+  },
+  {
+    no: 26, title: "Fortune Tower - Units 2005/2006", building: "Fortune Tower",
+    unitNo: "2005/2006", floor: 20, area: "Jumeirah Lake Towers (JLT)",
+    condition: "Furnished",
+    unitTotalSize: 2620.00, serviceChargePerSqft: 14.88, serviceChargeTotal: 38985.60,
+    contractValue: 6600000, netRoi: 47.28, status: "Rented", isTaxFreeZone: true,
+    description: "Large furnished commercial unit spanning units 2005 & 2006 in Fortune Tower, JLT.",
+  },
+  {
+    no: 27, title: "Silver Tower - Unit 11K", building: "Silver Tower",
+    unitNo: "11K", floor: 11, area: "Jumeirah Lake Towers (JLT)",
+    condition: "Furnished",
+    unitTotalSize: 1164.00, serviceChargePerSqft: null, serviceChargeTotal: null,
+    contractValue: 4550000, netRoi: 56.59, status: "Rented", isTaxFreeZone: true,
+    description: "Furnished commercial unit on the 11th floor of Silver Tower, JLT/DMCC.",
+  },
+  {
+    no: 28, title: "Silver Tower - Unit 4K", building: "Silver Tower",
+    unitNo: "4K", floor: 4, area: "Jumeirah Lake Towers (JLT)",
+    condition: "Furnished",
+    unitTotalSize: 1164.00, serviceChargePerSqft: null, serviceChargeTotal: null,
+    contractValue: 4450000, netRoi: null, status: "Rented", isTaxFreeZone: true,
+    description: "Furnished commercial unit on the 4th floor of Silver Tower, JLT/DMCC.",
+  },
+  {
+    no: 29, title: "Marina Plaza - Unit 3503", building: "Marina Plaza",
+    unitNo: "3503", floor: 35, area: "Dubai Marina",
+    condition: "Furnished",
+    unitTotalSize: 3724.31, serviceChargePerSqft: null, serviceChargeTotal: 89968.04,
+    contractValue: 16300000, netRoi: null, status: "Rented", isTaxFreeZone: false,
+    description: "Furnished apartment on the 35th floor of Marina Plaza, Dubai Marina.",
+  },
+];
+
+function fmt(n, digits = 0) {
+  if (n == null) return '<span style="color:#bbb">—</span>';
+  return n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function eb(value) {
+  // editable cell
+  return `<span contenteditable="true" spellcheck="false">${value ?? '—'}</span>`;
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  data.forEach(p => {
+    const tr = document.createElement('tr');
+    if (p.status === 'Vacant') tr.classList.add('vacant-row');
+    tr.dataset.area = p.area;
+    tr.dataset.status = p.status;
+    tr.dataset.search = (p.title + p.building + p.area + p.unitNo + p.condition + p.description).toLowerCase();
+
+    const roiHtml = p.netRoi != null
+      ? `<span class="roi">${p.netRoi.toFixed(2)}%</span>`
+      : `<span class="roi-null">—</span>`;
+
+    const statusBadge = p.status === 'Vacant'
+      ? `<span class="badge badge-vacant">Vacant</span>`
+      : `<span class="badge badge-rented">Rented</span>`;
+
+    const dmccBadge = p.isTaxFreeZone
+      ? `<span class="badge badge-dmcc">DMCC</span>`
+      : `<span style="color:#bbb;font-size:11px;">—</span>`;
+
+    tr.innerHTML = `
+      <td class="num">${p.no}</td>
+      <td class="title-cell">${eb(p.title)}</td>
+      <td>${eb(p.building)}</td>
+      <td>${eb(p.unitNo)}</td>
+      <td style="text-align:center">${eb(p.floor)}</td>
+      <td>${eb(p.area)}</td>
+      <td>${eb(p.condition)}</td>
+      <td style="text-align:right">${fmt(p.unitTotalSize, 2)}</td>
+      <td style="text-align:right">${eb(p.serviceChargePerSqft != null ? p.serviceChargePerSqft : null)}</td>
+      <td style="text-align:right">${eb(p.serviceChargeTotal != null ? fmt(p.serviceChargeTotal, 2) : null)}</td>
+      <td style="text-align:right" class="price">${eb('AED ' + fmt(p.contractValue))}</td>
+      <td style="text-align:center">${roiHtml}</td>
+      <td>${statusBadge}</td>
+      <td style="text-align:center">${dmccBadge}</td>
+      <td style="max-width:280px">${eb(p.description)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateCount(data.length);
+}
+
+function applyFilter() {
+  const q = document.getElementById('filterInput').value.toLowerCase();
+  const areaF = document.getElementById('areaFilter').value;
+  const statusF = document.getElementById('statusFilter').value;
+
+  const rows = document.querySelectorAll('#tbody tr');
+  let visible = 0;
+  rows.forEach(tr => {
+    const matchText = !q || tr.dataset.search.includes(q);
+    const matchArea = !areaF || tr.dataset.area === areaF;
+    const matchStatus = !statusF || tr.dataset.status === statusF;
+    const show = matchText && matchArea && matchStatus;
+    tr.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  updateCount(visible);
+}
+
+function updateCount(n) {
+  document.getElementById('count').textContent = `Showing ${n} of 29 properties`;
+}
+
+renderTable(properties);
+</script>
+</body>
+</html>

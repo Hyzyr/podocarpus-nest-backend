@@ -34,7 +34,7 @@ import { UpdateContractDto } from './dto/contract.dto';
  * @returns Partial<Prisma.ContractUpdateInput>
  */
 export function buildContractUpdateData(dto: UpdateContractDto): Partial<Prisma.ContractUpdateInput> {
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
   if (dto.brokerId !== undefined) updateData.brokerId = dto.brokerId;
   if (dto.fileUrl !== undefined) updateData.fileUrl = dto.fileUrl;
   if (dto.filesUrl !== undefined) updateData.filesUrl = dto.filesUrl;

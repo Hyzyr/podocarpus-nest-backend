@@ -80,6 +80,11 @@ enum EventStatus {
   CANCELLED
 }
 
+enum PaymentType {
+  ANNUAL
+  MONTHLY
+}
+
 model AppUser {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -115,6 +120,9 @@ model AppUser {
   notifications           Notification[]
   globalNotificationViews GlobalNotificationView[]
   userKycProfile          UserKycProfile?
+  recordedPayments        RentPayment[]            @relation("PaymentRecorder")
+
+  @@index([role, isEnabled])
 }
 
 model InvestorProfile {
@@ -222,6 +230,11 @@ model Property {
   contracts         Contract[]
   tenantLeases      TenantLease[]
   documents         Json                 @default("[]") // File attachments with metadata (e.g., [{name, url, sizeMb, isPro}])
+
+  @@index([area, status])
+  @@index([isEnabled, isVacant])
+  @@index([city])
+  @@index([ownerId])
 }
 
 model GovernmentLease {
@@ -255,14 +268,38 @@ model TenantLease {
   terminatedEarly   Boolean @default(false)
   terminationReason String?
 
+  // Rent
+  annualRent Float? // Expected total rent for the year
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   property   Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   statistics InvestmentStatistics[]
+  payments   RentPayment[]
 
   @@index([propertyId])
   @@index([leaseStart, leaseEnd])
+}
+
+model RentPayment {
+  id            String      @id @default(uuid())
+  tenantLeaseId String
+
+  amount       Float       // How much was paid (AED)
+  paidDate     DateTime    // When it was paid
+  type         PaymentType // ANNUAL or MONTHLY
+  note         String?     // Optional note from admin
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  recordedById String?  // Which admin entered this
+
+  tenantLease TenantLease @relation(fields: [tenantLeaseId], references: [id], onDelete: Cascade)
+  recordedBy  AppUser?    @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantLeaseId])
+  @@index([paidDate])
 }
 
 model AvailabilitySlot {

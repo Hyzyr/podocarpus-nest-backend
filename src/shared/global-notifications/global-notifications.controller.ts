@@ -25,6 +25,7 @@ import {
   NotificationActionResponseDto,
   GetAllNotificationsResponseDto,
   GetAnalyticsResponseDto,
+  GlobalNotificationWithStatusDto,
 } from './global-notifications.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
@@ -148,7 +149,7 @@ export class GlobalNotificationsController {
     }));
 
     return {
-      notifications: mappedNotifications as any,
+      notifications: mappedNotifications as unknown as GlobalNotificationWithStatusDto[],
       total: notifications.length,
       unviewedCount,
     };
