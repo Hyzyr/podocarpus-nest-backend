@@ -14,7 +14,10 @@ const baseCookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
-  domain: process.env.NODE_ENV === 'production' ? WEBSITE_DOMAIN : undefined,
+  domain:
+    process.env.NODE_ENV === 'production'
+      ? `${WEBSITE_DOMAIN}`.replace(/^https?:\/\//, '')
+      : undefined,
 };
 
 export const setAuthCookies = (
