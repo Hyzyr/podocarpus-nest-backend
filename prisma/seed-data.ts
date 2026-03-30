@@ -5,7 +5,7 @@
  * Separated from seed.ts for better organization and maintainability.
  */
 
-import { EventStatus } from '@prisma/client';
+import { EventStatus, PaymentType } from '@prisma/client';
 
 /**
  * Superadmin user configuration
@@ -760,6 +760,487 @@ export const properties = [
     isTaxFreeZone: false,
     keyBenefits: [],
     isVacant: false,
+  },
+];
+
+/**
+ * Tenant Lease seed data
+ * Source: Assets 15.12.2025.csv — lease details for rented properties
+ *
+ * Each entry is keyed by the property unitNo so reset-seed can look up the
+ * property ID after creating properties. lease.payments[] are nested for
+ * convenience — the seed script creates them as separate RentPayment rows.
+ */
+export const tenantLeases: Array<{
+  unitNo: string;
+  tenantName: string;
+  tenantEmail?: string;
+  tenantPhone?: string;
+  leaseStart: string;
+  leaseEnd?: string;
+  monthlyRent: number;
+  annualRent: number;
+  paymentMethod?: string;
+  depositAmount?: number;
+  payments: Array<{ amount: number; paidDate: string; type: PaymentType; note?: string }>;
+}> = [
+  // ── 1 ── Marina Pinnacle 5105 — (VACANT but had prior service charge payments to previous tenant)
+  {
+    unitNo: '5105',
+    tenantName: 'Previous Tenant (Left)',
+    leaseStart: '2024-01-01',
+    leaseEnd: '2024-12-31',
+    monthlyRent: 15500,
+    annualRent: 186000,
+    isActive: false,
+    payments: [
+      { amount: 15500, paidDate: '2025-01-15', type: PaymentType.MONTHLY },
+      { amount: 15500, paidDate: '2025-02-15', type: PaymentType.MONTHLY },
+      { amount: 15500, paidDate: '2025-03-15', type: PaymentType.MONTHLY },
+      { amount: 15500, paidDate: '2025-04-15', type: PaymentType.MONTHLY },
+      { amount: 15500, paidDate: '2025-05-15', type: PaymentType.MONTHLY },
+    ],
+  } as any,
+  // ── 3 ── Prime Residency 3 · 320
+  {
+    unitNo: '320',
+    tenantName: 'YSLAM ATAYEV',
+    tenantEmail: 'jamescarter78.ia@gmail.com',
+    leaseStart: '2025-05-07',
+    leaseEnd: '2026-05-06',
+    monthlyRent: 15000,
+    annualRent: 60000,
+    paymentMethod: 'Cheque',
+    payments: [
+      { amount: 15000, paidDate: '2025-05-15', type: PaymentType.ANNUAL, note: 'cheque/EIB personal' },
+      { amount: 15000, paidDate: '2025-08-15', type: PaymentType.ANNUAL },
+      { amount: 15000, paidDate: '2025-11-15', type: PaymentType.ANNUAL },
+      { amount: 15000, paidDate: '2026-02-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 4 ── Al Jawhara · 1107
+  {
+    unitNo: '1107',
+    tenantName: 'IMAD ALDEEN ABDULHALIM SHAMS',
+    tenantEmail: 'imadaldeenshams@hotmail.com',
+    tenantPhone: '971504373217',
+    leaseStart: '2025-05-01',
+    leaseEnd: '2026-04-30',
+    monthlyRent: 11000,
+    annualRent: 44000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2200,
+    payments: [
+      { amount: 11000, paidDate: '2025-04-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 11000, paidDate: '2025-08-15', type: PaymentType.ANNUAL },
+      { amount: 11000, paidDate: '2025-11-15', type: PaymentType.ANNUAL },
+      { amount: 11000, paidDate: '2026-02-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 5 ── Al Jawhara · 1307
+  {
+    unitNo: '1307',
+    tenantName: 'AHMAD ASHRAF AHMAD ALHAMMOURI',
+    tenantEmail: 'ahmad.alhammouri92@gmail.com',
+    tenantPhone: '971508553004',
+    leaseStart: '2025-12-15',
+    leaseEnd: '2026-12-14',
+    monthlyRent: 15000,
+    annualRent: 45000,
+    paymentMethod: 'Cheque',
+    depositAmount: 1600,
+    payments: [
+      { amount: 5950, paidDate: '2025-02-15', type: PaymentType.ANNUAL, note: 'FAB' },
+      { amount: 5950, paidDate: '2025-04-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 5950, paidDate: '2025-06-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 5950, paidDate: '2025-08-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 5950, paidDate: '2025-10-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 6 ── Al Jawhara · 2010
+  {
+    unitNo: '2010',
+    tenantName: 'MOHAMMAD TAWFIQ SADEQ JARRAR',
+    tenantEmail: 'mjarrar92@gmail.com',
+    tenantPhone: '971569419086',
+    leaseStart: '2025-12-15',
+    leaseEnd: '2026-12-15',
+    monthlyRent: 45000,
+    annualRent: 45000,
+    paymentMethod: 'Cheque',
+    depositAmount: 4000,
+    payments: [
+      { amount: 10000, paidDate: '2025-03-15', type: PaymentType.ANNUAL, note: 'CASH' },
+      { amount: 10000, paidDate: '2025-06-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 10000, paidDate: '2025-09-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 7 ── Al Jawhara · 1608
+  {
+    unitNo: '1608',
+    tenantName: 'MEHMET TATLI',
+    tenantEmail: 'tatli.ethio@gmail.com',
+    tenantPhone: '971564840264',
+    leaseStart: '2025-02-18',
+    leaseEnd: '2025-12-31',
+    monthlyRent: 2961,
+    annualRent: 34650,
+    paymentMethod: 'Cheque',
+    depositAmount: 1050,
+    payments: [
+      { amount: 29610, paidDate: '2025-02-15', type: PaymentType.ANNUAL, note: 'EIB — full contract value' },
+    ],
+  },
+  // ── 8 ── Al Jawhara · 1207
+  {
+    unitNo: '1207',
+    tenantName: 'YOUSRA ALI',
+    tenantEmail: 'yfmohdali@hotmail.com',
+    tenantPhone: '971555892600',
+    leaseStart: '2025-03-10',
+    leaseEnd: '2025-12-31',
+    monthlyRent: 6500,
+    annualRent: 40000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2000,
+    payments: [
+      { amount: 6500, paidDate: '2025-03-15', type: PaymentType.MONTHLY, note: 'FAB' },
+      { amount: 6500, paidDate: '2025-05-15', type: PaymentType.MONTHLY, note: 'Cheque/FAB' },
+      { amount: 6500, paidDate: '2025-07-15', type: PaymentType.MONTHLY, note: 'cheque' },
+      { amount: 6500, paidDate: '2025-09-15', type: PaymentType.MONTHLY },
+      { amount: 6500, paidDate: '2025-11-15', type: PaymentType.MONTHLY },
+    ],
+  },
+  // ── 9 ── Al Jawhara · 1405
+  {
+    unitNo: '1405',
+    tenantName: 'SAM JR BASAS SANTOS',
+    tenantEmail: 'samsantosjr3@gmail.com',
+    tenantPhone: '971558495652',
+    leaseStart: '2025-04-20',
+    leaseEnd: '2026-04-19',
+    monthlyRent: 11000,
+    annualRent: 44000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2200,
+    payments: [
+      { amount: 11000, paidDate: '2025-04-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 11000, paidDate: '2025-07-15', type: PaymentType.ANNUAL, note: 'cheque' },
+      { amount: 11000, paidDate: '2025-10-15', type: PaymentType.ANNUAL },
+      { amount: 11000, paidDate: '2026-01-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 10 ── Al Jawhara · 1205
+  {
+    unitNo: '1205',
+    tenantName: 'ROHAN SUBHASH NAIR',
+    tenantEmail: 'Rohanair00007@gmail.com',
+    tenantPhone: '971507843856',
+    leaseStart: '2025-05-25',
+    leaseEnd: '2026-05-24',
+    monthlyRent: 11000,
+    annualRent: 44000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2200,
+    payments: [
+      { amount: 10165, paidDate: '2025-08-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 11 ── Al Jawhara · 907
+  {
+    unitNo: '907',
+    tenantName: 'ANURAG AGARWAL',
+    tenantEmail: 'agarwalanurag20@yahoo.com',
+    tenantPhone: '971585150327',
+    leaseStart: '2025-04-24',
+    leaseEnd: '2026-04-23',
+    monthlyRent: 11000,
+    annualRent: 44000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2200,
+    payments: [
+      { amount: 7930, paidDate: '2025-04-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+    ],
+  },
+  // ── 12 ── Al Jawhara · 1408
+  {
+    unitNo: '1408',
+    tenantName: 'MOHAMED ADEL AMIN YOUSSEF ABOSHANAB',
+    tenantEmail: 'mohamed.adel.abushanab@gmail.com',
+    tenantPhone: '971556323542',
+    leaseStart: '2025-04-27',
+    leaseEnd: '2025-12-31',
+    monthlyRent: 10165,
+    annualRent: 30000,
+    paymentMethod: 'Cheque',
+    depositAmount: 1050,
+    payments: [
+      { amount: 10165, paidDate: '2025-08-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 14 ── Al Jawhara · 1108
+  {
+    unitNo: '1108',
+    tenantName: 'MOHAMMAD ABDEL HALIM ALALOUL',
+    tenantEmail: 'mohammad.a.alaloul@gmail.com',
+    tenantPhone: '971523445570',
+    leaseStart: '2025-05-10',
+    leaseEnd: '2025-12-31',
+    monthlyRent: 7242,
+    annualRent: 33600,
+    paymentMethod: 'Cheque',
+    depositAmount: 1600,
+    payments: [
+      { amount: 8400, paidDate: '2025-02-15', type: PaymentType.ANNUAL, note: 'FAB' },
+      { amount: 8400, paidDate: '2025-05-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 8400, paidDate: '2025-08-15', type: PaymentType.ANNUAL },
+      { amount: 4925, paidDate: '2025-11-15', type: PaymentType.ANNUAL, note: 'partial final payment' },
+    ],
+  },
+  // ── 15 ── Al Jawhara · 1110 (no payments recorded yet — lease starts Nov 2025)
+  {
+    unitNo: '1110',
+    tenantName: 'TENANT 1110',
+    leaseStart: '2025-11-26',
+    leaseEnd: '2026-11-25',
+    monthlyRent: 3750,
+    annualRent: 45000,
+    paymentMethod: 'Cheque',
+    payments: [],
+  },
+  // ── 16 ── Al Jawhara · 1208
+  {
+    unitNo: '1208',
+    tenantName: 'ORAZDURDY MAMIYEV',
+    tenantEmail: 'orazvasov@gmail.com',
+    tenantPhone: '971505841730',
+    leaseStart: '2025-05-07',
+    leaseEnd: '2026-05-06',
+    monthlyRent: 11250,
+    annualRent: 45000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2250,
+    payments: [
+      { amount: 11250, paidDate: '2025-05-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 11250, paidDate: '2025-08-15', type: PaymentType.ANNUAL },
+      { amount: 11250, paidDate: '2025-11-15', type: PaymentType.ANNUAL },
+      { amount: 11250, paidDate: '2026-02-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 17 ── Al Jawhara · 1007
+  {
+    unitNo: '1007',
+    tenantName: 'RONNY ANDRADE DA SILVA',
+    tenantEmail: 'ronnydasilva@outlook.com',
+    tenantPhone: '971585772172',
+    leaseStart: '2025-06-05',
+    leaseEnd: '2026-06-04',
+    monthlyRent: 11000,
+    annualRent: 44000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2000,
+    payments: [
+      { amount: 10000, paidDate: '2025-03-15', type: PaymentType.ANNUAL, note: 'EIB' },
+    ],
+  },
+  // ── 18 ── Al Jawhara · 1508 — (VACANT in CSV but had previous tenant payments)
+  {
+    unitNo: '1508',
+    tenantName: 'Previous Tenant 1508',
+    leaseStart: '2024-07-01',
+    leaseEnd: '2025-05-31',
+    monthlyRent: 3333,
+    annualRent: 40000,
+    isActive: false,
+    paymentMethod: 'Cash',
+    payments: [
+      { amount: 3333, paidDate: '2025-01-15', type: PaymentType.MONTHLY, note: 'Cash' },
+      { amount: 3333, paidDate: '2025-02-15', type: PaymentType.MONTHLY, note: 'Cash' },
+      { amount: 3333, paidDate: '2025-03-15', type: PaymentType.MONTHLY, note: 'Cash' },
+      { amount: 3333, paidDate: '2025-04-15', type: PaymentType.MONTHLY, note: 'Cash' },
+      { amount: 3350, paidDate: '2025-05-15', type: PaymentType.MONTHLY, note: 'Cash' },
+    ],
+  } as any,
+  // ── 19 ── Al Jawhara · 1310
+  {
+    unitNo: '1310',
+    tenantName: 'JASMIN TOLENTINO GO',
+    tenantEmail: 'jastgo24@yahoo.com',
+    tenantPhone: '971506401695',
+    leaseStart: '2025-07-01',
+    leaseEnd: '2025-12-31',
+    monthlyRent: 8335,
+    annualRent: 33340,
+    paymentMethod: 'Cheque',
+    depositAmount: 1650,
+    payments: [
+      { amount: 7930, paidDate: '2025-04-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 8334, paidDate: '2025-07-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 8334, paidDate: '2025-10-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 20 ── Al Jawhara · 1305
+  {
+    unitNo: '1305',
+    tenantName: 'LAILA HASSAN DEEB',
+    tenantEmail: 'deeblolo576@gmail.com',
+    tenantPhone: '971585964772',
+    leaseStart: '2025-09-16',
+    leaseEnd: '2026-09-15',
+    monthlyRent: 11250,
+    annualRent: 45000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2500,
+    payments: [
+      { amount: 7000, paidDate: '2025-03-15', type: PaymentType.ANNUAL, note: 'cheque/EIB' },
+      { amount: 7000, paidDate: '2025-05-15', type: PaymentType.ANNUAL, note: 'Cheque/FAB' },
+      { amount: 7000, paidDate: '2025-07-15', type: PaymentType.ANNUAL, note: 'cheque/FAB' },
+      { amount: 13750, paidDate: '2025-09-15', type: PaymentType.ANNUAL },
+      { amount: 11250, paidDate: '2025-12-15', type: PaymentType.ANNUAL },
+      { amount: 11250, paidDate: '2026-03-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 21 ── Al Jawhara · 1105
+  {
+    unitNo: '1105',
+    tenantName: 'MOHAMMAD TALAL AHMAD AL TAWEEL',
+    tenantEmail: 'mohdtal_taweel@hotmail.com',
+    tenantPhone: '971504451561',
+    leaseStart: '2025-06-20',
+    leaseEnd: '2025-12-31',
+    monthlyRent: 10685,
+    annualRent: 40000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2000,
+    payments: [
+      { amount: 10000, paidDate: '2025-03-15', type: PaymentType.ANNUAL, note: 'EIB' },
+      { amount: 10685, paidDate: '2025-06-15', type: PaymentType.ANNUAL, note: 'CASH' },
+      { amount: 10685, paidDate: '2025-09-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 22 ── Al Jawhara · 1210
+  {
+    unitNo: '1210',
+    tenantName: 'IBRAHIM AHMED ELSAYED ALI ELTORGOMAN',
+    tenantEmail: 'ibrahimeltorgoman@gmail.com',
+    tenantPhone: '971521401506',
+    leaseStart: '2025-11-12',
+    leaseEnd: '2026-11-11',
+    monthlyRent: 15000,
+    annualRent: 45000,
+    paymentMethod: 'Cheque',
+    depositAmount: 2250,
+    payments: [
+      { amount: 13330, paidDate: '2025-02-15', type: PaymentType.ANNUAL, note: 'EIB' },
+      { amount: 13330, paidDate: '2025-06-15', type: PaymentType.ANNUAL, note: 'cheque bounced back' },
+    ],
+  },
+  // ── 23 ── Al Jawhara · 1505
+  {
+    unitNo: '1505',
+    tenantName: 'TENANT 1505',
+    leaseStart: '2025-11-02',
+    leaseEnd: '2026-11-01',
+    monthlyRent: 4500,
+    annualRent: 45000,
+    paymentMethod: 'Cash',
+    depositAmount: 4200,
+    payments: [
+      { amount: 7000, paidDate: '2025-03-15', type: PaymentType.ANNUAL, note: 'FAB' },
+      { amount: 7000, paidDate: '2025-05-15', type: PaymentType.ANNUAL, note: 'Cheque/FAB' },
+      { amount: 7000, paidDate: '2025-07-15', type: PaymentType.ANNUAL, note: 'Cheque/FAB' },
+    ],
+  },
+  // ── 24 ── Gold Tower · B3-05-01 (2-year contract)
+  {
+    unitNo: 'B3-05-01',
+    tenantName: 'AFFINITY SHIPPING DMCC',
+    tenantEmail: 'john.widdrington@affinityship.com',
+    tenantPhone: '971502750801',
+    leaseStart: '2025-01-01',
+    leaseEnd: '2026-12-31',
+    monthlyRent: 32917,
+    annualRent: 395000,
+    paymentMethod: 'Bank transfer',
+    depositAmount: 8500,
+    payments: [
+      { amount: 165000, paidDate: '2025-03-15', type: PaymentType.ANNUAL, note: 'EIB' },
+      { amount: 197500, paidDate: '2025-07-15', type: PaymentType.ANNUAL, note: 'Bank transfer' },
+      { amount: 197500, paidDate: '2026-01-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 25 ── Mazaya · 2905 (3-year contract, 1st year = 340k)
+  {
+    unitNo: '2905',
+    tenantName: 'YOUMI INTERNATIONAL DMCC',
+    leaseStart: '2025-02-01',
+    leaseEnd: '2028-01-31',
+    monthlyRent: 28333,
+    annualRent: 340000,
+    paymentMethod: 'Cheque',
+    depositAmount: 34000,
+    payments: [
+      { amount: 107417.58, paidDate: '2025-05-15', type: PaymentType.ANNUAL, note: 'cheque/EIB' },
+      { amount: 170000, paidDate: '2025-09-15', type: PaymentType.ANNUAL },
+      { amount: 178500, paidDate: '2026-01-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 26 ── Fortune Tower · 2005/2006 (5-year contract, 1st year = 600k)
+  {
+    unitNo: '2005/2006',
+    tenantName: 'POWER HORSE GLOBAL DMCC',
+    tenantEmail: 'p-kayyur@power-horse.com',
+    tenantPhone: '971504517657',
+    leaseStart: '2025-05-01',
+    leaseEnd: '2030-06-15',
+    monthlyRent: 50000,
+    annualRent: 600000,
+    paymentMethod: 'Bank transfer',
+    depositAmount: 70000,
+    payments: [
+      { amount: 200000, paidDate: '2025-08-15', type: PaymentType.ANNUAL, note: 'Bank transfer/FAB' },
+      { amount: 200000, paidDate: '2025-11-15', type: PaymentType.ANNUAL },
+      { amount: 200000, paidDate: '2026-02-15', type: PaymentType.ANNUAL },
+    ],
+  },
+  // ── 27 ── Silver Tower · 11K (5-year contract, 1st year = 465,992)
+  {
+    unitNo: '11K',
+    tenantName: 'LONDON DE LIMITED (DMCC BRANCH)',
+    tenantEmail: 'philipspencere81@hotmail.co.uk',
+    leaseStart: '2025-05-07',
+    leaseEnd: '2030-05-06',
+    monthlyRent: 38833,
+    annualRent: 465992,
+    paymentMethod: 'Cheque',
+    depositAmount: 46599.20,
+    payments: [
+      { amount: 441734.88, paidDate: '2025-07-15', type: PaymentType.ANNUAL, note: 'bank transfer/FAB' },
+    ],
+  },
+  // ── 28 ── Silver Tower · 4K (3-year contract, 1st year = 465k — no payments yet)
+  {
+    unitNo: '4K',
+    tenantName: 'TENANT 4K',
+    leaseStart: '2025-06-02',
+    leaseEnd: '2028-06-30',
+    monthlyRent: 38750,
+    annualRent: 465000,
+    paymentMethod: 'Cheque',
+    depositAmount: 46500,
+    payments: [],
+  },
+  // ── 29 ── Marina Plaza · 3503 (3-year contract, 1st year = 1.7M — no payments yet)
+  {
+    unitNo: '3503',
+    tenantName: 'TENANT 3503',
+    leaseStart: '2025-08-20',
+    leaseEnd: '2028-08-19',
+    monthlyRent: 141667,
+    annualRent: 1700000,
+    paymentMethod: 'Cheque',
+    depositAmount: 170000,
+    payments: [],
   },
 ];
 
