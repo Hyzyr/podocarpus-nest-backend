@@ -62,3 +62,4 @@ uploads-seed/*
 .github/prompts/*
 *.prompt.md
 git-activity-report-*
+/uploads/properties/properties
