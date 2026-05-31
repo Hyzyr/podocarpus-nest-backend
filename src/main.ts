@@ -15,6 +15,7 @@ import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
 import { COOKIE_SECRET, UPLOADS_URL } from 'src/common/constants';
 import { join } from 'path';
+import { Readable } from 'stream';
 
 const PORT = process.env.PORT || 3030;
 
@@ -24,30 +25,24 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
-  // Register plugins
   // >>> file management
-  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(multipart, {
     limits: {
       fileSize: 6 * 1024 * 1024, // 6 MB per file
     },
   });
-  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(fastifyStatic, {
     root: join(process.cwd(), UPLOADS_URL.replaceAll('/', '')), // local uploads folder
     prefix: `${UPLOADS_URL}/`, // URL prefix
   });
 
   // >>> cookies & cors management
-  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register<FastifyCookieOptions>(cookie, {
     secret: COOKIE_SECRET,
   });
-  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(helmet);
-  // @ts-ignore - Fastify v5 plugin type incompatibility with NestJS FastifyAdapter
   await app.register(cors, {
-     origin: [
+    origin: [
       'http://localhost:3000',
       'https://pdcps.co',
       'https://www.pdcps.co',
@@ -84,12 +79,42 @@ async function bootstrap() {
   // NOTE: SwaggerModule.setup already exposes the OpenAPI JSON at /swagger-json for the
   // Fastify/Express adapter. Removing a manual registration to avoid duplicated routes.
 
-  // Health check (outside /api prefix — accessible at GET /health)
   const fastify = app.getHttpAdapter().getInstance();
-  fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+  fastify.addHook('preParsing', async (request, _reply, payload) => {
+    const requestPath = request.url.split('?')[0];
+    if (
+      request.method !== 'POST' ||
+      requestPath !== '/api/billing/webhooks/stripe'
+    ) {
+      return payload;
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of payload as AsyncIterable<Buffer | string>) {
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    }
+
+    const rawBody = Buffer.concat(chunks);
+    (request as typeof request & { rawBody?: Buffer }).rawBody = rawBody;
+
+    const replayedPayload = Readable.from([rawBody]);
+    (
+      replayedPayload as typeof replayedPayload & {
+        receivedEncodedLength?: number;
+      }
+    ).receivedEncodedLength = rawBody.length;
+
+    return replayedPayload;
+  });
+
+  // Health check (outside /api prefix — accessible at GET /health)
+  fastify.get('/health', () => ({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  }));
 
   await app.listen(PORT, '0.0.0.0');
   console.log(`✅ Server listening on http://localhost:${PORT}`);
 }
 
-bootstrap();
+void bootstrap();

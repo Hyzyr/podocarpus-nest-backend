@@ -30,8 +30,14 @@ export class LandingService {
       query.propertiesLimit,
       DEFAULT_PROPERTIES_LIMIT,
     );
-    const eventsLimit = this.normalizeLimit(query.eventsLimit, DEFAULT_EVENTS_LIMIT);
-    const casesLimit = this.normalizeLimit(query.casesLimit, DEFAULT_CASES_LIMIT);
+    const eventsLimit = this.normalizeLimit(
+      query.eventsLimit,
+      DEFAULT_EVENTS_LIMIT,
+    );
+    const casesLimit = this.normalizeLimit(
+      query.casesLimit,
+      DEFAULT_CASES_LIMIT,
+    );
 
     const [stats, properties, events, successCases] = await Promise.all([
       this.getPublicStats(),
@@ -45,13 +51,16 @@ export class LandingService {
 
   async getPublicStats(): Promise<LandingStatsDto> {
     const [settings, calculated] = await Promise.all([
-      this.prisma.landingPageStats.findUnique({ where: { id: LANDING_STATS_ID } }),
+      this.prisma.landingPageStats.findUnique({
+        where: { id: LANDING_STATS_ID },
+      }),
       this.calculateStats(),
     ]);
 
     return {
       yearsOperating: settings?.yearsOperating ?? calculated.yearsOperating,
-      maxLeaseTermYears: settings?.maxLeaseTermYears ?? calculated.maxLeaseTermYears,
+      maxLeaseTermYears:
+        settings?.maxLeaseTermYears ?? calculated.maxLeaseTermYears,
       totalProperties: settings?.totalProperties ?? calculated.totalProperties,
       availableProperties:
         settings?.availableProperties ?? calculated.availableProperties,
@@ -67,7 +76,9 @@ export class LandingService {
     };
   }
 
-  async getPublicProperties(limit = DEFAULT_PROPERTIES_LIMIT): Promise<LandingPropertyDto[]> {
+  async getPublicProperties(
+    limit = DEFAULT_PROPERTIES_LIMIT,
+  ): Promise<LandingPropertyDto[]> {
     const take = this.normalizeLimit(limit, DEFAULT_PROPERTIES_LIMIT);
     const properties = await this.prisma.property.findMany({
       where: {
@@ -119,7 +130,9 @@ export class LandingService {
     }));
   }
 
-  async getPublicEvents(limit = DEFAULT_EVENTS_LIMIT): Promise<LandingEventDto[]> {
+  async getPublicEvents(
+    limit = DEFAULT_EVENTS_LIMIT,
+  ): Promise<LandingEventDto[]> {
     const take = this.normalizeLimit(limit, DEFAULT_EVENTS_LIMIT);
     const events = await this.prisma.event.findMany({
       where: {
@@ -180,7 +193,11 @@ export class LandingService {
           },
         },
       },
-      orderBy: [{ displayOrder: 'asc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [
+        { displayOrder: 'asc' },
+        { publishedAt: 'desc' },
+        { createdAt: 'desc' },
+      ],
       take,
     });
 
@@ -224,13 +241,14 @@ export class LandingService {
 
   async createSuccessCase(dto: CreateSuccessCaseDto) {
     const { publishedAt, propertySnapshot, ...rest } = dto;
+    const data: Prisma.SuccessCaseUncheckedCreateInput = {
+      ...rest,
+      publishedAt: this.toDateOrNull(publishedAt),
+      propertySnapshot: this.toInputJsonOrNull(propertySnapshot),
+    };
 
     return this.prisma.successCase.create({
-      data: {
-        ...rest,
-        publishedAt: this.toDateOrNull(publishedAt),
-        propertySnapshot: this.toJsonOrNull(propertySnapshot),
-      },
+      data,
     });
   }
 
@@ -238,18 +256,19 @@ export class LandingService {
     await this.assertSuccessCaseExists(id);
 
     const { publishedAt, propertySnapshot, ...rest } = dto;
+    const data: Prisma.SuccessCaseUncheckedUpdateInput = {
+      ...rest,
+      ...(publishedAt !== undefined && {
+        publishedAt: this.toDateOrNull(publishedAt),
+      }),
+      ...(propertySnapshot !== undefined && {
+        propertySnapshot: this.toInputJsonOrNull(propertySnapshot),
+      }),
+    };
 
     return this.prisma.successCase.update({
       where: { id },
-      data: {
-        ...rest,
-        ...(publishedAt !== undefined && {
-          publishedAt: this.toDateOrNull(publishedAt),
-        }),
-        ...(propertySnapshot !== undefined && {
-          propertySnapshot: this.toJsonOrNull(propertySnapshot),
-        }),
-      },
+      data,
     });
   }
 
@@ -258,7 +277,9 @@ export class LandingService {
     return this.prisma.successCase.delete({ where: { id } });
   }
 
-  private async calculateStats(): Promise<Omit<LandingStatsDto, 'generatedAt'>> {
+  private async calculateStats(): Promise<
+    Omit<LandingStatsDto, 'generatedAt'>
+  > {
     const [
       totalProperties,
       availableProperties,
@@ -272,7 +293,9 @@ export class LandingService {
     ] = await Promise.all([
       this.prisma.property.count({ where: { isEnabled: true } }),
       this.prisma.property.count({ where: { isEnabled: true, ownerId: null } }),
-      this.prisma.property.count({ where: { isEnabled: true, isVacant: false } }),
+      this.prisma.property.count({
+        where: { isEnabled: true, isVacant: false },
+      }),
       this.prisma.property.findFirst({
         where: { isEnabled: true },
         orderBy: { createdAt: 'asc' },
@@ -304,9 +327,10 @@ export class LandingService {
       propertyRoi._avg.netRoiMin,
       propertyRoi._avg.netRoiMax,
     ]);
-    const occupancyRate = totalProperties > 0
-      ? Math.round((occupiedProperties / totalProperties) * 100)
-      : 0;
+    const occupancyRate =
+      totalProperties > 0
+        ? Math.round((occupiedProperties / totalProperties) * 100)
+        : 0;
 
     return {
       yearsOperating: this.calculateYearsOperating(earliestProperty?.createdAt),
@@ -334,14 +358,22 @@ export class LandingService {
   private mapEventStats(stats: Prisma.JsonValue): LandingEventStatDto[] {
     if (!Array.isArray(stats)) return [];
 
-    return stats
-      .map((item) => this.toRecord(item))
-      .filter((item): item is Record<string, unknown> => Boolean(item?.title))
-      .slice(0, 2)
-      .map((item) => ({
-        title: String(item.title),
-        info: item.info === undefined || item.info === null ? null : String(item.info),
-      }));
+    const mappedStats: LandingEventStatDto[] = [];
+
+    for (const item of stats) {
+      const record = this.toRecord(item);
+      const title = this.toOptionalString(record?.title);
+      if (!title) continue;
+
+      mappedStats.push({
+        title,
+        info: this.toOptionalString(record?.info),
+      });
+
+      if (mappedStats.length === 2) break;
+    }
+
+    return mappedStats;
   }
 
   private mapSuccessCaseProperty(successCase: {
@@ -414,7 +446,9 @@ export class LandingService {
       (value): value is number => typeof value === 'number',
     );
     if (validValues.length === 0) return null;
-    return validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
+    return (
+      validValues.reduce((sum, value) => sum + value, 0) / validValues.length
+    );
   }
 
   private roundOneDecimal(value: number) {
@@ -427,20 +461,61 @@ export class LandingService {
     return new Date(value);
   }
 
-  private toJsonOrNull(value: Record<string, unknown> | null | undefined) {
+  private toInputJsonOrNull(
+    value: Record<string, unknown> | null | undefined,
+  ): Prisma.InputJsonObject | Prisma.NullableJsonNullValueInput | undefined {
+    if (value === undefined) return undefined;
+    if (value === null) return Prisma.DbNull;
+    return this.toInputJsonObject(value);
+  }
+
+  private toInputJsonObject(
+    value: Record<string, unknown>,
+  ): Prisma.InputJsonObject {
+    const jsonObject: Record<string, Prisma.InputJsonValue | null> = {};
+
+    for (const [key, rawValue] of Object.entries(value)) {
+      const jsonValue = this.toInputJsonValue(rawValue);
+      if (jsonValue !== undefined) jsonObject[key] = jsonValue;
+    }
+
+    return jsonObject as Prisma.InputJsonObject;
+  }
+
+  private toInputJsonValue(
+    value: unknown,
+  ): Prisma.InputJsonValue | null | undefined {
     if (value === undefined) return undefined;
     if (value === null) return null;
-    return JSON.parse(JSON.stringify(value));
+    if (typeof value === 'string' || typeof value === 'boolean') return value;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => this.toInputJsonValue(item))
+        .filter(
+          (item): item is Prisma.InputJsonValue | null => item !== undefined,
+        );
+    }
+    if (typeof value === 'object') {
+      return this.toInputJsonObject(value as Record<string, unknown>);
+    }
+
+    return undefined;
   }
 
   private toRecord(value: unknown): Record<string, unknown> | null {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      return null;
     return value as Record<string, unknown>;
   }
 
   private toOptionalString(value: unknown) {
     if (value === undefined || value === null) return null;
-    return String(value);
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean')
+      return String(value);
+    if (value instanceof Date) return value.toISOString();
+    return null;
   }
 
   private toOptionalNumber(value: unknown) {

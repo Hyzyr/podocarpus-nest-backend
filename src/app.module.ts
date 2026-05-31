@@ -17,6 +17,7 @@ import { ContractsModule } from './contracts/contracts.module';
 import { NotificationsModule } from './shared/notifications/notifications.module';
 import { PaymentsModule } from './payments/payments.module';
 import { LandingModule } from './landing/landing.module';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { LandingModule } from './landing/landing.module';
     NotificationsModule,
     PaymentsModule,
     LandingModule,
+    BillingModule,
   ],
   controllers: [],
   providers: [],

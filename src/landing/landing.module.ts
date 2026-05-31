@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from 'src/shared/database/database.module';
-import { AdminLandingController, PublicLandingController } from './landing.controller';
+import {
+  AdminLandingController,
+  PublicLandingController,
+} from './landing.controller';
 import { LandingService } from './landing.service';
 
 @Module({

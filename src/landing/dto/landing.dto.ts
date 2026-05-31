@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { EventStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsBoolean,
   IsDateString,
   IsInt,
@@ -13,7 +12,6 @@ import {
   Max,
   MaxLength,
   Min,
-  ValidateNested,
 } from 'class-validator';
 
 export class LandingQueryDto {
