@@ -166,6 +166,32 @@ export class CreatePropertyDto {
   @IsString()
   freezoneAuthority?: string;
 
+  @ApiPropertyOptional({
+    description: 'Lower numbers appear first on the public landing page',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  featuredRank?: number;
+
+  @ApiPropertyOptional({
+    description: 'Short public display label for the landing page',
+    example: 'Active',
+  })
+  @IsOptional()
+  @IsString()
+  statusLabel?: string;
+
+  @ApiPropertyOptional({
+    description: 'Public vacancy risk label shown on the landing page',
+    enum: ['low', 'medium', 'high'],
+    example: 'low',
+  })
+  @IsOptional()
+  @IsString()
+  vacancyRisk?: string;
+
   @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })

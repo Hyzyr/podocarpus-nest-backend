@@ -180,6 +180,24 @@ export class PublicPropertyDto {
   @IsString()
   freezoneAuthority?: string;
 
+  @ApiPropertyOptional({
+    description: 'Lower numbers appear first on the public landing page',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  featuredRank?: number | null;
+
+  @ApiPropertyOptional({ description: 'Short public display label' })
+  @IsOptional()
+  @IsString()
+  statusLabel?: string | null;
+
+  @ApiPropertyOptional({ enum: ['low', 'medium', 'high'] })
+  @IsOptional()
+  @IsString()
+  vacancyRisk?: string | null;
+
   @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })
@@ -308,6 +326,9 @@ export const PublicPropertySchema = z
     isTaxFreeZone: z.boolean().nullable().optional(),
     keyBenefits: z.array(z.string()).optional(),
     freezoneAuthority: z.string().nullable().optional(),
+    featuredRank: z.number().nullable().optional(),
+    statusLabel: z.string().nullable().optional(),
+    vacancyRisk: z.string().nullable().optional(),
   })
   .strip();
 

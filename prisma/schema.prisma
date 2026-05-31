@@ -209,6 +209,9 @@ model Property {
   isTaxFreeZone     Boolean? // true/false
   keyBenefits       String[] // ["100% Foreign Ownership", "Tax-Free Zone", "Full Capital Repatriation"]
   freezoneAuthority String? // e.g. "DMCC Freezone"
+  featuredRank      Int?
+  statusLabel       String?
+  vacancyRisk       String?
 
   // Current vacancy status
   isVacant Boolean @default(true)
@@ -229,10 +232,12 @@ model Property {
   userStatuses      UserPropertyStatus[]
   contracts         Contract[]
   tenantLeases      TenantLease[]
+  successCases      SuccessCase[]
   documents         Json                 @default("[]") // File attachments with metadata (e.g., [{name, url, sizeMb, isPro}])
 
   @@index([area, status])
   @@index([isEnabled, isVacant])
+  @@index([isEnabled, ownerId, featuredRank, createdAt])
   @@index([city])
   @@index([ownerId])
 }
@@ -486,6 +491,7 @@ model InvestmentStatistics {
 model Event {
   id          String    @id @default(uuid())
   title       String
+  subtitle    String?
   description String?
   startsAt    DateTime
   endsAt      DateTime?
@@ -496,12 +502,55 @@ model Event {
   budget       Decimal?    @db.Decimal(10, 2)
   status       EventStatus @default(OPEN)
   image        String
+  stats        Json        @default("[]") @db.Json
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userStatuses UserEventStatus[]
+
+  @@index([isActive, status, startsAt])
+}
+
+model LandingPageStats {
+  id                  String   @id @default("default")
+  yearsOperating      Int?
+  maxLeaseTermYears   Int?
+  totalProperties     Int?
+  availableProperties Int?
+  averageRoi          Float?
+  roiMin              Float?
+  roiMax              Float?
+  totalInvestedValue  Float?
+  totalProfit         Float?
+  activeContracts     Int?
+  occupancyRate       Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SuccessCase {
+  id               String    @id @default(uuid())
+  isPublished      Boolean   @default(false)
+  hasConsent       Boolean   @default(false)
+  publishedAt      DateTime?
+  quote            String
+  investorName     String
+  investorTitle    String?
+  avatarUrl        String?
+  totalProfit      Float?
+  totalRoi         Float?
+  propertyId       String?
+  propertySnapshot Json?     @db.Json
+  displayOrder     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, hasConsent, displayOrder, publishedAt])
+  @@index([propertyId])
 }
 
 model UserPropertyStatus {

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { EventStatus } from '@prisma/client';
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsEnum,
@@ -29,6 +30,17 @@ export class CreateEventDto {
   @IsString()
   @MaxLength(255)
   title: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    maxLength: 255,
+    example: 'Lunch with VIP Members',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  subtitle?: string | null;
 
   @ApiPropertyOptional({
     type: String,
@@ -108,6 +120,21 @@ export class CreateEventDto {
   @IsString()
   image: string;
 
+  @ApiPropertyOptional({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: '300 VIP guests' },
+        info: { type: 'string', example: 'limited guest list' },
+      },
+    },
+    description: 'Optional short facts for the public landing slider. Only the first two are returned publicly.',
+  })
+  @IsOptional()
+  @IsArray()
+  stats?: Array<{ title: string; info?: string | null }>;
+
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
@@ -122,6 +149,9 @@ export class EventDto {
 
   @ApiProperty({ example: 'AI Arab Night Lunch with VIP members' })
   title: string;
+
+  @ApiProperty({ example: 'Lunch with VIP Members' })
+  subtitle?: string | null;
 
   @ApiProperty({
     example:
@@ -156,6 +186,9 @@ export class EventDto {
 
   @ApiProperty({ example: true })
   isActive: boolean;
+
+  @ApiProperty({ example: [{ title: '300 VIP guests', info: 'limited guest list' }] })
+  stats: Array<{ title: string; info?: string | null }>;
 
   @ApiProperty({ example: '2025-05-08T12:00:00.000Z' })
   createdAt: Date;

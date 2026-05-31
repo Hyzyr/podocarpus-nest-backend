@@ -16,6 +16,7 @@ import { EventStatusModule } from './events/event.status.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { NotificationsModule } from './shared/notifications/notifications.module';
 import { PaymentsModule } from './payments/payments.module';
+import { LandingModule } from './landing/landing.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PaymentsModule } from './payments/payments.module';
     ContractsModule,
     NotificationsModule,
     PaymentsModule,
+    LandingModule,
   ],
   controllers: [],
   providers: [],
