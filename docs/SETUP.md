@@ -70,9 +70,13 @@ WEBSITE_URL="https://pdcps.co"
 UPLOADS_LOCATION="/uploads"
 
 # ── Email (SMTP) ───────────────────────────────────
-MAIL_HOST="sandbox.smtp.mailtrap.io"
+MAIL_HOST="smtp.gmail.com"
+MAIL_PORT="465"
+MAIL_SECURE="true"
 MAIL_USER=""
 MAIL_PASS=""
+MAIL_FROM=""
+MAIL_FROM_NAME="Podocarpus Real Estate LLC"
 
 # ── Seed (superadmin account) ──────────────────────
 ADMIN_EMAIL="admin@podocarpus.local"
@@ -262,7 +266,8 @@ npx prisma migrate reset
 [ ] WEBSITE_DOMAIN matches your actual domain
 [ ] WEBSITE_URL matches your frontend URL
 [ ] MAIL_HOST/USER/PASS configured for real SMTP (not Mailtrap)
-[ ] SMTP port updated if not 2525 (in mailer.service.ts)
+[ ] MAIL_PORT and MAIL_SECURE set for your SMTP provider
+[ ] MAIL_FROM and MAIL_FROM_NAME verified
 [ ] CORS origins updated in main.ts if using different domains
 [ ] Migrations applied: npx prisma migrate deploy
 [ ] Seed run: npx prisma db seed

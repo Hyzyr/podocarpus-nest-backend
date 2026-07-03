@@ -17,5 +17,11 @@ if (process.env.NODE_ENV === 'production') {
 
 // mailer details :
 export const MAIL_HOST = process.env.MAIL_HOST || '';
+export const MAIL_PORT = Number(process.env.MAIL_PORT || 2525);
+export const MAIL_SECURE = process.env.MAIL_SECURE
+  ? process.env.MAIL_SECURE.toLowerCase() === 'true'
+  : MAIL_PORT === 465;
 export const MAIL_USER = process.env.MAIL_USER || '';
 export const MAIL_PASS = process.env.MAIL_PASS || '';
+export const MAIL_FROM = process.env.MAIL_FROM || MAIL_USER;
+export const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || WEBSITE_NAME;
