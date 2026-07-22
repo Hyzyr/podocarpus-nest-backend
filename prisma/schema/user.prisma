@@ -1,0 +1,111 @@
+model AppUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  // Optional: users who sign up with Google have no local password.
+  passwordHash String?
+  // Google account subject id ("sub" claim) for users who sign in with Google.
+  googleId     String?  @unique
+  role         UserRole
+  // `isEnabled` controls whether the user is allowed to access the system.
+  // Set to false to block/disable the user without deleting their data.
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // onboarding
+  firstName       String?
+  lastName        String?
+  phone           String?
+  nationality     String?
+  recidence       String?
+  profilePhotoUrl String?
+
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  emailVerified       Boolean   @default(false)
+  onboardingCompleted Boolean   @default(false)
+
+  investorProfile InvestorProfile?
+  brokerProfile   BrokerProfile?
+  adminProfile    AdminProfile?
+  appointments    Appointment[]
+
+  propertyStatuses        UserPropertyStatus[]
+  eventStatuses           UserEventStatus[]
+  activityLogs            ActivityLog[]
+  notifications           Notification[]
+  globalNotificationViews GlobalNotificationView[]
+  userKycProfile          UserKycProfile?
+  recordedPayments        RentPayment[]            @relation("PaymentRecorder")
+
+  @@index([role, isEnabled])
+}
+
+model InvestorProfile {
+  userId String  @id
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  properties  Property[]
+  contracts   Contract[]
+  preferences InvestorPreferences?
+}
+
+model InvestorPreferences {
+  investorProfileId String          @id
+  investorProfile   InvestorProfile @relation(fields: [investorProfileId], references: [userId], onDelete: Cascade)
+
+  investingInDubai       Boolean
+  openToJointInvestments Boolean
+  wantsAdvisorCall       Boolean
+  interestedInEvents     Boolean
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model BrokerProfile {
+  userId    String     @id
+  user      AppUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contracts Contract[]
+}
+
+model AdminProfile {
+  userId     String  @id
+  department String?
+  user       AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// -------------------- USER KYC PROFILE - Identity & Verification --------------------
+// Stores user identity documents for verification and contract autofill
+model UserKycProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  // Identity Documents (used for contract autofill)
+  emiratesId Json? @db.Json // { nameEn, nameAr, idNumber, nationality, gender, expiryDate, unifiedNumber, fileNumber, dateOfBirth, placeOfBirth, isCitizenChild }
+  passport   Json? @db.Json // { number, passportType, nationality, issuePlace, issueDate, expiryDate, dateOfBirth, placeOfBirth }
+
+  // Verification Documents (used for contract autofill)
+  documents Json? @db.Json // { emiratesIdCopy: FileAttachment, passportCopy: FileAttachment, ... }
+
+  // Buyer Details (reusable across contracts for autofill)
+  buyerDetails Json? @db.Json // { isSpecialNeeds, currentJob, country, city, address, mobileDomestic, emailDomestic, emergency contacts, etc }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String // e.g. "property_viewed", "event_seen", "login"
+  entityId  String? // optional: link to property/event/etc
+  metadata  Json? // store extra details if needed
+  createdAt DateTime @default(now())
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([entityId])
+}

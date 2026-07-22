@@ -1,0 +1,155 @@
+model Contract {
+  id           String   @id @default(uuid())
+  propertyId   String
+  investorId   String
+  brokerId     String?
+  filesUrl     String[]
+
+  // Single JSON field for all contract form data
+  formData Json? @db.Json // { contractDetails, buyerDetails, emiratesId, passportId, documents }
+
+  // Core dates & finance
+  signedDate            DateTime?
+  contractStart         DateTime?
+  contractEnd           DateTime?
+  contractValue         Float?
+  depositPaid           Float?
+  investorPaymentMethod String?
+  paymentSchedule       String?
+  vacancyRiskLevel      String?
+
+  status ContractStatus @default(pending)
+  notes  String?
+
+  // Versioning
+  version          Int     @default(1) // optimistic concurrency
+  currentVersionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  // Relations (existing)
+  investor   InvestorProfile        @relation(fields: [investorId], references: [userId], onDelete: Cascade)
+  broker     BrokerProfile?         @relation(fields: [brokerId], references: [userId], onDelete: SetNull)
+  property   Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  statistics InvestmentStatistics[]
+
+  // New relations
+  versions   ContractVersion[]
+  changeSets ContractChangeSet[]
+  signatures ContractSignature[]
+  timeline   ContractEvent[]
+
+  @@index([status, updatedAt])
+  @@index([propertyId])
+  @@index([investorId])
+}
+
+// -------------------- NEW MODELS --------------------
+model ContractVersion {
+  id            String   @id @default(uuid())
+  contractId    String
+  versionNumber Int
+  snapshot      Json     @db.Json // full immutable snapshot
+  createdById   String?
+  createdAt     DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@unique([contractId, versionNumber])
+  @@index([contractId, createdAt])
+}
+
+model ContractChangeSet {
+  id          String          @id @default(uuid())
+  contractId  String
+  baseVersion Int // for optimistic lock
+  patch       Json            @db.Json // JSON Merge Patch (RFC 7386)
+  reason      String?
+  status      ChangeSetStatus @default(draft)
+
+  requestedById String?
+  reviewedById  String?
+  approvedById  String?
+
+  submittedAt DateTime?
+  reviewedAt  DateTime?
+  approvedAt  DateTime?
+  appliedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId, status])
+  @@index([contractId, baseVersion])
+}
+
+model ContractSignature {
+  id         String          @id @default(uuid())
+  contractId String
+  role       SignatureRole
+  signerId   String?
+  status     SignatureStatus @default(pending)
+  signedAt   DateTime?
+  evidence   Json?           @db.Json // IP, device, provider payload…
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId, role, status])
+}
+
+model ContractEvent {
+  id         String   @id @default(uuid())
+  contractId String
+  type       String // "changeset_submitted" | "applied" | "signature_signed" | ...
+  data       Json?    @db.Json
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId, createdAt])
+  @@index([type])
+}
+
+model InvestmentStatistics {
+  id            String  @id @default(uuid())
+  contractId    String
+  tenantLeaseId String? // Which tenant was active this month
+  month         Int // 1-12
+  year          Int
+
+  // Income
+  rentReceived Float @default(0)
+
+  // Expenses
+  serviceCharge   Float @default(0)
+  maintenanceCost Float @default(0)
+  otherExpenses   Float @default(0)
+
+  // Calculated fields
+  totalExpenses Float @default(0)
+  netProfit     Float @default(0)
+  roiPercentage Float @default(0)
+
+  // Cumulative tracking for charts
+  cumulativeProfit Float @default(0) // Running total profit
+  cumulativeRoi    Float @default(0) // Running ROI %
+
+  // Occupancy tracking
+  daysOccupied Int     @default(0)
+  daysVacant   Int     @default(0)
+  wasVacant    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contract    Contract     @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  tenantLease TenantLease? @relation(fields: [tenantLeaseId], references: [id], onDelete: SetNull)
+
+  @@unique([contractId, month, year])
+  @@index([contractId])
+  @@index([year, month])
+}

@@ -4,7 +4,7 @@ import { defineConfig, env } from 'prisma/config';
 console.log('DATABASE_URL:', env('DATABASE_URL'));
 
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
+  schema: 'prisma/schema',
   migrations: {
     path: 'prisma/migrations',
     seed: 'tsx prisma/reset-seed.ts',

@@ -1,0 +1,151 @@
+model Property {
+  id                String   @id @default(uuid())
+  title             String
+  description       String?
+  area              String?
+  buildingName      String?
+  contractValue     Float    @default(1000) // for Investors
+  developer         String?
+  unitNo            String?
+  floor             Int?
+  condition         String?
+  unitTotalSize     Float?
+  apartmentSize     Float?
+  balconySize       Float?
+  status            String?
+  latitude          Float?
+  longitude         Float?
+  city              String?
+  country           String?
+  images            String[]
+  assets            String[] // Property features/amenities (e.g., ["Gym", "Pool", "Parking"])
+  // `isEnabled` controls whether the property is visible/available to users.
+  // Set to false to hide the property without deleting contract/investment data.
+  isEnabled         Boolean  @default(true)
+  netRoiMin         Float? // e.g. 9
+  netRoiMax         Float? // e.g. 11
+  isTaxFreeZone     Boolean? // true/false
+  keyBenefits       String[] // ["100% Foreign Ownership", "Tax-Free Zone", "Full Capital Repatriation"]
+  freezoneAuthority String? // e.g. "DMCC Freezone"
+  featuredRank      Int?
+  statusLabel       String?
+  vacancyRisk       String?
+
+  // Current vacancy status
+  isVacant Boolean @default(true)
+
+  // Admin
+  serviceChargePerSqft Float?
+  serviceChargeTotal   Float?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // ❗ owner is optional, survives if investor removed
+  ownerId String?
+  owner   InvestorProfile? @relation(fields: [ownerId], references: [userId], onDelete: SetNull)
+
+  governmentLeases  GovernmentLease[]
+  availabilitySlots AvailabilitySlot[]
+  appointments      Appointment[]
+  userStatuses      UserPropertyStatus[]
+  contracts         Contract[]
+  tenantLeases      TenantLease[]
+  successCases      SuccessCase[]
+  documents         Json                 @default("[]") // File attachments with metadata (e.g., [{name, url, sizeMb, isPro}])
+
+  @@index([area, status])
+  @@index([isEnabled, isVacant])
+  @@index([isEnabled, ownerId, featuredRank, createdAt])
+  @@index([city])
+  @@index([ownerId])
+}
+
+model GovernmentLease {
+  id          String   @id @default(uuid())
+  propertyId  String
+  startDate   DateTime
+  endDate     DateTime
+  monthlyRent Float
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model TenantLease {
+  id         String @id @default(uuid())
+  propertyId String
+
+  // Tenant details
+  tenantName  String?
+  tenantEmail String?
+  tenantPhone String?
+
+  // Lease terms
+  leaseStart    DateTime
+  leaseEnd      DateTime?
+  monthlyRent   Float
+  paymentMethod String?
+  depositAmount Float?
+
+  // Status
+  isActive          Boolean @default(true)
+  terminatedEarly   Boolean @default(false)
+  terminationReason String?
+
+  // Rent
+  annualRent Float? // Expected total rent for the year
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  property   Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  statistics InvestmentStatistics[]
+  payments   RentPayment[]
+
+  @@index([propertyId])
+  @@index([leaseStart, leaseEnd])
+}
+
+model RentPayment {
+  id            String      @id @default(uuid())
+  tenantLeaseId String
+
+  amount       Float       // How much was paid (AED)
+  paidDate     DateTime    // When it was paid
+  type         PaymentType // ANNUAL or MONTHLY
+  note         String?     // Optional note from admin
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  recordedById String?  // Which admin entered this
+
+  tenantLease TenantLease @relation(fields: [tenantLeaseId], references: [id], onDelete: Cascade)
+  recordedBy  AppUser?    @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantLeaseId])
+  @@index([paidDate])
+}
+
+model AvailabilitySlot {
+  id         String   @id @default(uuid())
+  propertyId String
+  startsAt   DateTime
+  endsAt     DateTime
+  capacity   Int      @default(1)
+
+  property     Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String            @id @default(uuid())
+  propertyId  String
+  bookedById  String
+  slotId      String?
+  status      UserActionsStatus @default(requested)
+  scheduledAt DateTime
+  notes       String?
+
+  property Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bookedBy AppUser           @relation(fields: [bookedById], references: [id], onDelete: Cascade)
+  slot     AvailabilitySlot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
+}

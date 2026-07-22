@@ -1,0 +1,53 @@
+model LandingPageStats {
+  id                  String   @id @default("default")
+  yearsOperating      Int?
+  maxLeaseTermYears   Int?
+  totalProperties     Int?
+  availableProperties Int?
+  averageRoi          Float?
+  roiMin              Float?
+  roiMax              Float?
+  totalInvestedValue  Float?
+  totalProfit         Float?
+  activeContracts     Int?
+  occupancyRate       Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SuccessCase {
+  id               String    @id @default(uuid())
+  isPublished      Boolean   @default(false)
+  hasConsent       Boolean   @default(false)
+  publishedAt      DateTime?
+  quote            String
+  investorName     String
+  investorTitle    String?
+  avatarUrl        String?
+  totalProfit      Float?
+  totalRoi         Float?
+  propertyId       String?
+  propertySnapshot Json?     @db.Json
+  displayOrder     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, hasConsent, displayOrder, publishedAt])
+  @@index([propertyId])
+}
+
+model UserPropertyStatus {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  seen       Boolean  @default(false)
+  viewedAt   DateTime @default(now())
+
+  user     AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@index([propertyId])
+}

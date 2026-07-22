@@ -1,0 +1,86 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum NotificationType {
+  system
+  event
+  contract
+  property
+  appointment
+  message
+  user
+}
+
+enum NotificationStatus {
+  unread
+  read
+}
+
+enum UserRole {
+  investor
+  broker
+  admin
+  superadmin
+}
+
+enum UserActionsStatus {
+  seen // seen and no action
+  requested // booking created, waiting for approval
+  confirmed // scheduled and approved
+  completed // appointment done, user visited
+  noShow // user did not attend
+  canceled // appointment canceled
+}
+
+enum ContractStatus {
+  draft // contract created but not yet signed
+  pending // awaiting approval or payment
+  active // signed and currently valid
+  suspended // temporarily paused
+  expired // reached end date
+  terminated // ended early by one or both parties
+  completed // fully executed and closed successfully
+  canceled // canceled before activation
+}
+
+enum ChangeSetStatus {
+  draft
+  submitted
+  approved
+  rejected
+  applied
+  cancelled
+}
+
+enum SignatureRole {
+  investor
+  broker
+  admin
+}
+
+enum SignatureStatus {
+  pending
+  signed
+  declined
+  revoked
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  OPEN
+  // WAITLIST
+  ENDED
+  CANCELLED
+}
+
+enum PaymentType {
+  ANNUAL
+  MONTHLY
+}
