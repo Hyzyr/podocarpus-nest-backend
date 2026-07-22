@@ -84,3 +84,10 @@ enum PaymentType {
   ANNUAL
   MONTHLY
 }
+
+enum EmailVerificationPurpose {
+  // Confirms an extra contact email added by the user.
+  extra_email
+  // "This wasn't me" link from the signup welcome email; consuming it blocks the account.
+  disown_signup
+}

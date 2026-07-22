@@ -24,4 +24,20 @@ export class AuthNotificationsService {
       json: { userId, role, email },
     });
   }
+
+  /**
+   * Sends a high-priority notification to admins when a user disowns a signup
+   * ("this wasn't me" link). The account has been blocked and needs review.
+   */
+  async notifyDisownedSignup(userId: string, email: string): Promise<void> {
+    await this.globalNotifications.create({
+      title: 'Signup Disowned — Account Blocked',
+      message: `${email} clicked "this wasn't me" on their welcome email. The account has been blocked pending review.`,
+      type: NotificationType.user,
+      targetRoles: [UserRole.admin, UserRole.superadmin],
+      link: `/users/${userId}`,
+      priority: 'high',
+      json: { userId, email, reason: 'disowned_signup' },
+    });
+  }
 }

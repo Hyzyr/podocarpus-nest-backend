@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -9,16 +11,29 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
-import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { EmailVerificationService } from './services/email-verification.service';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CommonResponse } from 'src/common/types/common.dto';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { Throttle } from '@nestjs/throttler';
 import {
+  AddExtraEmailDto,
   AuthResponseDto,
+  ConfirmEmailDto,
+  DisownSignupDto,
+  ExtraEmailDto,
   GoogleLoginDto,
   LoginBodyDto,
+  MessageResponseDto,
   OnboardStep1Dto,
   OnboardStep2Dto,
   RegisterBodyDto,
@@ -30,7 +45,10 @@ import {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private emailVerification: EmailVerificationService,
+  ) {}
 
   @Post('register')
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
@@ -184,5 +202,127 @@ export class AuthController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.auth.updateProfile(user, dto);
+  }
+
+  // -------------------- EXTRA CONTACT EMAILS --------------------
+
+  @UseGuards(JwtAuthGuard)
+  @Get('emails')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List extra contact emails for the current user',
+    description:
+      'Returns the additional (non-login) contact emails attached to the account, with their verification status.',
+  })
+  @ApiResponse({ status: 200, type: [ExtraEmailDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async listEmails(@CurrentUser() user: CurrentUser) {
+    return this.emailVerification.listExtraEmails(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('emails')
+  @Throttle({ default: { ttl: 300_000, limit: 3 } })
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Add an extra contact email and send a confirmation link',
+    description:
+      'Adds an unverified extra email and emails a magic link to confirm it. Max 2 extra emails per user.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Confirmation email sent',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Maximum number of extra emails reached',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Email already added, or is your account email',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async addEmail(
+    @CurrentUser() user: CurrentUser,
+    @Body() dto: AddExtraEmailDto,
+  ) {
+    return this.emailVerification.addExtraEmail(user, dto.email);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('emails/:id/resend')
+  @Throttle({ default: { ttl: 300_000, limit: 3 } })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'UserEmail id to resend the link for' })
+  @ApiOperation({ summary: 'Resend the confirmation link for an extra email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Confirmation email sent',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Email is already verified' })
+  @ApiResponse({ status: 404, description: 'Email not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async resendEmail(
+    @CurrentUser() user: CurrentUser,
+    @Param('id') id: string,
+  ) {
+    return this.emailVerification.resendExtraEmail(user, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('emails/:id')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'UserEmail id to remove' })
+  @ApiOperation({ summary: 'Remove an extra contact email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email removed',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Email not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async deleteEmail(
+    @CurrentUser() user: CurrentUser,
+    @Param('id') id: string,
+  ) {
+    return this.emailVerification.deleteExtraEmail(user, id);
+  }
+
+  @Post('emails/confirm')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({
+    summary: 'Confirm an extra email using a magic-link token',
+    description:
+      'Public endpoint reached from the confirmation link. The token in the body is the proof of ownership.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email confirmed',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async confirmEmail(@Body() dto: ConfirmEmailDto) {
+    return this.emailVerification.confirmExtraEmail(dto.token);
+  }
+
+  // -------------------- SIGNUP DISOWN --------------------
+
+  @Post('disown')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({
+    summary: 'Disown a signup ("this wasn\'t me") — blocks the account',
+    description:
+      'Public endpoint reached from the "this wasn\'t me" link in the welcome email. Blocks the account and notifies admins for review.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Account blocked and admins notified',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async disown(@Body() dto: DisownSignupDto) {
+    return this.emailVerification.disownSignup(dto.token);
   }
 }

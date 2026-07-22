@@ -25,6 +25,10 @@ model AppUser {
   emailVerified       Boolean   @default(false)
   onboardingCompleted Boolean   @default(false)
 
+  // Set when a user clicks the "this wasn't me" link in the signup welcome email.
+  // The account is blocked (isEnabled=false) and admins are notified for review.
+  disownedAt DateTime?
+
   investorProfile InvestorProfile?
   brokerProfile   BrokerProfile?
   adminProfile    AdminProfile?
@@ -37,8 +41,52 @@ model AppUser {
   globalNotificationViews GlobalNotificationView[]
   userKycProfile          UserKycProfile?
   recordedPayments        RentPayment[]            @relation("PaymentRecorder")
+  extraEmails             UserEmail[]
+  emailVerifications      EmailVerification[]
 
   @@index([role, isEnabled])
+}
+
+// -------------------- EXTRA CONTACT EMAILS --------------------
+// Additional emails a user can attach to their account (for documents /
+// contacting clients). These are NOT login identities — the primary
+// AppUser.email is unchanged. Not globally unique: the same address may be an
+// extra email on multiple accounts. Unique only per user.
+model UserEmail {
+  id         String    @id @default(uuid())
+  userId     String
+  email      String
+  isVerified Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  verifiedAt DateTime?
+
+  user          AppUser             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verifications EmailVerification[]
+
+  @@unique([userId, email])
+  @@index([userId])
+}
+
+// -------------------- EMAIL VERIFICATION TOKENS --------------------
+// Short-lived, single-use magic-link tokens. Only the SHA-256 hash of the raw
+// token is stored; the raw token is delivered in the email. Serves both the
+// extra-email confirmation flow and the "this wasn't me" disown flow.
+model EmailVerification {
+  id          String                   @id @default(uuid())
+  userId      String
+  purpose     EmailVerificationPurpose
+  // For extra_email: the UserEmail being confirmed. Null for disown_signup.
+  userEmailId String?
+  tokenHash   String                   @unique
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime                 @default(now())
+
+  user      AppUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userEmail UserEmail? @relation(fields: [userEmailId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model InvestorProfile {

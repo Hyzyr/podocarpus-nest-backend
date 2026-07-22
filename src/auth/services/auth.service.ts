@@ -11,10 +11,15 @@ import { UserRole } from '@prisma/client';
 import { TokenPayload } from '../auth.types';
 import * as crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
-import { GOOGLE_CLIENT_ID, WEBSITE_URL } from 'src/common/constants';
+import {
+  GOOGLE_CLIENT_ID,
+  WEBSITE_NAME,
+  WEBSITE_URL,
+} from 'src/common/constants';
 import { MailerService } from 'src/shared/mailer/mailer.service';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { AuthNotificationsService } from './auth.notifications.service';
+import { EmailVerificationService } from './email-verification.service';
 
 import {
   getAuthCookies,
@@ -41,6 +46,7 @@ export class AuthService {
     private readonly mailer: MailerService,
     private readonly notifications: NotificationsService,
     private readonly authNotifications: AuthNotificationsService,
+    private readonly emailVerification: EmailVerificationService,
   ) {}
 
   async register(
@@ -75,6 +81,10 @@ export class AuthService {
     // notify admins about new user (include userId in json for admin routing)
     await this.authNotifications.notifyNewUser(user.id, email, role);
 
+    // Send a welcome email with a "this wasn't me" link. Best-effort: a mail
+    // failure must not block registration.
+    await this.sendWelcomeEmail(user.id, user.email, true);
+
     // create tokens
     const payload: TokenPayload = { sub: user.id, role: user.role };
     setAuthCookies(payload, this.jwtService, reply);
@@ -85,6 +95,48 @@ export class AuthService {
     return {
       user: authUserParser.parse(user),
     };
+  }
+
+  /**
+   * Send the post-signup welcome email.
+   * @param withDisownLink when true (password signups), include a "this wasn't
+   *   me" link that lets the recipient block the account. Google signups get a
+   *   plain welcome (their email is already proven by Google).
+   */
+  private async sendWelcomeEmail(
+    userId: string,
+    email: string,
+    withDisownLink: boolean,
+  ): Promise<void> {
+    try {
+      const subject = `Welcome to ${WEBSITE_NAME}`;
+      const greeting = `Thanks for joining ${WEBSITE_NAME}! Your account is ready.`;
+
+      if (!withDisownLink) {
+        await this.mailer.sendMail(
+          email,
+          subject,
+          `${greeting}`,
+          `<p>${greeting}</p>`,
+        );
+        return;
+      }
+
+      const notMeUrl = await this.emailVerification.createDisownLink(userId);
+      const disclaimer =
+        "If you didn't create this account, let us know and we'll block it right away.";
+
+      await this.mailer.sendMail(
+        email,
+        subject,
+        `${greeting}\n\n${disclaimer}\nOpen: ${notMeUrl}`,
+        `<p>${greeting}</p>
+         <p>${disclaimer}</p>
+         <p><a href="${notMeUrl}">This wasn't me</a></p>`,
+      );
+    } catch {
+      // Swallow mail errors — never fail signup because the welcome email failed.
+    }
   }
   async login(
     email: string,
@@ -181,6 +233,10 @@ export class AuthService {
       });
 
       await this.authNotifications.notifyNewUser(user.id, email, safeRole);
+
+      // Plain welcome for new Google users — no disown link, since Google has
+      // already proven ownership of this email.
+      await this.sendWelcomeEmail(user.id, user.email, false);
     } else if (!user.googleId) {
       // Existing password account signing in with Google for the first time: link it.
       user = await this.prisma.appUser.update({

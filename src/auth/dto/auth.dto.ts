@@ -137,6 +137,46 @@ export class OnboardStep2Dto {
   interestedInEvents: boolean;
 }
 
+export class MessageResponseDto {
+  @ApiProperty({ example: 'Confirmation email sent' })
+  message: string;
+}
+
+export class AddExtraEmailDto {
+  @ApiProperty({ example: 'contact@example.com' })
+  @IsEmail()
+  email: string;
+}
+
+export class ConfirmEmailDto {
+  @ApiProperty({ description: 'Token from the confirmation magic link' })
+  @IsString()
+  token: string;
+}
+
+export class DisownSignupDto {
+  @ApiProperty({ description: 'Token from the "this wasn\'t me" link in the welcome email' })
+  @IsString()
+  token: string;
+}
+
+export class ExtraEmailDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty({ example: 'contact@example.com' })
+  email: string;
+
+  @ApiProperty()
+  isVerified: boolean;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiPropertyOptional({ type: Date, nullable: true })
+  verifiedAt: Date | null;
+}
+
 export class UpdateProfileDto {
   @ApiPropertyOptional({ type: String, example: 'John' })
   @IsString()

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { AuthNotificationsService } from './services/auth.notifications.service';
+import { EmailVerificationService } from './services/email-verification.service';
 import { AuthController } from './auth.controller';
 import { DatabaseModule } from 'src/shared/database/database.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -19,7 +20,12 @@ import { NotificationsModule } from 'src/shared/notifications/notifications.modu
     MailerModule,
     NotificationsModule,
   ],
-  providers: [AuthService, AuthNotificationsService, JwtStrategy],
+  providers: [
+    AuthService,
+    AuthNotificationsService,
+    EmailVerificationService,
+    JwtStrategy,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}
