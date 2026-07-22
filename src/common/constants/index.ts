@@ -25,3 +25,6 @@ export const MAIL_USER = process.env.MAIL_USER || '';
 export const MAIL_PASS = process.env.MAIL_PASS || '';
 export const MAIL_FROM = process.env.MAIL_FROM || MAIL_USER;
 export const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || WEBSITE_NAME;
+
+// Google OAuth (Sign in with Google)
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';

@@ -17,6 +17,7 @@ import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { Throttle } from '@nestjs/throttler';
 import {
   AuthResponseDto,
+  GoogleLoginDto,
   LoginBodyDto,
   OnboardStep1Dto,
   OnboardStep2Dto,
@@ -59,6 +60,22 @@ export class AuthController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     return this.auth.login(dto.email, dto.password, reply);
+  }
+
+  @Post('google')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({ summary: 'Login or register with a Google ID token' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in with Google successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid Google token' })
+  async google(
+    @Body() dto: GoogleLoginDto,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    return this.auth.googleLogin(dto.idToken, reply, dto.role);
   }
 
   @Get('logout')

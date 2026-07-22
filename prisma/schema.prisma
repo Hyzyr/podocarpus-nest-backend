@@ -88,7 +88,10 @@ enum PaymentType {
 model AppUser {
   id           String   @id @default(uuid())
   email        String   @unique
-  passwordHash String
+  // Optional: users who sign up with Google have no local password.
+  passwordHash String?
+  // Google account subject id ("sub" claim) for users who sign in with Google.
+  googleId     String?  @unique
   role         UserRole
   // `isEnabled` controls whether the user is allowed to access the system.
   // Set to false to block/disable the user without deleting their data.

@@ -1,5 +1,11 @@
--- AlterTable
-ALTER TABLE "Event" ALTER COLUMN "stats" SET DATA TYPE JSON;
-
--- AlterTable
-ALTER TABLE "SuccessCase" ALTER COLUMN "propertySnapshot" SET DATA TYPE JSON;
+-- No-op.
+--
+-- This migration originally ran `ALTER COLUMN ... SET DATA TYPE JSON` on
+-- Event.stats and SuccessCase.propertySnapshot, but it is dated BEFORE the
+-- migration that creates those columns (20260601090000_add_public_landing),
+-- so on a fresh database it failed ("column does not exist") and broke
+-- `prisma migrate dev`.
+--
+-- The column type is now set correctly at creation time in
+-- 20260601090000_add_public_landing (created directly as JSON), so this
+-- migration no longer needs to do anything.

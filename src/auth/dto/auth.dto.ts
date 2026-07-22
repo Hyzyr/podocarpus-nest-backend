@@ -30,6 +30,24 @@ export class LoginBodyDto {
   @IsString()
   password: string;
 }
+export class GoogleLoginDto {
+  @ApiProperty({
+    description: 'The ID token (credential) returned by Google Identity Services on the frontend',
+    example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6...',
+  })
+  @IsString()
+  idToken: string;
+
+  @ApiPropertyOptional({
+    enum: UserRole,
+    description: 'Role to assign if this is the first time the Google user signs in',
+    example: UserRole.investor,
+  })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+}
+
 export class RegisterBodyDto {
   @ApiProperty({ example: 'john.doe@example.com' })
   @IsEmail()

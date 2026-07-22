@@ -10,7 +10,8 @@ import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
 import { TokenPayload } from '../auth.types';
 import * as crypto from 'crypto';
-import { WEBSITE_URL } from 'src/common/constants';
+import { OAuth2Client } from 'google-auth-library';
+import { GOOGLE_CLIENT_ID, WEBSITE_URL } from 'src/common/constants';
 import { MailerService } from 'src/shared/mailer/mailer.service';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { AuthNotificationsService } from './auth.notifications.service';
@@ -32,6 +33,8 @@ import {
 
 @Injectable()
 export class AuthService {
+  private readonly googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -91,6 +94,13 @@ export class AuthService {
     const user = await this.prisma.appUser.findUnique({ where: { email } });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
+    // Users created via Google sign-in have no local password.
+    if (!user.passwordHash) {
+      throw new UnauthorizedException(
+        'This account uses Google sign-in. Please continue with Google.',
+      );
+    }
+
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
@@ -108,6 +118,95 @@ export class AuthService {
     };
   }
   
+  /**
+   * Sign in (or sign up) using a Google ID token (credential) obtained on the
+   * frontend via Google Identity Services. Verifies the token against Google,
+   * then either links/logs in an existing user or creates a new one, and
+   * finally sets the same auth cookies used by password login.
+   */
+  async googleLogin(
+    idToken: string,
+    reply: FastifyReply,
+    role: UserRole = UserRole.investor,
+  ): Promise<AuthResponseDto> {
+    if (!GOOGLE_CLIENT_ID) {
+      throw new BadRequestException('Google sign-in is not configured.');
+    }
+
+    // Verify the token: checks signature, expiry, and that it was issued for us.
+    let payload;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+
+    if (!payload?.email) {
+      throw new UnauthorizedException('Google account has no email');
+    }
+    if (!payload.email_verified) {
+      throw new UnauthorizedException('Google email is not verified');
+    }
+
+    const googleId = payload.sub;
+    const email = payload.email.toLowerCase();
+
+    // 1) Find by googleId, or 2) by email (link existing account), or 3) create.
+    let user = await this.prisma.appUser.findFirst({
+      where: { OR: [{ googleId }, { email }] },
+    });
+
+    if (!user) {
+      // Only self-service roles may be created via Google sign-in.
+      const safeRole =
+        role === UserRole.admin || role === UserRole.superadmin
+          ? UserRole.investor
+          : role;
+
+      user = await this.prisma.appUser.create({
+        data: {
+          email,
+          googleId,
+          role: safeRole,
+          isEnabled: true,
+          emailVerified: true,
+          firstName: payload.given_name ?? null,
+          lastName: payload.family_name ?? null,
+          profilePhotoUrl: payload.picture ?? null,
+        },
+      });
+
+      await this.authNotifications.notifyNewUser(user.id, email, safeRole);
+    } else if (!user.googleId) {
+      // Existing password account signing in with Google for the first time: link it.
+      user = await this.prisma.appUser.update({
+        where: { id: user.id },
+        data: {
+          googleId,
+          emailVerified: true,
+          profilePhotoUrl: user.profilePhotoUrl ?? payload.picture ?? null,
+        },
+      });
+    }
+
+    if (!user.isEnabled) {
+      throw new UnauthorizedException(
+        'Account is disabled. Please contact an administrator.',
+      );
+    }
+
+    const tokenPayload: TokenPayload = { sub: user.id, role: user.role };
+    setAuthCookies(tokenPayload, this.jwtService, reply);
+
+    return {
+      user: authUserParser.parse(user),
+    };
+  }
+
   async logout(reply: FastifyReply) {
     console.log('logout');
     removeAuthCookies(reply);

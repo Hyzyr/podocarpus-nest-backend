@@ -5,7 +5,7 @@ ADD COLUMN     "vacancyRisk" TEXT;
 
 -- AlterTable
 ALTER TABLE "Event" ADD COLUMN     "subtitle" TEXT,
-ADD COLUMN     "stats" JSONB NOT NULL DEFAULT '[]';
+ADD COLUMN     "stats" JSON NOT NULL DEFAULT '[]';
 
 -- CreateTable
 CREATE TABLE "LandingPageStats" (
@@ -40,7 +40,7 @@ CREATE TABLE "SuccessCase" (
     "totalProfit" DOUBLE PRECISION,
     "totalRoi" DOUBLE PRECISION,
     "propertyId" TEXT,
-    "propertySnapshot" JSONB,
+    "propertySnapshot" JSON,
     "displayOrder" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
