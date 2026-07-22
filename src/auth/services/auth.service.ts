@@ -208,7 +208,6 @@ export class AuthService {
   }
 
   async logout(reply: FastifyReply) {
-    console.log('logout');
     removeAuthCookies(reply);
   }
 
