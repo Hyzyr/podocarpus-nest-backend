@@ -207,6 +207,59 @@ export interface NotifyRolesOptions extends NotifyOptions {
 export type NotifyInputDto = NotifyContent;
 
 // Response DTOs
+export class UnreadCountDto {
+  @ApiProperty({ example: 3, description: 'Unread notifications addressed to this user' })
+  direct: number;
+
+  @ApiProperty({ example: 5, description: 'Broadcasts this user has not opened' })
+  broadcast: number;
+
+  @ApiProperty({ example: 8, description: 'direct + broadcast' })
+  total: number;
+}
+
+export class InboxItemDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty({
+    enum: ['direct', 'broadcast'],
+    description:
+      'direct = addressed to this user; broadcast = sent to their role. Broadcasts are marked read via /global-notifications/:id/view, direct ones via /notifications/:id/read.',
+  })
+  scope: 'direct' | 'broadcast';
+
+  @ApiProperty({ enum: NotificationType })
+  type: NotificationType;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  message: string;
+
+  @ApiPropertyOptional({ nullable: true, example: '/contracts/123' })
+  link?: string | null;
+
+  @ApiPropertyOptional({ example: { contractId: '123' } })
+  json?: Record<string, any> | null;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty({ example: false })
+  read: boolean;
+
+  @ApiPropertyOptional({
+    example: 'normal',
+    description: 'Broadcasts only.',
+  })
+  priority?: string;
+
+  @ApiPropertyOptional({ description: 'Broadcasts only.' })
+  icon?: string | null;
+}
+
 export class MarkAsReadResponseDto {
   @ApiProperty({ 
     example: true,

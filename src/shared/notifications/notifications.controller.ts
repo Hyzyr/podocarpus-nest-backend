@@ -16,7 +16,13 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
-import { CreateNotificationDto, NotificationDto, NotificationIdParamDto, MarkAsReadResponseDto } from './notifications.dto';
+import {
+  CreateNotificationDto,
+  InboxItemDto,
+  NotificationDto,
+  NotificationIdParamDto,
+  UnreadCountDto,
+} from './notifications.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from 'src/auth/roles';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
@@ -49,28 +55,43 @@ export class NotificationsController {
   }
 
   @Get()
-  @ApiOperation({ 
-    summary: 'Get current user notifications',
-    description: 'Returns all notifications for the authenticated user, including user-specific and global notifications.',
+  @ApiOperation({
+    summary: 'Get notifications addressed to the current user',
+    description:
+      'Direct notifications only — role broadcasts are not included here. Use /notifications/inbox for both in one list, or /global-notifications for broadcasts alone.',
   })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Default 50, max 100.' })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
   @ApiResponse({
     status: 200,
     description: 'List of user notifications retrieved successfully.',
     type: [NotificationDto],
   })
-  getMyNotifications(@CurrentUser() user: CurrentUser) {
-    return this.notificationsService.getRelatedNotifications(user);
+  getMyNotifications(
+    @CurrentUser() user: CurrentUser,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.notificationsService.getRelatedNotifications(
+      user,
+      limit ? Number(limit) : undefined,
+      offset ? Number(offset) : undefined,
+    );
   }
 
   @Get('inbox')
   @ApiOperation({
     summary: 'Everything addressed to the current user',
     description:
-      'Direct notifications and role broadcasts merged into one list, newest first. Broadcasts sent before the user registered are excluded.',
+      'Direct notifications and role broadcasts merged into one list, newest first. Each item carries a `scope` telling you which it is, because the two are marked read through different endpoints.',
   })
   @ApiQuery({ name: 'unreadOnly', required: false, type: Boolean })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'Merged notification list.' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Default 50.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Merged notification list, newest first.',
+    type: [InboxItemDto],
+  })
   getInbox(
     @CurrentUser() user: CurrentUser,
     @Query('unreadOnly') unreadOnly?: string,
@@ -86,29 +107,31 @@ export class NotificationsController {
   @ApiOperation({
     summary: 'Unread counts for the bell badge',
     description:
-      'Returns { direct, broadcast, total } so the badge needs a single request.',
+      'Both sources counted in one request. A direct notification is unread until its status flips; a broadcast until the user has viewed it.',
   })
-  @ApiResponse({ status: 200, description: 'Unread counts.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Unread counts.',
+    type: UnreadCountDto,
+  })
   getUnreadCount(@CurrentUser() user: CurrentUser) {
     return this.notificationsService.getUnreadCount(user);
   }
 
   @Patch(':id/read')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Mark a notification as read',
-    description: 'Mark a specific notification as read for the current user.',
+    description:
+      'Marks one of the current user\'s own notifications as read. Returns false (with 200, not 404) if no notification with that id belongs to them.',
   })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Notification marked as read successfully.',
-    type: MarkAsReadResponseDto,
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Notification not found or does not belong to user.',
+  @ApiResponse({
+    status: 200,
+    description:
+      'true if a notification was updated, false if none matched this user.',
+    schema: { type: 'boolean', example: true },
   })
   markAsRead(
-    @Param() { id }: NotificationIdParamDto, 
+    @Param() { id }: NotificationIdParamDto,
     @CurrentUser() { userId }: CurrentUser,
   ) {
     return this.notificationsService.markAsRead(id, userId);
@@ -117,12 +140,13 @@ export class NotificationsController {
   @Patch('mark-all-read')
   @ApiOperation({
     summary: 'Mark all notifications as read',
-    description: 'Mark all notifications as read for the current user.',
+    description:
+      'Marks every direct notification as read and every visible broadcast as viewed.',
   })
   @ApiResponse({
     status: 200,
-    description: 'All user notifications marked as read successfully.',
-    type: MarkAsReadResponseDto,
+    description: 'Always true once the update completes.',
+    schema: { type: 'boolean', example: true },
   })
   markAllAsRead(@CurrentUser() user: CurrentUser) {
     return this.notificationsService.markAllAsRead(user);

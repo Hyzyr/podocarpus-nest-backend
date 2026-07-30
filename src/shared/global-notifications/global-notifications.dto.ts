@@ -208,6 +208,16 @@ export class CreateGlobalNotificationDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    default: false,
+    description:
+      'Marks this as a work item rather than an announcement. Actionable items can be resolved by any recipient, which clears them for everyone; announcements keep per-user read state.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  requiresAction?: boolean;
 }
 
 export class UpdateGlobalNotificationDto {

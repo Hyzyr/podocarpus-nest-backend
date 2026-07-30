@@ -12,7 +12,13 @@ import {
   HttpCode,
   ForbiddenException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { GlobalNotificationsService } from './global-notifications.service';
 import {
   CreateGlobalNotificationDto,
@@ -125,8 +131,11 @@ export class GlobalNotificationsController {
   @ApiOperation({
     summary: 'Get active global notifications for current user',
     description:
-      'Returns all active global notifications that target the user\'s role, sorted by creation date (newest first). Includes viewed and dismissed status.',
+      "Broadcasts targeting the user's role, newest first, with their viewed/dismissed status. Excludes expired ones and any actionable item somebody has already resolved.",
   })
+  @ApiQuery({ name: 'unreadOnly', required: false, type: Boolean })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Default 50, max 100.' })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
   @ApiResponse({
     status: 200,
     description: 'List of active global notifications retrieved successfully.',
@@ -134,9 +143,16 @@ export class GlobalNotificationsController {
   })
   async getActiveNotifications(
     @CurrentUser() user: CurrentUser,
+    @Query('unreadOnly') unreadOnly?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<GetGlobalNotificationsResponseDto> {
     const notifications =
-      await this.globalNotificationsService.getActiveNotifications(user);
+      await this.globalNotificationsService.getActiveNotifications(user, {
+        unreadOnly: unreadOnly === 'true',
+        limit: limit ? Number(limit) : undefined,
+        offset: offset ? Number(offset) : undefined,
+      });
 
     const unviewedCount = notifications.filter((n) => !n.viewed).length;
 
@@ -230,7 +246,11 @@ export class GlobalNotificationsController {
     description:
       'Actionable notifications targeting this role that nobody has resolved yet, oldest first.',
   })
-  @ApiResponse({ status: 200, description: 'Open tasks.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Unresolved actionable notifications, oldest first.',
+    type: [GlobalNotificationDto],
+  })
   async getOpenTasks(@CurrentUser() user: CurrentUser) {
     return this.globalNotificationsService.getOpenTasks(user);
   }
