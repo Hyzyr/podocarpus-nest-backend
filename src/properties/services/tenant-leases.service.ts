@@ -5,7 +5,7 @@ import {
   UpdateTenantLeaseDto,
 } from '../dto/tenant-lease.dto';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
-import { NotificationType, UserRole } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
 
 @Injectable()
 export class TenantLeasesService {
@@ -71,13 +71,11 @@ export class TenantLeasesService {
 
     // Send notification to property owner if exists
     if (property.ownerId) {
-      await this.notifications.create({
-        userId: property.ownerId,
+      await this.notifications.notifyUser(property.ownerId, {
         type: NotificationType.property,
         title: 'New Tenant Lease Created',
         message: `A new tenant lease has been created for your property "${property.title}"`,
         link: `/properties/${property.id}`,
-        targetRoles: [UserRole.investor],
       });
     }
 
@@ -188,13 +186,11 @@ export class TenantLeasesService {
 
       // Notify owner if lease became inactive
       if (!dto.isActive && existingLease.property.ownerId) {
-        await this.notifications.create({
-          userId: existingLease.property.ownerId,
+        await this.notifications.notifyUser(existingLease.property.ownerId, {
           type: NotificationType.property,
           title: 'Tenant Lease Ended',
           message: `The tenant lease for "${existingLease.property.title}" has been marked as inactive`,
           link: `/properties/${existingLease.propertyId}`,
-          targetRoles: [UserRole.investor],
         });
       }
     }
@@ -230,13 +226,11 @@ export class TenantLeasesService {
 
     // Notify owner
     if (lease.property.ownerId) {
-      await this.notifications.create({
-        userId: lease.property.ownerId,
+      await this.notifications.notifyUser(lease.property.ownerId, {
         type: NotificationType.property,
         title: 'Lease Terminated Early',
         message: `Lease for "${lease.property.title}" has been terminated. Reason: ${reason}`,
         link: `/properties/${lease.propertyId}`,
-        targetRoles: [UserRole.investor],
       });
     }
 

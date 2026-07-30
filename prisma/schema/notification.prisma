@@ -1,18 +1,23 @@
+// A notification addressed to one person. Role-targeted announcements are a
+// different thing entirely — see GlobalNotification below.
 model Notification {
-  id          String             @id @default(uuid())
-  userId      String?
-  type        NotificationType   @default(system)
-  title       String
-  message     String
-  targetRoles UserRole[]
-  link        String? // optional deep link (e.g. /contracts/123)
-  status      NotificationStatus @default(unread)
-  createdAt   DateTime           @default(now())
-  isGlobal    Boolean?           @default(false)
-  readAt      DateTime?
-  json        Json?
+  id        String             @id @default(uuid())
+  userId    String?
+  type      NotificationType   @default(system)
+  title     String
+  message   String
+  link      String? // optional deep link (e.g. /contracts/123)
+  status    NotificationStatus @default(unread)
+  createdAt DateTime           @default(now())
+  readAt    DateTime?
+  json      Json?
 
   user AppUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // The inbox query is always "this user's notifications, newest first", and the
+  // bell badge counts unread — without these every read was a sequential scan.
+  @@index([userId, createdAt])
+  @@index([userId, status])
 }
 
 // Global Notifications: One notification, many users (reverse inbox pattern)
@@ -34,11 +39,23 @@ model GlobalNotification {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
+  // ---- Shared resolution (tasks, as opposed to news) ----
+  // Read state is per-user and lives in GlobalNotificationView: one admin
+  // reading an announcement must not hide it from the rest. But some
+  // broadcasts are work rather than news — "this account was disowned, review
+  // it" only needs handling once. Those set requiresAction, and resolving them
+  // clears the item for everyone who can see it.
+  requiresAction Boolean   @default(false)
+  resolvedAt     DateTime?
+  resolvedById   String?
+  resolutionNote String?
+
   // Relations
   views GlobalNotificationView[]
 
   @@index([isActive, startsAt])
   @@index([createdAt])
+  @@index([requiresAction, resolvedAt])
 }
 
 // Many-to-many: Tracks which users have viewed each global notification

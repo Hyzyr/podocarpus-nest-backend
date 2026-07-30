@@ -6,7 +6,7 @@ import {
   RoiChartDataDto,
 } from '../dto/investment-statistics.dto';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
-import { NotificationType, UserRole } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
 
 @Injectable()
 export class InvestmentStatisticsService {
@@ -108,25 +108,21 @@ export class InvestmentStatisticsService {
 
     // Send notification for significant ROI milestones
     if (cumulativeRoi >= 10 && (!previousStats || previousStats.cumulativeRoi < 10)) {
-      await this.notifications.create({
-        userId: contract.investorId,
+      await this.notifications.notifyUser(contract.investorId, {
         type: NotificationType.contract,
         title: '🎉 10% Cumulative ROI Achieved!',
         message: `Your investment in "${contract.property.title}" has reached 10% cumulative ROI`,
         link: `/contracts/${contract.id}`,
-        targetRoles: [UserRole.investor],
       });
     }
 
     // Notify on negative monthly performance
     if (netProfit < 0) {
-      await this.notifications.create({
-        userId: contract.investorId,
+      await this.notifications.notifyUser(contract.investorId, {
         type: NotificationType.contract,
         title: 'Negative Monthly Performance',
         message: `Your property "${contract.property.title}" had a net loss of ${Math.abs(netProfit).toFixed(2)} this month`,
         link: `/contracts/${contract.id}`,
-        targetRoles: [UserRole.investor],
       });
     }
 

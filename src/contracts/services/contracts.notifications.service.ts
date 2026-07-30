@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
-import { GlobalNotificationsService } from 'src/shared/global-notifications/global-notifications.service';
-import { NotificationType, UserRole } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
 import {
   notificationForAdmin,
   notificationForInvestor,
@@ -17,11 +15,11 @@ import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @Injectable()
 export class ContractsNotificationsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly notifications: NotificationsService,
-    private readonly globalNotifications: GlobalNotificationsService,
-  ) {}
+  constructor(private readonly notifications: NotificationsService) {}
+
+  private isStaff(user: CurrentUser): boolean {
+    return user.role === 'admin' || user.role === 'superadmin';
+  }
 
   /**
    * Handles notifications for new contract creation.
@@ -39,24 +37,16 @@ export class ContractsNotificationsService {
     }
 
     // structured ids included in json payload so admin UI can build the correct route
-    const jsonPayload = { investorId, propertyId, contractId };
+    const json = { investorId, propertyId, contractId };
+    const copy =
+      currentUserId === investorId ? notificationForAdmin : notificationForInvestor;
 
-    if (currentUserId === investorId)
-      await this.globalNotifications.create({
-        ...notificationForAdmin,
-        type: NotificationType.contract,
-        targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/${contractId}`,
-        json: jsonPayload,
-      });
-    else
-      await this.globalNotifications.create({
-        ...notificationForInvestor,
-        type: NotificationType.contract,
-        targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/${contractId}`,
-        json: jsonPayload,
-      });
+    await this.notifications.notifyAdmins({
+      ...copy,
+      type: NotificationType.contract,
+      link: `/${contractId}`,
+      json,
+    });
   }
 
   /**
@@ -69,26 +59,11 @@ export class ContractsNotificationsService {
     investorId: string,
     newStatus: string,
   ): Promise<void> {
-    const jsonPayload = { investorId, propertyId, contractId };
-    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
-
-    if (isAdmin) {
-      // admin updated, notify investor
-      await this.notifications.notify(investorId, 'contract', {
-        ...updateNotificationForInvestor,
-        link: `/${contractId}`,
-        json: jsonPayload,
-      });
-    } else {
-      // investor/broker updated, notify admin
-      await this.globalNotifications.create({
-        ...updateNotificationForAdmin,
-        type: NotificationType.contract,
-        targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/${contractId}`,
-        json: jsonPayload,
-      });
-    }
+    await this.notifyBothSides(currentUser, investorId, `/${contractId}`, {
+      investorId,
+      propertyId,
+      contractId,
+    }, updateNotificationForInvestor, updateNotificationForAdmin);
   }
 
   /**
@@ -100,26 +75,11 @@ export class ContractsNotificationsService {
     propertyId: string,
     investorId: string,
   ): Promise<void> {
-    const jsonPayload = { investorId, propertyId, contractId };
-    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
-
-    if (isAdmin) {
-      // admin deleted, notify investor
-      await this.notifications.notify(investorId, 'contract', {
-        ...deletionNotificationForInvestor,
-        link: `/contracts`,
-        json: jsonPayload,
-      });
-    } else {
-      // investor deleted (if they have permission), notify admin
-      await this.globalNotifications.create({
-        ...deletionNotificationForAdmin,
-        type: NotificationType.contract,
-        targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/contracts`,
-        json: jsonPayload,
-      });
-    }
+    await this.notifyBothSides(currentUser, investorId, '/contracts', {
+      investorId,
+      propertyId,
+      contractId,
+    }, deletionNotificationForInvestor, deletionNotificationForAdmin);
   }
 
   /**
@@ -131,24 +91,38 @@ export class ContractsNotificationsService {
     propertyId: string,
     investorId: string,
   ): Promise<void> {
-    const jsonPayload = { investorId, propertyId, contractId };
-    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
+    await this.notifyBothSides(currentUser, investorId, `/${contractId}`, {
+      investorId,
+      propertyId,
+      contractId,
+    }, generalUpdateNotificationForInvestor, generalUpdateNotificationForAdmin);
+  }
 
-    if (isAdmin) {
-      // admin updated, notify investor
-      await this.notifications.notify(investorId, 'contract', {
-        ...generalUpdateNotificationForInvestor,
-        link: `/${contractId}`,
-        json: jsonPayload,
+  /**
+   * Contract changes are always "one side acted, tell the other side" — staff
+   * edits notify the investor, investor/broker edits notify staff.
+   */
+  private async notifyBothSides(
+    currentUser: CurrentUser,
+    investorId: string,
+    link: string,
+    json: Record<string, unknown>,
+    copyForInvestor: { title: string; message: string },
+    copyForAdmin: { title: string; message: string },
+  ): Promise<void> {
+    if (this.isStaff(currentUser)) {
+      await this.notifications.notifyUser(investorId, {
+        ...copyForInvestor,
+        type: NotificationType.contract,
+        link,
+        json,
       });
     } else {
-      // investor/broker updated, notify admin
-      await this.globalNotifications.create({
-        ...generalUpdateNotificationForAdmin,
+      await this.notifications.notifyAdmins({
+        ...copyForAdmin,
         type: NotificationType.contract,
-        targetRoles: [UserRole.admin, UserRole.superadmin],
-        link: `/${contractId}`,
-        json: jsonPayload,
+        link,
+        json,
       });
     }
   }

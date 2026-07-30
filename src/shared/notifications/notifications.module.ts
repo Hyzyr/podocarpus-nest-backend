@@ -3,9 +3,10 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { DatabaseModule } from 'src/shared/database/database.module';
 import { GlobalNotificationsModule } from '../global-notifications/global-notifications.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
-  imports: [DatabaseModule, GlobalNotificationsModule],
+  imports: [DatabaseModule, GlobalNotificationsModule, MailerModule],
   exports: [NotificationsService, GlobalNotificationsModule],
   controllers: [NotificationsController],
   providers: [NotificationsService],

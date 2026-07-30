@@ -5,9 +5,16 @@ import {
   Patch,
   Param,
   Body,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto, NotificationDto, NotificationIdParamDto, MarkAsReadResponseDto } from './notifications.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -53,6 +60,37 @@ export class NotificationsController {
   })
   getMyNotifications(@CurrentUser() user: CurrentUser) {
     return this.notificationsService.getRelatedNotifications(user);
+  }
+
+  @Get('inbox')
+  @ApiOperation({
+    summary: 'Everything addressed to the current user',
+    description:
+      'Direct notifications and role broadcasts merged into one list, newest first. Broadcasts sent before the user registered are excluded.',
+  })
+  @ApiQuery({ name: 'unreadOnly', required: false, type: Boolean })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Merged notification list.' })
+  getInbox(
+    @CurrentUser() user: CurrentUser,
+    @Query('unreadOnly') unreadOnly?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.notificationsService.getInbox(user, {
+      unreadOnly: unreadOnly === 'true',
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
+
+  @Get('unread-count')
+  @ApiOperation({
+    summary: 'Unread counts for the bell badge',
+    description:
+      'Returns { direct, broadcast, total } so the badge needs a single request.',
+  })
+  @ApiResponse({ status: 200, description: 'Unread counts.' })
+  getUnreadCount(@CurrentUser() user: CurrentUser) {
+    return this.notificationsService.getUnreadCount(user);
   }
 
   @Patch(':id/read')

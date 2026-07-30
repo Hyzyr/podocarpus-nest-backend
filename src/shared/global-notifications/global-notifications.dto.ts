@@ -115,6 +115,15 @@ export class GlobalNotificationDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'Marks this as a work item rather than an announcement. Actionable items can be resolved by any recipient, which clears them for everyone; announcements keep per-user read state.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  requiresAction?: boolean;
+
   @ApiPropertyOptional({ example: '2025-10-29T10:30:00Z' })
   createdAt?: string;
 

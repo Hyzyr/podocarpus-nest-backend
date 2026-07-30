@@ -221,6 +221,54 @@ export class GlobalNotificationsController {
   }
 
   /**
+   * Shared resolution for actionable notifications.
+   * Dismissing hides an item for you; resolving clears it for everyone.
+   */
+  @Get('tasks')
+  @ApiOperation({
+    summary: 'Open work items for the current user',
+    description:
+      'Actionable notifications targeting this role that nobody has resolved yet, oldest first.',
+  })
+  @ApiResponse({ status: 200, description: 'Open tasks.' })
+  async getOpenTasks(@CurrentUser() user: CurrentUser) {
+    return this.globalNotificationsService.getOpenTasks(user);
+  }
+
+  @Patch(':id/resolve')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mark an actionable notification as handled (shared)',
+    description:
+      'Clears the item for every recipient, not just the caller — use for work that only needs doing once. Idempotent: a second call keeps the original handler. Fails on announcements, which use per-user read state instead.',
+  })
+  @ApiResponse({ status: 200, type: NotificationActionResponseDto })
+  @ApiResponse({
+    status: 400,
+    description: 'Notification is an announcement, not a task.',
+  })
+  @ApiResponse({ status: 404, description: 'Notification not found.' })
+  async resolve(
+    @Param() { id }: GlobalNotificationIdParamDto,
+    @CurrentUser() user: CurrentUser,
+    @Body() body: { note?: string },
+  ) {
+    await this.globalNotificationsService.resolve(id, user.userId, body?.note);
+    return { success: true, message: 'Notification resolved' };
+  }
+
+  @UseGuards(RolesGuard)
+  @Patch(':id/unresolve')
+  @Roles('admin', 'superadmin')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reopen a resolved work item (Admin only)' })
+  @ApiResponse({ status: 200, type: NotificationActionResponseDto })
+  async unresolve(@Param() { id }: GlobalNotificationIdParamDto) {
+    await this.globalNotificationsService.unresolve(id);
+    return { success: true, message: 'Notification reopened' };
+  }
+
+  /**
    * Get view statistics for a notification
    * Admin/superadmin only
    */

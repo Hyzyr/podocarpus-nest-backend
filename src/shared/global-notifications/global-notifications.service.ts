@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
   CreateGlobalNotificationDto,
@@ -30,6 +34,7 @@ export class GlobalNotificationsService {
         startsAt: dto.startsAt ? new Date(dto.startsAt) : new Date(),
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
         isActive: dto.isActive !== false,
+        requiresAction: dto.requiresAction ?? false,
       },
     });
   }
@@ -64,18 +69,17 @@ export class GlobalNotificationsService {
    * Uses role-based filtering - only shows notifications targeting user's role
    * Filters out expired notifications
    */
-  async getActiveNotifications(user: CurrentUser) {
-    const now = new Date();
+  async getActiveNotifications(
+    user: CurrentUser,
+    options: { unreadOnly?: boolean; limit?: number; offset?: number } = {},
+  ) {
+    const { unreadOnly = false, limit = 50, offset = 0 } = options;
 
     const notifications = await this.prisma.globalNotification.findMany({
       where: {
-        isActive: true,
-        startsAt: { lte: now },
-        // Not yet expired
-        OR: [
-          { expiresAt: null }, // No expiration
-          { expiresAt: { gte: now } }, // Not yet expired
-        ],
+        ...(await this.visibleTo(user)),
+        // "Unread" for a broadcast means no view record exists for this user.
+        ...(unreadOnly && { views: { none: { userId: user.userId } } }),
       },
       include: {
         views: {
@@ -84,21 +88,115 @@ export class GlobalNotificationsService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: Math.min(limit, 100),
+      skip: offset,
     });
 
-    // Filter by role after fetching
-    return notifications
-      .filter((notif) => {
-        // Show if no specific roles targeted (visible to all)
-        if (notif.targetRoles.length === 0) return true;
-        // Show if user's role is in targetRoles
-        return notif.targetRoles.includes(user.role);
-      })
-      .map((notif) => ({
-        ...notif,
-        viewed: notif.views.length > 0,
-        dismissed: notif.views[0]?.dismissed || false,
-      }));
+    return notifications.map((notif) => ({
+      ...notif,
+      viewed: notif.views.length > 0,
+      dismissed: notif.views[0]?.dismissed || false,
+    }));
+  }
+
+  /**
+   * Mark an actionable broadcast as handled. Unlike read state, this is shared:
+   * once any admin resolves it, it clears for everyone. Use it for work items
+   * ("review this blocked account"), never for announcements.
+   *
+   * Idempotent — a second call by another admin leaves the original handler and
+   * timestamp in place rather than overwriting who dealt with it.
+   */
+  async resolve(id: string, userId: string, note?: string) {
+    const notification = await this.prisma.globalNotification.findUnique({
+      where: { id },
+      select: { id: true, requiresAction: true, resolvedAt: true },
+    });
+
+    if (!notification) {
+      throw new NotFoundException(`Notification ${id} not found`);
+    }
+    if (!notification.requiresAction) {
+      throw new BadRequestException(
+        'This notification is an announcement, not a task. Read state is per-user; there is nothing to resolve.',
+      );
+    }
+    if (notification.resolvedAt) {
+      return this.prisma.globalNotification.findUnique({ where: { id } });
+    }
+
+    return this.prisma.globalNotification.update({
+      where: { id },
+      data: {
+        resolvedAt: new Date(),
+        resolvedById: userId,
+        resolutionNote: note,
+      },
+    });
+  }
+
+  /** Reopen a resolved task. */
+  async unresolve(id: string) {
+    return this.prisma.globalNotification.update({
+      where: { id },
+      data: { resolvedAt: null, resolvedById: null, resolutionNote: null },
+    });
+  }
+
+  /** Outstanding work items for this user's role, oldest first. */
+  async getOpenTasks(user: CurrentUser) {
+    return this.prisma.globalNotification.findMany({
+      where: {
+        ...(await this.visibleTo(user)),
+        requiresAction: true,
+        resolvedAt: null,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /** How many broadcasts this user has never opened. */
+  async getUnreadCount(user: CurrentUser) {
+    return this.prisma.globalNotification.count({
+      where: {
+        ...(await this.visibleTo(user)),
+        views: { none: { userId: user.userId } },
+      },
+    });
+  }
+
+  /**
+   * Live notifications this user is allowed to see.
+   *
+   * Role matching runs in Postgres rather than in JS — filtering after the
+   * fetch meant loading every active notification into memory on each request.
+   * An empty targetRoles means "everyone", which is why isEmpty is part of the
+   * match rather than a special case handled afterwards.
+   *
+   * Recency is handled by expiry rather than by the reader's join date: a user
+   * who registered yesterday still benefits from seeing the properties added
+   * this week. What keeps the list short is that broadcasts age out — see
+   * BROADCAST_TTL_DAYS.
+   */
+  private async visibleTo(user: CurrentUser) {
+    const now = new Date();
+
+    return {
+      isActive: true,
+      startsAt: { lte: now },
+      // A resolved task is done for everyone, so it leaves the feed entirely.
+      // Announcements have requiresAction=false and are unaffected.
+      resolvedAt: null,
+      AND: [
+        { OR: [{ expiresAt: null }, { expiresAt: { gte: now } }] },
+        {
+          OR: [
+            { targetRoles: { isEmpty: true } },
+            { targetRoles: { hasSome: [user.role] } },
+          ],
+        },
+      ],
+    };
   }
 
   /**
@@ -145,51 +243,33 @@ export class GlobalNotificationsService {
    * Mark all active global notifications as viewed for a user
    * Used when user clicks "mark all as read"
    */
+  /**
+   * Mark every notification this user can see as viewed.
+   *
+   * Previously one upsert per notification; now a single insert that skips the
+   * rows already there, so the cost no longer scales with the notification count.
+   * Existing view records keep their original viewedAt, which is the more
+   * accurate reading of "when did they first see it".
+   */
   async markAllAsViewed(user: CurrentUser) {
-    const now = new Date();
-
-    // Get all active global notifications for this user's role
     const notifications = await this.prisma.globalNotification.findMany({
-      where: {
-        isActive: true,
-        startsAt: { lte: now },
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gte: now } },
-        ],
-      },
-      select: { id: true, targetRoles: true },
+      where: await this.visibleTo(user),
+      select: { id: true },
     });
 
-    // Filter by role - only mark those relevant to user
-    const relevantNotifications = notifications.filter((notif) => {
-      if (notif.targetRoles.length === 0) return true;
-      return notif.targetRoles.includes(user.role);
+    if (notifications.length === 0) return 0;
+
+    const { count } = await this.prisma.globalNotificationView.createMany({
+      data: notifications.map((notif) => ({
+        userId: user.userId,
+        globalNotificationId: notif.id,
+        viewedAt: new Date(),
+        dismissed: false,
+      })),
+      skipDuplicates: true,
     });
 
-    // Mark each as viewed (upsert to avoid duplicates)
-    const viewPromises = relevantNotifications.map((notif) =>
-      this.prisma.globalNotificationView.upsert({
-        where: {
-          userId_globalNotificationId: {
-            userId: user.userId,
-            globalNotificationId: notif.id,
-          },
-        },
-        create: {
-          userId: user.userId,
-          globalNotificationId: notif.id,
-          viewedAt: new Date(),
-          dismissed: false,
-        },
-        update: {
-          viewedAt: new Date(),
-        },
-      }),
-    );
-
-    await Promise.all(viewPromises);
-    return relevantNotifications.length;
+    return count;
   }
 
   /**
@@ -201,38 +281,31 @@ export class GlobalNotificationsService {
   ): Promise<GlobalNotificationStatsDto> {
     const notification = await this.prisma.globalNotification.findUnique({
       where: { id: notificationId },
-      include: {
-        views: true,
-      },
     });
 
     if (!notification) {
-      throw new Error(`Notification ${notificationId} not found`);
+      throw new NotFoundException(`Notification ${notificationId} not found`);
     }
 
-    // Count target users based on role
-    let targetedUsersCount = 0;
-    if (notification.targetRoles.length === 0) {
-      // If no specific roles, count all enabled users
-      targetedUsersCount = await this.prisma.appUser.count({
-        where: { isEnabled: true },
-      });
-    } else {
-      // Count users with matching roles
-      targetedUsersCount = await this.prisma.appUser.count({
+    // Counted in Postgres rather than by loading every view row and filtering
+    // in JS — this endpoint is for notifications sent to the whole user base.
+    const [targetedUsersCount, viewedCount, dismissedCount] = await Promise.all([
+      this.prisma.appUser.count({
         where: {
           isEnabled: true,
-          role: { in: notification.targetRoles as UserRole[] },
+          ...(notification.targetRoles.length > 0 && {
+            role: { in: notification.targetRoles as UserRole[] },
+          }),
         },
-      });
-    }
+      }),
+      this.prisma.globalNotificationView.count({
+        where: { globalNotificationId: notificationId, dismissed: false },
+      }),
+      this.prisma.globalNotificationView.count({
+        where: { globalNotificationId: notificationId, dismissed: true },
+      }),
+    ]);
 
-    const viewedCount = notification.views.filter(
-      (v) => !v.dismissed,
-    ).length;
-    const dismissedCount = notification.views.filter(
-      (v) => v.dismissed,
-    ).length;
     const viewPercentage =
       targetedUsersCount > 0
         ? Math.round((viewedCount / targetedUsersCount) * 100)

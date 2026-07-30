@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
-import { GlobalNotificationsService } from 'src/shared/global-notifications/global-notifications.service';
 import { NotificationType, UserRole } from '@prisma/client';
 
 @Injectable()
@@ -9,7 +8,6 @@ export class PropertiesNotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
-    private readonly globalNotifications: GlobalNotificationsService,
   ) {}
 
   /**
@@ -29,32 +27,39 @@ export class PropertiesNotificationsService {
       data: { status: 'canceled' },
     });
 
-    // bulk create notifications
-    const notifications = appointments.map(appointment => ({
-      userId: appointment.bookedById,
-      body: {
-        title: 'Appointment Canceled',
-        message: `Your appointment for this property has been canceled due to ownership change.`,
-        link: `/${appointment.id}`,
-        json: { appointmentId: appointment.id, bookedById: appointment.bookedById },
-      },
-    }));
-
-    await this.notifications.notifyBulkCustom(notifications, 'appointment');
+    // one notification per affected booking, each deep-linking to its own appointment
+    await this.notifications.notifyEach(
+      appointments.map((appointment) => ({
+        userId: appointment.bookedById,
+        content: {
+          title: 'Appointment Canceled',
+          message:
+            'Your appointment for this property has been canceled due to ownership change.',
+          link: `/${appointment.id}`,
+          json: {
+            appointmentId: appointment.id,
+            bookedById: appointment.bookedById,
+          },
+        },
+      })),
+      NotificationType.appointment,
+    );
   }
 
   /**
    * Sends notification for new property creation.
    */
   async notifyNewProperty(propertyId: string, title: string): Promise<void> {
-    await this.globalNotifications.create({
-      title: 'New Property Available',
-      message: `**${title}** is now open for investment.`,
-      type: NotificationType.property,
-      targetRoles: [UserRole.broker, UserRole.investor],
-      link: `/properties/${propertyId}`,
-      priority: 'normal',
-      json: { propertyId },
-    });
+    await this.notifications.notifyRoles(
+      [UserRole.broker, UserRole.investor],
+      {
+        title: 'New Property Available',
+        message: `**${title}** is now open for investment.`,
+        type: NotificationType.property,
+        link: `/properties/${propertyId}`,
+        priority: 'normal',
+        json: { propertyId },
+      },
+    );
   }
 }

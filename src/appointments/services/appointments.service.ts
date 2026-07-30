@@ -216,9 +216,10 @@ export class AppointmentService {
         );
       } else {
         // general update notification to the booked user
-        await this.notifications.notify(existing.bookedById, 'appointment', {
+        await this.notifications.notifyUser(existing.bookedById, {
           title: 'Appointment Updated',
           message: `Your appointment has been updated.`,
+          type: 'appointment',
           link: `/${id}`,
           json: {
             appointmentId: id,

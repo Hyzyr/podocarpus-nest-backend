@@ -34,6 +34,7 @@ npm run build
 git pull
 npm install
 npx prisma migrate deploy    # applies migrations, no shadow DB
+npx prisma generate    # or migrate deploy if schema also changed
 npm run build
 # restart the server
 ```
