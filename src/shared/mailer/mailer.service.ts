@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { ApiErrorCode } from 'src/common/http/api-error';
 import {
   MAIL_HOST,
   MAIL_PASS,
@@ -26,8 +31,7 @@ export interface SendMailOptions {
 }
 
 export interface SendTemplateOptions
-  extends Omit<SendMailOptions, 'text' | 'html'>,
-    EmailTemplateOptions {}
+  extends Omit<SendMailOptions, 'text' | 'html'>, EmailTemplateOptions {}
 
 @Injectable()
 export class MailerService {
@@ -79,9 +83,15 @@ export class MailerService {
    */
   async sendMail(options: SendMailOptions): Promise<void> {
     if (!this.isConfigured) {
-      throw new Error(
+      // A misconfigured server, not a bad request — 503 so callers and uptime
+      // checks can tell it apart from a rejected message.
+      this.logger.error(
         'Mailer is not configured. Set MAIL_HOST, MAIL_PORT, MAIL_USER, and MAIL_PASS.',
       );
+      throw new ServiceUnavailableException({
+        code: ApiErrorCode.SERVICE_UNAVAILABLE,
+        message: 'Email is temporarily unavailable. Please try again later.',
+      });
     }
 
     const { to, subject, text, html, from, cc, bcc, replyTo } = options;

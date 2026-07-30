@@ -14,15 +14,37 @@ import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { ValidationPipe } from '@nestjs/common';
 import { COOKIE_SECRET, UPLOADS_URL } from 'src/common/constants';
+import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
+import { PrismaExceptionFilter } from 'src/common/filters/prisma-exception.filter';
+import { validationExceptionFactory } from 'src/common/http/validation-exception.factory';
+import {
+  ActionResponseDto,
+  ApiErrorDto,
+  FieldErrorDto,
+  PaginatedDto,
+} from 'src/common/http/api-response.dto';
 import { join } from 'path';
+import { randomUUID } from 'crypto';
 
 const PORT = process.env.PORT || 3030;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({
+      // Reuse an upstream request id when one is supplied (proxy, frontend,
+      // another service) so a single id follows the request across hops;
+      // otherwise mint one. It is echoed on responses and in error bodies.
+      genReqId: (req) =>
+        (req.headers['x-request-id'] as string) || randomUUID(),
+    }),
   );
+
+  // Echo the id back so the caller can quote it in a bug report.
+  app.getHttpAdapter().getInstance().addHook('onSend', (req, reply, payload, done) => {
+    reply.header('x-request-id', req.id);
+    done(null, payload);
+  });
 
   // Register plugins
   // >>> file management
@@ -65,8 +87,15 @@ async function bootstrap() {
       transform: true,
       transformOptions: { enableImplicitConversion: true },
       forbidNonWhitelisted: false, // Allow extra properties to be stripped instead of throwing errors
+      // Field-level errors, so a form can highlight the offending input
+      // instead of receiving one flattened string.
+      exceptionFactory: validationExceptionFactory,
     }),
   );
+
+  // Global error handling. Order matters: Nest applies the LAST matching
+  // filter, so the specific Prisma one is registered after the catch-all.
+  app.useGlobalFilters(new AllExceptionsFilter(), new PrismaExceptionFilter());
 
   // Swagger Config
   const config = new DocumentBuilder()
@@ -76,7 +105,12 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  // PaginatedDto is generic and ApiErrorDto is produced by a filter rather than
+  // a handler, so neither is reachable by Swagger's type scanning — register
+  // them explicitly or $ref lookups against them resolve to nothing.
+  const document = SwaggerModule.createDocument(app, config, {
+    extraModels: [PaginatedDto, ApiErrorDto, ActionResponseDto, FieldErrorDto],
+  });
 
   // Setup Swagger UI at /swagger
   SwaggerModule.setup('swagger', app, document);

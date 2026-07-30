@@ -133,13 +133,13 @@ export class GlobalNotificationDto {
 
 // Response DTO with user-specific view status
 export class GlobalNotificationWithStatusDto extends GlobalNotificationDto {
-  @ApiProperty({ 
+  @ApiProperty({
     example: true,
     description: 'Whether the current user has viewed this notification',
   })
   viewed: boolean;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: false,
     description: 'Whether the current user has dismissed this notification',
   })
@@ -321,19 +321,20 @@ export class GlobalNotificationStatsDto {
 }
 
 export class GetGlobalNotificationsResponseDto {
-  @ApiProperty({ 
+  @ApiProperty({
     type: [GlobalNotificationWithStatusDto],
-    description: 'List of global notifications with view/dismiss status for current user',
+    description:
+      'List of global notifications with view/dismiss status for current user',
   })
   notifications: GlobalNotificationWithStatusDto[];
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 12,
     description: 'Total number of active notifications',
   })
   total: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 8,
     description: 'Number of notifications not yet viewed by current user',
   })
@@ -356,13 +357,13 @@ export class GlobalNotificationWithViewCountDto extends GlobalNotificationDto {
 }
 
 export class GetAllNotificationsResponseDto {
-  @ApiProperty({ 
+  @ApiProperty({
     type: [GlobalNotificationWithViewCountDto],
     description: 'List of all global notifications with view counts',
   })
   notifications: GlobalNotificationWithViewCountDto[];
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 25,
     description: 'Total count of all notifications',
   })
@@ -409,7 +410,7 @@ export class GetAnalyticsResponseDto {
   @ApiProperty({ example: 45, description: 'Total number of dismissed views' })
   totalDismissed: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: 'object',
     additionalProperties: { type: 'object' },
     example: {
@@ -420,7 +421,7 @@ export class GetAnalyticsResponseDto {
   })
   viewsByRole: Record<string, ViewsByRoleDto>;
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: 'object',
     additionalProperties: { type: 'number' },
     example: { '9': 23, '10': 45, '11': 32 },
@@ -428,7 +429,7 @@ export class GetAnalyticsResponseDto {
   })
   viewsByHour: Record<number, number>;
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: [RecentViewDto],
     description: 'Most recent 10 views',
   })

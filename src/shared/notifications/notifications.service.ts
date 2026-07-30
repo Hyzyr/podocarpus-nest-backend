@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ApiErrorCode } from 'src/common/http/api-error';
+import { paginated } from 'src/common/http/api-response.dto';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
   CreateNotificationDto,
@@ -17,6 +19,7 @@ import { escapeHtml } from '../mailer/templates/base.template';
 export const ADMIN_ROLES: UserRole[] = [UserRole.admin, UserRole.superadmin];
 
 const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 100;
 
 /**
  * How long a broadcast stays visible unless the caller says otherwise.
@@ -97,6 +100,9 @@ export class NotificationsService {
    */
   async notifyRoles(roles: UserRole[], options: NotifyRolesOptions) {
     if (roles.length === 0) {
+      // Deliberately a plain Error, not an HttpException: no request can cause
+      // this, it only fires when calling code is wrong. Surfacing it as a 500
+      // is the correct outcome.
       throw new Error(
         'notifyRoles() needs at least one role. Use notifyEveryone() to reach all users.',
       );
@@ -110,8 +116,15 @@ export class NotificationsService {
   }
 
   private async broadcast(roles: UserRole[], options: NotifyRolesOptions) {
-    const { type, email, priority, icon, expiresAt, requiresAction, ...content } =
-      options;
+    const {
+      type,
+      email,
+      priority,
+      icon,
+      expiresAt,
+      requiresAction,
+      ...content
+    } = options;
 
     // `undefined` means "caller didn't say" and gets the default TTL; an
     // explicit null means "keep this visible indefinitely".
@@ -213,32 +226,58 @@ export class NotificationsService {
     limit = DEFAULT_PAGE_SIZE,
     offset = 0,
   ) {
-    return this.prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: Math.min(limit, 100),
-      skip: offset,
-    });
+    const take = Math.min(limit, MAX_PAGE_SIZE);
+
+    const [items, total] = await Promise.all([
+      this.prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take,
+        skip: offset,
+      }),
+      this.prisma.notification.count({ where: { userId } }),
+    ]);
+
+    return paginated(items, total, take, offset);
   }
 
+  /**
+   * Scoped to the caller's own notifications. A missing id and someone else's
+   * id both raise the same 404 — distinguishing them would let a caller probe
+   * which notification ids exist.
+   */
   async markAsRead(id: string, userId: string) {
     const updated = await this.prisma.notification.updateMany({
       where: { id, userId },
       data: { status: 'read', readAt: new Date() },
     });
 
-    return updated.count > 0;
+    if (updated.count === 0) {
+      throw new NotFoundException({
+        code: ApiErrorCode.NOT_FOUND,
+        message: 'Notification not found.',
+      });
+    }
+
+    return { success: true, message: 'Notification marked as read' };
   }
 
   async markAllAsRead(user: CurrentUser) {
-    await this.prisma.notification.updateMany({
-      where: { userId: user.userId, status: 'unread' },
-      data: { status: 'read', readAt: new Date() },
-    });
+    const [direct, broadcast] = await Promise.all([
+      this.prisma.notification.updateMany({
+        where: { userId: user.userId, status: 'unread' },
+        data: { status: 'read', readAt: new Date() },
+      }),
+      this.globalNotifications.markAllAsViewed(user),
+    ]);
 
-    await this.globalNotifications.markAllAsViewed(user);
+    const updated = direct.count + broadcast;
 
-    return true;
+    return {
+      success: true,
+      message: `Marked ${updated} notification${updated === 1 ? '' : 's'} as read`,
+      updated,
+    };
   }
 
   /**

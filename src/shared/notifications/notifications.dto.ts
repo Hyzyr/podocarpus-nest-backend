@@ -5,10 +5,8 @@ import {
   IsEnum,
   IsUUID,
   IsDateString,
-  IsArray,
-  IsBoolean,
 } from 'class-validator';
-import { NotificationType, NotificationStatus, UserRole } from '@prisma/client';
+import { NotificationType, NotificationStatus } from '@prisma/client';
 
 // Param validation DTOs
 export class NotificationIdParamDto {
@@ -147,7 +145,6 @@ export class UpdateNotificationDto {
   @IsOptional()
   @IsString()
   message?: string;
-
 }
 
 //
@@ -208,10 +205,16 @@ export type NotifyInputDto = NotifyContent;
 
 // Response DTOs
 export class UnreadCountDto {
-  @ApiProperty({ example: 3, description: 'Unread notifications addressed to this user' })
+  @ApiProperty({
+    example: 3,
+    description: 'Unread notifications addressed to this user',
+  })
   direct: number;
 
-  @ApiProperty({ example: 5, description: 'Broadcasts this user has not opened' })
+  @ApiProperty({
+    example: 5,
+    description: 'Broadcasts this user has not opened',
+  })
   broadcast: number;
 
   @ApiProperty({ example: 8, description: 'direct + broadcast' })
@@ -261,7 +264,7 @@ export class InboxItemDto {
 }
 
 export class MarkAsReadResponseDto {
-  @ApiProperty({ 
+  @ApiProperty({
     example: true,
     description: 'Whether the notification was successfully marked as read',
   })

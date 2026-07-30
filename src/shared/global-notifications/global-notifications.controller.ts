@@ -134,7 +134,12 @@ export class GlobalNotificationsController {
       "Broadcasts targeting the user's role, newest first, with their viewed/dismissed status. Excludes expired ones and any actionable item somebody has already resolved.",
   })
   @ApiQuery({ name: 'unreadOnly', required: false, type: Boolean })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Default 50, max 100.' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Default 50, max 100.',
+  })
   @ApiQuery({ name: 'offset', required: false, type: Number })
   @ApiResponse({
     status: 200,
@@ -165,7 +170,8 @@ export class GlobalNotificationsController {
     }));
 
     return {
-      notifications: mappedNotifications as unknown as GlobalNotificationWithStatusDto[],
+      notifications:
+        mappedNotifications as unknown as GlobalNotificationWithStatusDto[],
       total: notifications.length,
       unviewedCount,
     };
@@ -195,11 +201,7 @@ export class GlobalNotificationsController {
     @Param() { id }: GlobalNotificationIdParamDto,
     @CurrentUser() user: CurrentUser,
   ) {
-    await this.globalNotificationsService.markAsViewed(
-      id,
-      user.userId,
-      false,
-    );
+    await this.globalNotificationsService.markAsViewed(id, user.userId, false);
 
     return { success: true, message: 'Notification marked as viewed' };
   }
@@ -228,10 +230,7 @@ export class GlobalNotificationsController {
     @Param() { id }: GlobalNotificationIdParamDto,
     @CurrentUser() user: CurrentUser,
   ) {
-    await this.globalNotificationsService.dismissNotification(
-      id,
-      user.userId,
-    );
+    await this.globalNotificationsService.dismissNotification(id, user.userId);
 
     return { success: true, message: 'Notification dismissed' };
   }
@@ -297,8 +296,7 @@ export class GlobalNotificationsController {
   @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Get statistics for a global notification (Admin only)',
-    description:
-      'Returns view counts, dismissal rates, and engagement metrics',
+    description: 'Returns view counts, dismissal rates, and engagement metrics',
   })
   @ApiResponse({
     status: 200,
@@ -336,8 +334,7 @@ export class GlobalNotificationsController {
   @Roles('admin', 'superadmin')
   @ApiOperation({
     summary: 'Get detailed analytics for a notification (Admin only)',
-    description:
-      'Returns breakdown of views by role, time, and dismissal data',
+    description: 'Returns breakdown of views by role, time, and dismissal data',
   })
   @ApiResponse({
     status: 200,
@@ -393,9 +390,7 @@ export class GlobalNotificationsController {
   ) {
     const adminRoles: UserRole[] = [UserRole.admin, UserRole.superadmin];
     if (!adminRoles.includes(user.role)) {
-      throw new ForbiddenException(
-        'Only admins can view all notifications',
-      );
+      throw new ForbiddenException('Only admins can view all notifications');
     }
 
     return this.globalNotificationsService.getAllNotifications(

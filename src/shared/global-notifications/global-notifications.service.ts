@@ -9,7 +9,7 @@ import {
   UpdateGlobalNotificationDto,
   GlobalNotificationStatsDto,
 } from './global-notifications.dto';
-import { NotificationType, UserRole } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @Injectable()
@@ -77,7 +77,7 @@ export class GlobalNotificationsService {
 
     const notifications = await this.prisma.globalNotification.findMany({
       where: {
-        ...(await this.visibleTo(user)),
+        ...this.visibleTo(user),
         // "Unread" for a broadcast means no view record exists for this user.
         ...(unreadOnly && { views: { none: { userId: user.userId } } }),
       },
@@ -147,7 +147,7 @@ export class GlobalNotificationsService {
   async getOpenTasks(user: CurrentUser) {
     return this.prisma.globalNotification.findMany({
       where: {
-        ...(await this.visibleTo(user)),
+        ...this.visibleTo(user),
         requiresAction: true,
         resolvedAt: null,
       },
@@ -159,7 +159,7 @@ export class GlobalNotificationsService {
   async getUnreadCount(user: CurrentUser) {
     return this.prisma.globalNotification.count({
       where: {
-        ...(await this.visibleTo(user)),
+        ...this.visibleTo(user),
         views: { none: { userId: user.userId } },
       },
     });
@@ -178,7 +178,7 @@ export class GlobalNotificationsService {
    * this week. What keeps the list short is that broadcasts age out — see
    * BROADCAST_TTL_DAYS.
    */
-  private async visibleTo(user: CurrentUser) {
+  private visibleTo(user: CurrentUser) {
     const now = new Date();
 
     return {
@@ -232,10 +232,7 @@ export class GlobalNotificationsService {
   /**
    * Mark a notification as dismissed
    */
-  async dismissNotification(
-    globalNotificationId: string,
-    userId: string,
-  ) {
+  async dismissNotification(globalNotificationId: string, userId: string) {
     return this.markAsViewed(globalNotificationId, userId, true);
   }
 
@@ -253,7 +250,7 @@ export class GlobalNotificationsService {
    */
   async markAllAsViewed(user: CurrentUser) {
     const notifications = await this.prisma.globalNotification.findMany({
-      where: await this.visibleTo(user),
+      where: this.visibleTo(user),
       select: { id: true },
     });
 
@@ -289,22 +286,24 @@ export class GlobalNotificationsService {
 
     // Counted in Postgres rather than by loading every view row and filtering
     // in JS — this endpoint is for notifications sent to the whole user base.
-    const [targetedUsersCount, viewedCount, dismissedCount] = await Promise.all([
-      this.prisma.appUser.count({
-        where: {
-          isEnabled: true,
-          ...(notification.targetRoles.length > 0 && {
-            role: { in: notification.targetRoles as UserRole[] },
-          }),
-        },
-      }),
-      this.prisma.globalNotificationView.count({
-        where: { globalNotificationId: notificationId, dismissed: false },
-      }),
-      this.prisma.globalNotificationView.count({
-        where: { globalNotificationId: notificationId, dismissed: true },
-      }),
-    ]);
+    const [targetedUsersCount, viewedCount, dismissedCount] = await Promise.all(
+      [
+        this.prisma.appUser.count({
+          where: {
+            isEnabled: true,
+            ...(notification.targetRoles.length > 0 && {
+              role: { in: notification.targetRoles },
+            }),
+          },
+        }),
+        this.prisma.globalNotificationView.count({
+          where: { globalNotificationId: notificationId, dismissed: false },
+        }),
+        this.prisma.globalNotificationView.count({
+          where: { globalNotificationId: notificationId, dismissed: true },
+        }),
+      ],
+    );
 
     const viewPercentage =
       targetedUsersCount > 0
@@ -326,24 +325,20 @@ export class GlobalNotificationsService {
    * Get all global notifications for admin dashboard
    * Admin/superadmin only
    */
-  async getAllNotifications(
-    limit: number = 50,
-    offset: number = 0,
-  ) {
-    const [notifications, total] =
-      await this.prisma.$transaction([
-        this.prisma.globalNotification.findMany({
-          include: {
-            _count: {
-              select: { views: true },
-            },
+  async getAllNotifications(limit: number = 50, offset: number = 0) {
+    const [notifications, total] = await this.prisma.$transaction([
+      this.prisma.globalNotification.findMany({
+        include: {
+          _count: {
+            select: { views: true },
           },
-          orderBy: { createdAt: 'desc' },
-          take: limit,
-          skip: offset,
-        }),
-        this.prisma.globalNotification.count(),
-      ]);
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.globalNotification.count(),
+    ]);
 
     return {
       notifications: notifications.map((n) => ({
