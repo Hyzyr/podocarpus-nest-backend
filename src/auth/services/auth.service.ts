@@ -17,6 +17,7 @@ import {
   WEBSITE_URL,
 } from 'src/common/constants';
 import { MailerService } from 'src/shared/mailer/mailer.service';
+import { escapeHtml } from 'src/shared/mailer/templates/base.template';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { AuthNotificationsService } from './auth.notifications.service';
 import { EmailVerificationService } from './email-verification.service';
@@ -108,35 +109,40 @@ export class AuthService {
     email: string,
     withDisownLink: boolean,
   ): Promise<void> {
-    try {
-      const subject = `Welcome to ${WEBSITE_NAME}`;
-      const greeting = `Thanks for joining ${WEBSITE_NAME}! Your account is ready.`;
+    const subject = `Welcome to ${WEBSITE_NAME}`;
+    const intro = [
+      `Your ${escapeHtml(WEBSITE_NAME)} account is ready. You can now browse investment-ready properties, track returns, and manage your contracts in one place.`,
+    ];
 
-      if (!withDisownLink) {
-        await this.mailer.sendMail(
-          email,
-          subject,
-          `${greeting}`,
-          `<p>${greeting}</p>`,
-        );
-        return;
-      }
-
-      const notMeUrl = await this.emailVerification.createDisownLink(userId);
-      const disclaimer =
-        "If you didn't create this account, let us know and we'll block it right away.";
-
-      await this.mailer.sendMail(
-        email,
+    if (!withDisownLink) {
+      // Google signups: ownership is already proven, so no security link.
+      await this.mailer.sendTemplateSafe({
+        to: email,
         subject,
-        `${greeting}\n\n${disclaimer}\nOpen: ${notMeUrl}`,
-        `<p>${greeting}</p>
-         <p>${disclaimer}</p>
-         <p><a href="${notMeUrl}">This wasn't me</a></p>`,
-      );
-    } catch {
-      // Swallow mail errors — never fail signup because the welcome email failed.
+        preheader: 'Your account is ready.',
+        heading: 'Welcome to Podocarpus',
+        paragraphs: intro,
+        button: { label: 'Go to your dashboard', url: `${WEBSITE_URL}` },
+      });
+      return;
     }
+
+    const notMeUrl = await this.emailVerification.createDisownLink(userId);
+
+    await this.mailer.sendTemplateSafe({
+      to: email,
+      subject,
+      preheader: 'Your account is ready.',
+      heading: 'Welcome to Podocarpus',
+      paragraphs: intro,
+      button: { label: 'Go to your dashboard', url: `${WEBSITE_URL}` },
+      showLinkFallback: false,
+      infoBox: {
+        label: "Didn't sign up?",
+        text: `Someone may have used your address by mistake. <a href="${notMeUrl}" style="color:inherit;font-weight:600;">Let us know</a> and we'll block this account right away.`,
+        tone: 'warn',
+      },
+    });
   }
   async login(
     email: string,
@@ -345,12 +351,23 @@ export class AuthService {
     const resetUrl = `${WEBSITE_URL}/reset-password?token=${token}`;
 
     // send email
-    await this.mailer.sendMail(
-      user.email,
-      'Password Reset',
-      `Reset your password: ${resetUrl}`,
-      `<p>Click here: <a href="${resetUrl}">${resetUrl}</a></p>`,
-    );
+    await this.mailer.sendTemplate({
+      to: user.email,
+      subject: 'Reset your password',
+      preheader: 'Use this link to choose a new password.',
+      heading: 'Reset your password',
+      paragraphs: [
+        'We received a request to reset the password for your Podocarpus account.',
+        'Choose a new password using the button below.',
+      ],
+      button: { label: 'Reset password', url: resetUrl },
+      infoBox: {
+        text: 'This link expires in 15 minutes and can only be used once.',
+        tone: 'info',
+      },
+      footnote:
+        "If you didn't request a password reset, you can safely ignore this email — your password will stay the same.",
+    });
 
     return { message: 'Reset email sent' };
   }

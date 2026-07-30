@@ -8,6 +8,7 @@ import { EmailVerificationPurpose } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { MailerService } from 'src/shared/mailer/mailer.service';
+import { escapeHtml } from 'src/shared/mailer/templates/base.template';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { WEBSITE_NAME, WEBSITE_URL } from 'src/common/constants';
 import { AuthNotificationsService } from './auth.notifications.service';
@@ -183,14 +184,23 @@ export class EmailVerificationService {
     });
 
     const link = `${WEBSITE_URL}/verify-email?token=${raw}`;
-    await this.mailer.sendMail(
-      email,
-      `Confirm your email for ${WEBSITE_NAME}`,
-      `Confirm this email address by opening: ${link}\n\nThis link expires in 30 minutes. If you didn't request this, you can ignore this email.`,
-      `<p>Confirm this email address for your ${WEBSITE_NAME} account:</p>
-       <p><a href="${link}">Confirm email</a></p>
-       <p>This link expires in 30 minutes. If you didn't request this, you can safely ignore this email.</p>`,
-    );
+    await this.mailer.sendTemplate({
+      to: email,
+      subject: `Confirm your email for ${WEBSITE_NAME}`,
+      preheader: 'Confirm this address to finish adding it to your account.',
+      heading: 'Confirm your email',
+      paragraphs: [
+        `<b>${escapeHtml(email)}</b> was added as an additional contact email on your ${escapeHtml(WEBSITE_NAME)} account.`,
+        'Confirm it so we can use this address for documents and important updates.',
+      ],
+      button: { label: 'Confirm email', url: link },
+      infoBox: {
+        text: 'This link expires in 30 minutes and can only be used once.',
+        tone: 'info',
+      },
+      footnote:
+        "If you didn't request this, you can safely ignore this email — nothing will be added.",
+    });
   }
 
   // -------------------- SIGNUP DISOWN ("this wasn't me") --------------------
