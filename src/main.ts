@@ -17,6 +17,7 @@ import { COOKIE_SECRET, UPLOADS_URL } from 'src/common/constants';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { PrismaExceptionFilter } from 'src/common/filters/prisma-exception.filter';
 import { validationExceptionFactory } from 'src/common/http/validation-exception.factory';
+import { registerEmailPreview } from 'src/shared/mailer/email-preview';
 import {
   ActionResponseDto,
   ApiErrorDto,
@@ -121,6 +122,13 @@ async function bootstrap() {
   // Health check (outside /api prefix — accessible at GET /health)
   const fastify = app.getHttpAdapter().getInstance();
   fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+
+  // Email template preview at GET /dev/emails. Unauthenticated, so it is only
+  // ever mounted outside production.
+  if (process.env.NODE_ENV !== 'production') {
+    registerEmailPreview(fastify);
+    console.log(`📧 Email previews at http://localhost:${PORT}/dev/emails`);
+  }
 
   await app.listen(PORT, '0.0.0.0');
   console.log(`✅ Server listening on http://localhost:${PORT}`);

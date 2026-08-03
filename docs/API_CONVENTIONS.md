@@ -249,7 +249,34 @@ be noise; if you find yourself wanting a stack for one, it's probably a 500.
 
 ---
 
-## 5. Where things live
+## 5. Previewing emails
+
+**In a browser** — start the app and open:
+
+```
+http://localhost:8000/dev/emails
+```
+
+An index of every template the app sends, each viewable in light, dark, and
+plaintext. Rendered by the same `renderEmail()` the mailer uses, so it cannot
+drift from what actually goes out. **Dev only** — the routes are unauthenticated
+and are not mounted when `NODE_ENV=production`.
+
+**In a real inbox** — a browser is a poor stand-in for Gmail or Outlook, which
+strip CSS a browser keeps:
+
+```bash
+npm run mail:test -- you@example.com            # defaults to the confirm email
+npm run mail:test -- you@example.com welcome
+```
+
+Both read the same fixtures in
+`src/shared/mailer/templates/preview-samples.ts`. Add an entry there when you
+add an email and it appears in both automatically.
+
+---
+
+## 6. Where things live
 
 | Path | What |
 |---|---|
@@ -258,4 +285,6 @@ be noise; if you find yourself wanting a stack for one, it's probably a 500.
 | `src/common/http/validation-exception.factory.ts` | class-validator → `details[]` |
 | `src/common/filters/all-exceptions.filter.ts` | catch-all shaping |
 | `src/common/filters/prisma-exception.filter.ts` | Prisma → HTTP |
-| `src/main.ts` | registers filters, pipe, request id |
+| `src/main.ts` | registers filters, pipe, request id, email preview |
+| `src/shared/mailer/templates/preview-samples.ts` | sample content for every email |
+| `src/shared/mailer/email-preview.ts` | dev-only `/dev/emails` routes |

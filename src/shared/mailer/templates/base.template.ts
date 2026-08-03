@@ -111,7 +111,8 @@ export function renderEmail(opts: EmailTemplateOptions): {
   } = opts;
 
   const year = new Date().getFullYear();
-  const preview = preheader ?? (paragraphs[0] ? toPlain(paragraphs[0]) : heading);
+  const preview =
+    preheader ?? (paragraphs[0] ? toPlain(paragraphs[0]) : heading);
 
   const greetingHtml = greeting
     ? `<p style="margin:0 0 16px;font-family:${FONT_STACK};font-size:15px;line-height:1.6;color:${BRAND.body};">${greeting}</p>`
