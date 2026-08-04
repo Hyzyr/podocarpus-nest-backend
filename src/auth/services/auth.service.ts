@@ -218,25 +218,29 @@ export class AuthService {
       where: { OR: [{ googleId }, { email }] },
     });
 
+    let justCreated = false;
     if (!user) {
-      // Only self-service roles may be created via Google sign-in.
+      // superadmin can never be self-created; investor, broker and admin
+      // ("Agent") are all valid self-service roles. Admins/agents start
+      // disabled and must be approved by a superadmin — same rule as password
+      // registration, so both signup paths behave identically.
       const safeRole =
-        role === UserRole.admin || role === UserRole.superadmin
-          ? UserRole.investor
-          : role;
+        role === UserRole.superadmin ? UserRole.investor : role;
+      const isEnabledByDefault = safeRole !== UserRole.admin;
 
       user = await this.prisma.appUser.create({
         data: {
           email,
           googleId,
           role: safeRole,
-          isEnabled: true,
+          isEnabled: isEnabledByDefault,
           emailVerified: true,
           firstName: payload.given_name ?? null,
           lastName: payload.family_name ?? null,
           profilePhotoUrl: payload.picture ?? null,
         },
       });
+      justCreated = true;
 
       await this.authNotifications.notifyNewUser(user.id, email, safeRole);
 
@@ -257,7 +261,9 @@ export class AuthService {
 
     if (!user.isEnabled) {
       throw new UnauthorizedException(
-        'Account is disabled. Please contact an administrator.',
+        justCreated
+          ? 'Your account was created and is awaiting administrator approval.'
+          : 'Account is disabled. Please contact an administrator.',
       );
     }
 

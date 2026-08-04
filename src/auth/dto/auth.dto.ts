@@ -40,7 +40,10 @@ export class GoogleLoginDto {
 
   @ApiPropertyOptional({
     enum: UserRole,
-    description: 'Role to assign if this is the first time the Google user signs in',
+    description:
+      'Role to assign ONLY when this Google account signs up for the first time (ignored for existing users). ' +
+      '`investor`/`broker` are created active; `admin` (the "Agent" role) is created disabled until a superadmin approves it; ' +
+      '`superadmin` is not allowed and is treated as `investor`. Defaults to `investor` if omitted.',
     example: UserRole.investor,
   })
   @IsOptional()

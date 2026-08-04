@@ -82,13 +82,37 @@ export class AuthController {
 
   @Post('google')
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
-  @ApiOperation({ summary: 'Login or register with a Google ID token' })
+  @ApiOperation({
+    summary: 'Login or register with a Google ID token',
+    description: [
+      'Verifies the Google ID token, then signs the user in — or creates the',
+      'account on first use.',
+      '',
+      '`role` is only used the first time a Google account signs up (it is',
+      'ignored for existing users, who keep their current role):',
+      '- `investor` / `broker` → account is created and active immediately.',
+      '- `admin` (the public "Agent" role) → account is created but DISABLED,',
+      '  pending approval by a superadmin. The call then returns 401 with a',
+      '  "awaiting administrator approval" message — this is expected, not a',
+      '  failure. Once a superadmin enables the account, the next Google login',
+      '  succeeds.',
+      '- `superadmin` → not allowed via signup; silently treated as `investor`.',
+    ].join('\n'),
+  })
   @ApiResponse({
     status: 200,
     description: 'User logged in with Google successfully',
     type: AuthResponseDto,
   })
-  @ApiResponse({ status: 401, description: 'Invalid Google token' })
+  @ApiResponse({
+    status: 401,
+    description:
+      'Invalid/expired Google token, or the account is disabled / awaiting administrator approval (e.g. a newly created Agent). Show the returned message to the user.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Google sign-in is not configured on the server',
+  })
   async google(
     @Body() dto: GoogleLoginDto,
     @Res({ passthrough: true }) reply: FastifyReply,
