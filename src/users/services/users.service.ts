@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { AdminUserDto } from '../dto/user.get.dto';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
@@ -54,7 +54,18 @@ export class UsersService {
       data: dto,
     });
   }
-  async remove(id: string) {
+  async remove(id: string, currentUser: CurrentUser) {
+    const user = await this.prisma.appUser.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException(`User ${id} not found`);
+
+    if (id === currentUser.userId) {
+      throw new ForbiddenException('You cannot delete your own account');
+    }
+
+    if (user.role === UserRole.superadmin) {
+      throw new ForbiddenException('A super admin account cannot be deleted');
+    }
+
     return this.prisma.appUser.delete({ where: { id } });
   }
 

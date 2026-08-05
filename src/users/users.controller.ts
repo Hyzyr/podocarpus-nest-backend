@@ -68,11 +68,11 @@ export class UsersAdminController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'superadmin')
+  @Roles('superadmin')
   @Delete(':id')
-  @ApiOperation({ summary: 'Remove a user [AdminOnly]' })
-  remove(@Param() { id }: UserIdParamDto) {
-    return this.usersService.remove(id);
+  @ApiOperation({ summary: 'Remove a user [SuperAdminOnly]' })
+  remove(@Param() { id }: UserIdParamDto, @CurrentUser() currentUser: CurrentUser) {
+    return this.usersService.remove(id, currentUser);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
