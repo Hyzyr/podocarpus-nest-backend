@@ -1,0 +1,478 @@
+[
+    {
+        "id": "57ef2ea0-158a-4db9-beec-d1458657152d",
+        "unit": "1007",
+        "title": "Al Jawhara - Unit 1007",
+        "images": [
+            "/uploads/properties/images/25-4-scaled-20260504T055843-4783054e.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "37d99e85-bd6d-4b67-95ed-87814647c764",
+        "unit": "1105",
+        "title": "Al Jawhara - Unit 1105",
+        "images": [
+            "/uploads/properties/images/2-20260504T060248-92496b60.heic",
+            "/uploads/properties/images/4-20260504T060250-361c4d8b.heic",
+            "/uploads/properties/images/9-20260504T060249-69cb6c64.heic",
+            "/uploads/properties/images/gemini_generated_image_848km6848km6848k-20260504T060250-f0e71e1e.png",
+            "/uploads/properties/images/gemini_generated_image_3958i33958i33958-20260504T060250-ee294575.png",
+            "/uploads/properties/images/gemini_generated_image_kkyuhekkyuhekkyu-20260504T060250-2222d746.png",
+            "/uploads/properties/images/gemini_generated_image_ldwbjxldwbjxldwb-20260504T060250-24cabc0c.png"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "95297102-fe26-4440-84b7-99f046ec0a54",
+        "unit": "1107",
+        "title": "Al Jawhara - Unit 1107",
+        "images": [
+            "/uploads/properties/images/1400266460-20260504T071947-4bde802d.webp",
+            "/uploads/properties/images/photo-dubai-1-20260504T071947-097047dc.jpeg",
+            "/uploads/properties/images/nkfwcqznhz-1715074704-20260504T071949-adb2143d.jpg",
+            "/uploads/properties/images/9-b-20260504T071947-0c997fbe.jpg",
+            "/uploads/properties/images/21-pool-20260504T071948-5726a2f9.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "bc121720-981d-4e93-a51f-3105232e4b6a",
+        "unit": "1108",
+        "title": "Al Jawhara - Unit 1108",
+        "images": [
+            "/uploads/properties/images/1-20260504T054626-e7c5dbe6.heic",
+            "/uploads/properties/images/2-20260504T054627-5d00a4d1.heic",
+            "/uploads/properties/images/3-20260504T054627-d76e8d56.heic",
+            "/uploads/properties/images/4-20260504T054628-cfe1f8fe.heic",
+            "/uploads/properties/images/5-c-20260504T054627-6d692c8b.heic",
+            "/uploads/properties/images/5-20260504T054628-fed9d5df.heic",
+            "/uploads/properties/images/6-20260504T054627-76f21c9f.heic",
+            "/uploads/properties/images/11-balconyy-20260504T054626-b9fc27ec.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "0f6c51ef-074a-4b76-8de1-8fed08c1004a",
+        "unit": "1110",
+        "title": "Al Jawhara - Unit 1110",
+        "images": [
+            "/uploads/properties/images/1-20260504T055207-8134955d.heic",
+            "/uploads/properties/images/4-20260504T055208-0c37b57e.heic",
+            "/uploads/properties/images/5-20260504T055207-f0231f9c.heic",
+            "/uploads/properties/images/6-20260504T055208-46598579.heic",
+            "/uploads/properties/images/7-20260504T055208-db1635f8.heic",
+            "/uploads/properties/images/8-j-20260504T055207-858dd765.heic",
+            "/uploads/properties/images/8-20260504T055208-a9b9c9e1.heic",
+            "/uploads/properties/images/9-b-20260504T055204-35731f69.jpg",
+            "/uploads/properties/images/9-v-20260504T055204-8d1f7ca8.jpg",
+            "/uploads/properties/images/10-r-20260504T055208-a5b8dd7f.heic"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "3b0cd9a3-7415-47d7-b240-824f0f8f3c16",
+        "unit": "1205",
+        "title": "Al Jawhara - Unit 1205",
+        "images": [
+            "/uploads/properties/images/2-20260504T053047-46521619.heic",
+            "/uploads/properties/images/3-20260504T053047-50f3b9b7.heic",
+            "/uploads/properties/images/5-20260504T053050-eb3bf302.heic",
+            "/uploads/properties/images/6-20260504T053049-3d1b9c28.heic",
+            "/uploads/properties/images/8-b-20260504T053047-8e75c339.jpg",
+            "/uploads/properties/images/9-b-20260504T053047-af0e5c68.jpg",
+            "/uploads/properties/images/9-e-20260504T053050-75d0c76d.heic",
+            "/uploads/properties/images/9-20260504T053050-e1f494eb.heic"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "9cb4927a-aa29-4a86-aceb-e4badc6e687a",
+        "unit": "1207",
+        "title": "Al Jawhara - Unit 1207",
+        "images": [
+            "/uploads/properties/images/480428699-20260504T054342-d0dd6107.jpg",
+            "/uploads/properties/images/480428706-20260504T054342-1b7d8b3d.jpg",
+            "/uploads/properties/images/480428730-20260504T054342-f5fef008.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "c83ce2bf-5ab3-482f-9afe-75e9e608fb67",
+        "unit": "1208",
+        "title": "Al Jawhara - Unit 1208",
+        "images": [
+            "/uploads/properties/images/1-20260504T055719-3e373295.heic",
+            "/uploads/properties/images/2-20260504T055720-b1ada6b1.heic",
+            "/uploads/properties/images/4-20260504T055722-effa6395.heic",
+            "/uploads/properties/images/7-20260504T055722-125d6213.heic",
+            "/uploads/properties/images/8-20260504T055722-eb72a18d.heic",
+            "/uploads/properties/images/9-b-20260504T055718-925c441c.jpg",
+            "/uploads/properties/images/10-20260504T055722-53a61270.heic",
+            "/uploads/properties/images/11-balconyy-20260504T055718-227a380f.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "578586d1-0869-481f-8d4c-49b014e74347",
+        "unit": "1210",
+        "title": "Al Jawhara - Unit 1210",
+        "images": [
+            "/uploads/properties/images/1-20260504T060352-4ace557c.heic",
+            "/uploads/properties/images/4-20260504T060356-9dcc9949.heic",
+            "/uploads/properties/images/8-20260504T060354-a35b5ced.heic",
+            "/uploads/properties/images/9-b-20260504T060357-ba37ac85.heic",
+            "/uploads/properties/images/9-b-20260504T060352-bf9dd7fe.jpg",
+            "/uploads/properties/images/9-n-20260504T060356-875b9134.heic",
+            "/uploads/properties/images/9-20260504T060356-1f32feba.heic",
+            "/uploads/properties/images/10-20260504T060356-f0eb8c0f.heic"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "7d79a594-6e64-44de-ac21-3c4a61ce8dd9",
+        "unit": "1305",
+        "title": "Al Jawhara - Unit 1305",
+        "images": [
+            "/uploads/properties/images/1-20260504T060018-b00bc46c.heic",
+            "/uploads/properties/images/2-20260504T060017-3349561f.heic",
+            "/uploads/properties/images/3-20260504T060018-ea5c1863.heic",
+            "/uploads/properties/images/4-20260504T060019-2c27dbee.heic",
+            "/uploads/properties/images/5-20260504T060019-4bf34e87.heic",
+            "/uploads/properties/images/6-20260504T060018-00def28d.heic",
+            "/uploads/properties/images/8-b-20260504T060016-cebb56fb.jpg",
+            "/uploads/properties/images/9-b-20260504T060016-adc6a990.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "bd4f88c5-849c-4cef-a5df-2027becf57e7",
+        "unit": "1307",
+        "title": "Al Jawhara - Unit 1307",
+        "images": [
+            "/uploads/properties/images/dxuoxcokes-1715074704-20260504T055023-2e99e713.jpg",
+            "/uploads/properties/images/z3xy4vjelm-1715074704-20260504T055023-e7934579.jpg",
+            "/uploads/properties/images/hutfjacu9p-1715074731-20260504T055023-56195c44.jpg",
+            "/uploads/properties/images/h0ycwg5aqh-1715074732-20260504T055023-02557333.jpg",
+            "/uploads/properties/images/nkfwcqznhz-1715074704-20260504T055023-82661a15.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "b623de63-7bac-4283-9324-c17f498cebe5",
+        "unit": "1310",
+        "title": "Al Jawhara - Unit 1310",
+        "images": [
+            "/uploads/properties/images/al-jawhara-1310-1.webp",
+            "/uploads/properties/images/al-jawhara-1310-2.webp",
+            "/uploads/properties/images/al-jawhara-1310-3.webp",
+            "/uploads/properties/images/al-jawhara-1310-4.webp",
+            "/uploads/properties/images/al-jawhara-1310-5.webp",
+            "/uploads/properties/images/al-jawhara-1310-6.webp",
+            "/uploads/properties/images/al-jawhara-1310-7.webp",
+            "/uploads/properties/images/al-jawhara-1310-8.webp",
+            "/uploads/properties/images/al-jawhara-1310-9.webp",
+            "/uploads/properties/images/al-jawhara-1310-10.webp"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "a7ea5964-4f4e-4d2b-838b-ddddf2482307",
+        "unit": "1405",
+        "title": "Al Jawhara - Unit 1405",
+        "images": [
+            "/uploads/properties/images/jvt-photo-unfurnished-2-20260504T055322-9461e02a.jpg",
+            "/uploads/properties/images/jvt-photo-entrance-20260504T055322-6a4bde38.jpg",
+            "/uploads/properties/images/jvt-photo-unfurnished-20260504T055322-9c96a0a2.jpg",
+            "/uploads/properties/images/jvt-photo-bathroom-20260504T055322-7a870045.jpg",
+            "/uploads/properties/images/jvt-photo-balcony-20260504T055322-6202fd7f.jpg",
+            "/uploads/properties/images/11-view-20260504T055322-c6a86240.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "8046e677-fa8d-4f04-8218-8d1389a2d643",
+        "unit": "1408",
+        "title": "Al Jawhara - Unit 1408",
+        "images": [
+            "/uploads/properties/images/gemini_generated_image_jbuvicjbuvicjbuv-20260504T055443-f1b84cba.png",
+            "/uploads/properties/images/gemini_generated_image_dvpx9mdvpx9mdvpx-20260504T055443-8e55f3bd.png",
+            "/uploads/properties/images/gemini_generated_image_bgzqasbgzqasbgzq-20260504T055444-3ffb22b8.png",
+            "/uploads/properties/images/11-balconyy-20260504T055442-86041245.jpg",
+            "/uploads/properties/images/gemini_generated_image_am6n8dam6n8dam6n-20260504T055444-fb25eff2.png",
+            "/uploads/properties/images/gemini_generated_image_jomwj4jomwj4jomw-20260504T055444-d92d2788.png",
+            "/uploads/properties/images/gemini_generated_image_fb858nfb858nfb85-20260504T055444-004e55f4.png"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "767c5337-1dce-4ef9-a994-bc2d14e63d17",
+        "unit": "1505",
+        "title": "Al Jawhara - Unit 1505",
+        "images": [
+            "/uploads/properties/images/1-20260504T060150-52416265.heic",
+            "/uploads/properties/images/3-20260504T060152-8cdd7d42.heic",
+            "/uploads/properties/images/4-20260504T060150-3cb8bd06.heic",
+            "/uploads/properties/images/7-20260504T060151-681c2c2c.heic",
+            "/uploads/properties/images/8-20260504T060152-ddbda6cc.heic",
+            "/uploads/properties/images/10-a-20260504T060152-8d50a86f.heic",
+            "/uploads/properties/images/10-e-20260504T060152-f4754ded.heic",
+            "/uploads/properties/images/11-t-20260504T060152-48941a08.heic"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "f691001f-770a-4798-bbd3-a321806b43ae",
+        "unit": "1608",
+        "title": "Al Jawhara - Unit 1608",
+        "images": [
+            "/uploads/properties/images/2-20260504T053249-416400b2.heic",
+            "/uploads/properties/images/3-20260504T053250-082f5501.heic",
+            "/uploads/properties/images/5-20260504T053250-8e5dd090.heic",
+            "/uploads/properties/images/8-20260504T053250-0ab2c66a.heic",
+            "/uploads/properties/images/11-balcony-20260504T053248-aefb554e.jpg",
+            "/uploads/properties/images/11-view-20260504T053248-df848b08.jpg",
+            "/uploads/properties/images/11-vieww-20260504T053248-0560f5db.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "e49bd894-eb95-4b5c-bd14-37ae6c6386e9",
+        "unit": "2010",
+        "title": "Al Jawhara - Unit 2010",
+        "images": [
+            "/uploads/properties/images/gemini_generated_image_pitewypitewypite-20260504T055603-879eb6d6.png",
+            "/uploads/properties/images/gemini_generated_image_ktqi23ktqi23ktqi-20260504T055603-068a249b.png",
+            "/uploads/properties/images/gemini_generated_image_s4vix0s4vix0s4vi-20260504T055603-ba6842c0.png",
+            "/uploads/properties/images/gemini_generated_image_c9j1wic9j1wic9j1-20260504T055603-cd5e87f1.png",
+            "/uploads/properties/images/gemini_generated_image_5bkjv5bkjv5bkjv5-20260504T055603-25c8b6f8.png",
+            "/uploads/properties/images/10-20260504T055601-c13f4106.jpg",
+            "/uploads/properties/images/9-b-20260504T055601-cb8f6a98.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "8f6cc04d-d67f-46f9-988e-edd9a47428f8",
+        "unit": "907",
+        "title": "Al Jawhara - Unit 907",
+        "images": [
+            "/uploads/properties/images/403970099-20260504T054418-90925315.jpg",
+            "/uploads/properties/images/403970086-20260504T054418-051fa9ef.jpg",
+            "/uploads/properties/images/403970079-20260504T054418-07f67b89.jpg"
+        ],
+        "status": "Rented",
+        "building": "Al Jawhara"
+    },
+    {
+        "id": "71487eb8-18f4-429b-a432-d768368621b0",
+        "unit": "2005/2006",
+        "title": "Fortune Tower - Units 2005/2006",
+        "images": [
+            "/uploads/properties/images/manager-cabin-20260504T053959-13a3d6ee.png",
+            "/uploads/properties/images/fortune-ex-building-20260504T053958-2d960982.jpeg",
+            "/uploads/properties/images/coffe-station-20260504T053959-75ed8707.png",
+            "/uploads/properties/images/corridor-view-20260504T053959-5df76b4b.png",
+            "/uploads/properties/images/corridor-view-1-20260504T054000-8af9d4c3.png",
+            "/uploads/properties/images/manager-cabin-20260504T054000-39fcb097.png",
+            "/uploads/properties/images/meetig-room-20260504T054001-bf3a2916.png",
+            "/uploads/properties/images/office-view-20260504T054001-cf531883.png",
+            "/uploads/properties/images/openworkspace-1-20260504T053959-3d1b75c5.png",
+            "/uploads/properties/images/openworkspace-2-20260504T054001-b47e4ec4.png",
+            "/uploads/properties/images/reception-view-20260504T054001-77aa7b7e.png",
+            "/uploads/properties/images/workspace-2-20260504T054000-79e158b2.png",
+            "/uploads/properties/images/workspace-view-20260504T054001-c2e480dc.png"
+        ],
+        "status": "Rented",
+        "building": "Fortune Tower"
+    },
+    {
+        "id": "e38c80e9-baea-4ec0-995d-81308bb33946",
+        "unit": "B3-05-01",
+        "title": "Gold Tower - Unit 5A (B3-05-01)",
+        "images": [
+            "/uploads/properties/images/gold-tower-b3-05-01-1.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-2.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-3.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-4.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-5.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-6.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-7.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-8.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-9.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-10.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-11.webp",
+            "/uploads/properties/images/gold-tower-b3-05-01-12.webp"
+        ],
+        "status": "Rented",
+        "building": "Gold Tower"
+    },
+    {
+        "id": "99a443cd-4f7b-4927-aaaf-e9e5a42b5216",
+        "unit": "5105",
+        "title": "Marina Pinnacle - Unit 5105",
+        "images": [
+            "/uploads/properties/images/marina-living-room-4-20260504T071702-2b65a456.jpg",
+            "/uploads/properties/images/marina-bathroom-20260504T071702-8dfc1c3d.jpg",
+            "/uploads/properties/images/marina-second-room-3-20260504T071703-bb55fb24.jpg",
+            "/uploads/properties/images/marina-balcony-1-20260504T071703-a916a104.jpg",
+            "/uploads/properties/images/marina-room-1-20260504T071703-93dda1e7.jpg",
+            "/uploads/properties/images/marina-second-bathroom-20260504T071703-3196ef05.jpg",
+            "/uploads/properties/images/marina-corridor-20260504T071703-ecdbfead.jpg"
+        ],
+        "status": "Vacant",
+        "building": "Marina Pinnacle"
+    },
+    {
+        "id": "23bc5634-eafa-4468-87bd-da6d0bbfb8ee",
+        "unit": "5904",
+        "title": "Marina Pinnacle - Unit 5904",
+        "images": [
+            "/uploads/properties/images/marina-living-room-5-20260504T053426-774e1944.jpg",
+            "/uploads/properties/images/marina-balcony-2-20260504T053426-1b11bb7e.jpg",
+            "/uploads/properties/images/marina-bathroom-20260504T053426-8eb78cab.jpg",
+            "/uploads/properties/images/marina-second-room-3-20260504T053426-da7fd51f.jpg"
+        ],
+        "status": "Vacant",
+        "building": "Marina Pinnacle"
+    },
+    {
+        "id": "eb3f0abe-7dc0-445b-869e-322def7f6967",
+        "unit": "3503",
+        "title": "Marina Plaza - Unit 3503",
+        "images": [
+            "/uploads/properties/images/marina-plaza-3503-1.webp",
+            "/uploads/properties/images/marina-plaza-3503-2.webp",
+            "/uploads/properties/images/marina-plaza-3503-3.webp",
+            "/uploads/properties/images/marina-plaza-3503-4.webp",
+            "/uploads/properties/images/marina-plaza-3503-5.webp",
+            "/uploads/properties/images/marina-plaza-3503-6.webp",
+            "/uploads/properties/images/marina-plaza-3503-7.webp",
+            "/uploads/properties/images/marina-plaza-3503-8.webp",
+            "/uploads/properties/images/marina-plaza-3503-9.webp",
+            "/uploads/properties/images/marina-plaza-3503-10.webp",
+            "/uploads/properties/images/marina-plaza-3503-11.webp",
+            "/uploads/properties/images/marina-plaza-3503-12.webp",
+            "/uploads/properties/images/marina-plaza-3503-13.webp",
+            "/uploads/properties/images/marina-plaza-3503-14.webp",
+            "/uploads/properties/images/marina-plaza-3503-15.webp",
+            "/uploads/properties/images/marina-plaza-3503-16.webp",
+            "/uploads/properties/images/marina-plaza-3503-17.webp",
+            "/uploads/properties/images/marina-plaza-3503-18.webp",
+            "/uploads/properties/images/marina-plaza-3503-19.webp",
+            "/uploads/properties/images/marina-plaza-3503-20.webp",
+            "/uploads/properties/images/marina-plaza-3503-21.webp",
+            "/uploads/properties/images/marina-plaza-3503-22.webp",
+            "/uploads/properties/images/marina-plaza-3503-23.webp",
+            "/uploads/properties/images/marina-plaza-3503-24.webp",
+            "/uploads/properties/images/marina-plaza-3503-25.webp",
+            "/uploads/properties/images/marina-plaza-3503-26.webp",
+            "/uploads/properties/images/marina-plaza-3503-27.webp",
+            "/uploads/properties/images/marina-plaza-3503-28.webp",
+            "/uploads/properties/images/marina-plaza-3503-29.webp",
+            "/uploads/properties/images/marina-plaza-3503-30.webp",
+            "/uploads/properties/images/marina-plaza-3503-31.webp",
+            "/uploads/properties/images/marina-plaza-3503-32.webp",
+            "/uploads/properties/images/marina-plaza-3503-33.webp",
+            "/uploads/properties/images/marina-plaza-3503-34.webp",
+            "/uploads/properties/images/marina-plaza-3503-35.webp",
+            "/uploads/properties/images/marina-plaza-3503-36.webp",
+            "/uploads/properties/images/marina-plaza-3503-37.webp",
+            "/uploads/properties/images/marina-plaza-3503-38.webp",
+            "/uploads/properties/images/marina-plaza-3503-39.webp",
+            "/uploads/properties/images/marina-plaza-3503-40.webp",
+            "/uploads/properties/images/marina-plaza-3503-41.webp",
+            "/uploads/properties/images/marina-plaza-3503-42.webp",
+            "/uploads/properties/images/marina-plaza-3503-43.webp",
+            "/uploads/properties/images/marina-plaza-3503-44.webp"
+        ],
+        "status": "Rented",
+        "building": "Marina Plaza"
+    },
+    {
+        "id": "960defb4-ab64-4f53-834a-20145f45efed",
+        "unit": "2905",
+        "title": "Mazaya - Unit 2905",
+        "images": [
+            "/uploads/properties/images/mazaya-2905-1.webp",
+            "/uploads/properties/images/mazaya-2905-2.webp",
+            "/uploads/properties/images/mazaya-2905-3.webp",
+            "/uploads/properties/images/mazaya-2905-4.webp",
+            "/uploads/properties/images/mazaya-2905-5.webp",
+            "/uploads/properties/images/mazaya-2905-6.webp",
+            "/uploads/properties/images/mazaya-2905-7.webp",
+            "/uploads/properties/images/mazaya-2905-8.webp",
+            "/uploads/properties/images/mazaya-2905-9.webp",
+            "/uploads/properties/images/mazaya-2905-10.webp",
+            "/uploads/properties/images/mazaya-2905-11.webp",
+            "/uploads/properties/images/mazaya-2905-12.webp"
+        ],
+        "status": "Rented",
+        "building": "Mazaya"
+    },
+    {
+        "id": "10def9d7-b008-479e-a799-5d394edc5390",
+        "unit": "320",
+        "title": "Prime Residency 3 - Unit 320",
+        "images": [
+            "/uploads/properties/images/img_5991-20260504T052727-531b5d91.heic",
+            "/uploads/properties/images/img_5995-20260504T052755-6b579aa5.heic",
+            "/uploads/properties/images/img_5992-20260504T052755-8868cec4.heic",
+            "/uploads/properties/images/img_5993-20260504T052828-9d8c4828.heic",
+            "/uploads/properties/images/img_5994-20260504T052828-7de0daa7.heic",
+            "/uploads/properties/images/img_5990-20260504T052828-733112db.heic",
+            "/uploads/properties/images/img_5984-20260504T052918-48d3e6e2.heic",
+            "/uploads/properties/images/img_5985-20260504T052918-121884bd.heic",
+            "/uploads/properties/images/img_5997-20260504T052920-8609ee37.heic",
+            "/uploads/properties/images/img_5986-20260504T052921-0da02b9b.heic",
+            "/uploads/properties/images/img_5998-20260504T052920-7e406e3b.heic"
+        ],
+        "status": "Rented",
+        "building": "Prime Residency 3"
+    },
+    {
+        "id": "e57d7ac7-5d09-42f1-a907-ec8bf8d4e3a0",
+        "unit": "11K",
+        "title": "Silver Tower - Unit 11K",
+        "images": [
+            "/uploads/properties/images/silver-tower-11k-1.webp",
+            "/uploads/properties/images/silver-tower-11k-2.webp",
+            "/uploads/properties/images/silver-tower-11k-3.webp",
+            "/uploads/properties/images/silver-tower-11k-4.webp",
+            "/uploads/properties/images/silver-tower-11k-5.webp",
+            "/uploads/properties/images/silver-tower-11k-6.webp",
+            "/uploads/properties/images/silver-tower-11k-7.webp"
+        ],
+        "status": "Rented",
+        "building": "Silver Tower"
+    },
+    {
+        "id": "3302329d-08f3-4d17-8459-72b373a6b774",
+        "unit": "4K",
+        "title": "Silver Tower - Unit 4K",
+        "images": [
+            "/uploads/properties/images/img_1687-20260504T053721-5a09899a.jpg",
+            "/uploads/properties/images/img_1690-20260504T053721-02c370d4.jpg",
+            "/uploads/properties/images/img_1691-20260504T053721-6548c60c.jpg",
+            "/uploads/properties/images/img_1692-20260504T053721-c2760b80.jpg"
+        ],
+        "status": "Rented",
+        "building": "Silver Tower"
+    }
+]

@@ -63,3 +63,4 @@ uploads-seed/*
 *.prompt.md
 git-activity-report-*
 /uploads/properties/properties
+scripts/photo-recreate/final/uploads/properties/images
