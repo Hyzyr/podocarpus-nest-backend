@@ -64,3 +64,4 @@ uploads-seed/*
 git-activity-report-*
 /uploads/properties/properties
 scripts/photo-recreate/final/uploads/properties/images
+scripts/photo-recreate/*.tar.gz
