@@ -1,5 +1,8 @@
--- PROD: regenerate galleries (tower hero + curated photos). Keyed on id.
--- Safe to re-run. Review inside the txn before COMMIT.
+-- PROD: INITIAL full rebuild (tower hero + curated photos). Keyed on id.
+-- ⚠ SUPERSEDED for some properties — re-running this REVERTS them:
+--     Prime Residency 320 -> now 5 photos      (see update-prime.sql)
+--     All Al Jawhara units -> now one shared set (see update-aljawhara.sql)
+-- If you re-run this file, re-apply update-prime.sql and update-aljawhara.sql after.
 BEGIN;
 
 -- Al Jawhara - Unit 1007  (reuse 1108)

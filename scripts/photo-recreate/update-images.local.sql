@@ -1,5 +1,8 @@
--- LOCAL (realestate_mvp): same galleries, keyed on buildingName + unitNo.
+-- LOCAL (realestate_mvp): INITIAL full rebuild, keyed on buildingName + unitNo.
 -- Covers all local units incl. 1308/1508 which are not in prod.
+-- ⚠ SUPERSEDED for some properties — re-running this REVERTS them:
+--     Prime Residency 320 -> now 5 photos      (see update-prime.sql)
+--     All Al Jawhara units -> now one shared set (see update-aljawhara.sql)
 BEGIN;
 
 -- Al Jawhara - Unit 1007  (reuse 1108)
