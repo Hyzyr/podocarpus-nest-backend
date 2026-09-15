@@ -14,6 +14,11 @@ Newest first, grouped by `## YYYY-MM`. Append only; don't rewrite past entries.
 
 ## 2026-09
 
+### 2026-09-15 — Month-by-month rent collection table
+- **Type:** Feature
+- **Did:** Added `GET /api/payments/monthly` — the rent-roll grid: one row per tenant, one cell per month, bucketed server-side. Each cell reports what was *owed for* that month (`amountDue`/`amountPaid`/`balance`/`status`) separately from what *arrived during* it (`receivedInMonth`/`adHocInMonth`/`payments[]`), so rent paid late is counted in both places correctly. Columns are flagged `isPast`/`isCurrent`/`isFuture` and carry their own totals for the footer row. Filters: `year` or `from`/`to`, `propertyId`, `leaseId`, `activeLeasesOnly`, `hideEmptyRows`, `includePayments`. Documented in Swagger and in `docs/RENT_COLLECTION_FRONTEND.md` §4b.
+- **Impact:** Admins get one call for "past months: full payment history, current and future months: what's paid and what isn't" — previously it would have taken twelve requests and would still have missed off-schedule payments, which have no due date to bucket by.
+
 ### 2026-09-15 — Frontend handoff docs for rent collection
 - **Type:** Docs
 - **Did:** Wrote `docs/RENT_COLLECTION_FRONTEND.md` (model, TS types, every endpoint with real bodies, compatibility notes, gotchas, build order) and a paste-ready `.github/prompts/frontend-rent-collection.prompt.md` for the frontend repo. Added reusable prompts so this doesn't get rewritten each time: `.github/prompts/new-feature.prompt.md` (`/feature`) for building a backend feature, and `.github/prompts/frontend-handoff.prompt.md` (`/frontend-handoff`) for producing the handover pair.

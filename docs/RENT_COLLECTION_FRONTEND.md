@@ -17,6 +17,7 @@ what's been collected, what's coming, and what's late.
 | Set or change them later | `PUT /api/tenant-leases/:id/schedule` |
 | Show a lease's schedule | `GET /api/tenant-leases/:id/schedule` |
 | Build the collection dashboard | `GET /api/payments/dashboard` |
+| Month-by-month table (rent roll) | `GET /api/payments/monthly` |
 | Table of everything due / late | `GET /api/payments/installments` |
 | Mark a payment received | `POST /api/payments/installments/:id/collect` |
 | Edit / waive a scheduled date | `PATCH /api/payments/installments/:id` |
@@ -326,6 +327,136 @@ type Paginated<T> = {
 
 ---
 
+## 4b. The month-by-month table (rent roll)
+
+```http
+GET /api/payments/monthly?year=2026
+```
+
+Tenants down, months across. **Everything is pre-bucketed server-side** — don't
+build this by calling `/installments` once per month, and don't bucket payments
+yourself. Two reasons it has to be done here: what was *owed* comes from
+installments (by due date) while what *arrived* comes from payments (by paid
+date), and ad-hoc payments have no due date to bucket by at all.
+
+Query params, all optional: `year` (default current) · `from`/`to` (snapped to
+whole months, override `year`, max 120 months) · `propertyId` · `leaseId`
+(single-tenant view) · `activeLeasesOnly` (default false — past tenants keep
+their history) · `hideEmptyRows` (default false) · `includePayments`
+(default **true**; set false for a lighter payload when you only need paid/unpaid).
+
+```ts
+type MonthlyView = {
+  generatedAt: string;
+  range: { from: string; to: string };
+  months: MonthlyColumn[];   // column headers, in order
+  rows: MonthlyRow[];        // one per tenant
+  totals: MonthlyGrandTotals;
+};
+
+type MonthlyColumn = {
+  month: string;             // "2026-03"
+  isPast: boolean;           // history — render the payment list
+  isCurrent: boolean;
+  isFuture: boolean;         // expectation — never mark these late
+  scheduled: number; collected: number; received: number;
+  outstanding: number; overdueAmount: number;
+  dueCount: number; paidCount: number; partialCount: number;
+  pendingCount: number; overdueCount: number;
+};
+
+type MonthlyRow = {
+  leaseId: string; propertyId: string;
+  tenantName: string | null;
+  buildingName: string | null; unitNo: string | null; propertyTitle: string | null;
+  paymentFrequency: RentFrequency;
+  leaseStart: string; leaseEnd: string | null; isActive: boolean;
+  hasSchedule: boolean;      // false → show "set up collection dates", not an empty row
+  totals: {
+    scheduled: number; collected: number; received: number;
+    outstanding: number; overdueCount: number; overdueAmount: number;
+    collectionRate: number;
+  };
+  cells: MonthlyCell[];      // one per entry in `months`, same order, never sparse
+};
+
+type MonthlyCellStatus =
+  | 'NONE' | 'PENDING' | 'PARTIAL' | 'PAID'
+  | 'OVERDUE' | 'WAIVED' | 'CANCELLED' | 'AD_HOC';
+
+type MonthlyCell = {
+  month: string;
+  status: MonthlyCellStatus;
+
+  // What was OWED FOR this month (wherever the money eventually landed):
+  amountDue: number;
+  amountPaid: number;
+  balance: number;
+
+  // What ARRIVED DURING this month (whatever it was for):
+  receivedInMonth: number;
+  adHocInMonth: number;      // the part of it with no installment attached
+
+  isOverdue: boolean;
+  daysOverdue: number;
+  installments: RentInstallment[];
+  payments?: RentPayment[];  // omitted when includePayments=false
+};
+```
+
+### The one thing to understand before you render a cell
+
+**`amountPaid` and `receivedInMonth` are different numbers on purpose.**
+
+- `amountDue` / `amountPaid` / `balance` → *what this month owed*.
+- `receivedInMonth` / `payments[]` → *what arrived in this month*.
+
+A tenant who pays April's rent in June produces:
+
+| Month | status | amountDue | amountPaid | receivedInMonth |
+|---|---|---|---|---|
+| 2026-04 | `PAID` | 30000 | 30000 | **0** |
+| 2026-06 | `NONE` | 0 | 0 | **30000** |
+
+Both are correct. April's obligation *was* met; the cash simply landed in June.
+So:
+
+- For the **paid/unpaid grid**, read `status` and `balance`.
+- For the **"what came in this month" history**, read `payments[]` and
+  `receivedInMonth`.
+- A `NONE` cell with a non-zero `receivedInMonth` is not a bug — it's another
+  month's rent arriving. If your cell renders only on `status`, that money looks
+  invisible; show the amount too.
+
+`status` describes the **obligation**, never the cash. `AD_HOC` means money
+arrived that settles nothing scheduled anywhere (a late fee), not merely that
+money arrived.
+
+### Rendering the grid
+
+```tsx
+const { months, rows } = await api.get('/payments/monthly?year=2026');
+
+rows.map(row =>
+  row.cells.map((cell, i) => {
+    const col = months[i];              // same index, guaranteed
+    if (col.isFuture) return <Due cell={cell} />;          // expectation
+    if (col.isPast)   return <History cell={cell} />;      // payments[]
+    return <Current cell={cell} />;
+  })
+);
+```
+
+`months` doubles as your footer totals row — `scheduled`, `collected`,
+`received`, `outstanding`, `overdueAmount` and the per-status counts are already
+summed per column. `totals` is the grand total. No client-side arithmetic.
+
+Cells are **never sparse**: every row has exactly one cell per month, including
+months where nothing was due. A `QUARTERLY` tenant has eight `NONE` cells a year,
+and that is what makes the grid line up.
+
+---
+
 ## 5. Taking a payment
 
 ### The common case — tenant paid what they owed
@@ -474,7 +605,12 @@ treating it as an error.
   `error.message`. Field-level validation errors arrive in `details[]`.
 - **`anchorDay` maxes at 28.** Don't offer 29-31 in a day picker.
 - **Max 120 installments per schedule**, so a `MONTHLY` lease longer than 10 years
-  gets truncated.
+  gets truncated. `/payments/monthly` caps at 120 columns for the same reason.
+- **`/payments/monthly` cells are never sparse** — one per month per row, always.
+  Index into `months[]` by position rather than searching by month string.
+- **Don't confuse the two `monthly`s.** `dashboard.monthly[]` is an aggregate
+  series for the chart (`{ month, scheduled, collected }` across everything);
+  `GET /payments/monthly` is the per-tenant grid.
 
 ---
 
@@ -487,8 +623,11 @@ treating it as an error.
 4. Dashboard page → `GET /payments/dashboard`: KPI tiles from `totals`, chart from
    `monthly`, two lists from `upcoming` / `overdue`, activity feed from
    `recentPayments`.
-5. "All collections" table → `GET /payments/installments` with filters.
-6. Custom payment modal → `POST /payments`.
+5. **Rent roll page** → `GET /payments/monthly`: the tenants × months grid, with
+   `months` as the footer totals row. Click a past cell → payment history from
+   `cell.payments`; click a future cell → the due amount and a collect action.
+6. "All collections" table → `GET /payments/installments` with filters.
+7. Custom payment modal → `POST /payments`.
 
 Every request and response shape above is in Swagger with descriptions and
 examples — generate your client from `/swagger-json` rather than hand-writing

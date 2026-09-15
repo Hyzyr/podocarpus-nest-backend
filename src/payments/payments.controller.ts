@@ -37,7 +37,10 @@ import {
 import { PaymentsService } from './services/payments.service';
 import { RentScheduleService } from './services/rent-schedule.service';
 import { PaymentsDashboardService } from './services/payments-dashboard.service';
+import { PaymentsMonthlyService } from './services/payments-monthly.service';
 import { CreatePaymentDto, UpdatePaymentDto } from './dto/payment.dto';
+import { MonthlyViewQueryDto } from './dto/monthly-view.dto';
+import { MonthlyViewDto } from './dto/monthly-view.response.dto';
 import {
   CollectInstallmentDto,
   InstallmentQueryDto,
@@ -62,6 +65,7 @@ export class PaymentsController {
     private readonly paymentsService: PaymentsService,
     private readonly scheduleService: RentScheduleService,
     private readonly dashboardService: PaymentsDashboardService,
+    private readonly monthlyService: PaymentsMonthlyService,
   ) {}
 
   /* ------------------------------ dashboard ------------------------------ */
@@ -83,6 +87,30 @@ export class PaymentsController {
   @ApiOkResponse({ type: PaymentsDashboardDto })
   async dashboard(@Query() query: PaymentsDashboardQueryDto) {
     return this.dashboardService.getDashboard(query);
+  }
+
+  @Get('monthly')
+  @ApiOperation({
+    summary: 'Month-by-month collection table (tenants x months)',
+    description: [
+      'The rent-roll grid: one row per tenant, one cell per month, pre-bucketed server-side.',
+      '',
+      '`months` is the column header row and `rows[].cells` lines up with it index-for-index —',
+      'never sparse, so the table renders with no client-side bucketing.',
+      '',
+      'Each column is flagged `isPast` / `isCurrent` / `isFuture`. Past months are history:',
+      'read `payments` for the full record of what arrived. Current and future months are',
+      'expectations: read `status` and `balance` for what is still owed.',
+      '',
+      'A cell answers two different questions and they are not the same number —',
+      '`amountDue`/`amountPaid` describe what was **owed for** that month, while',
+      '`receivedInMonth`/`payments` describe what **arrived during** it. A tenant paying',
+      "January's rent in March raises January's `amountPaid` and March's `receivedInMonth`.",
+    ].join('\n'),
+  })
+  @ApiOkResponse({ type: MonthlyViewDto })
+  async monthly(@Query() query: MonthlyViewQueryDto) {
+    return this.monthlyService.getMonthlyView(query);
   }
 
   @Get('collection-tracker')

@@ -4,6 +4,7 @@ import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './services/payments.service';
 import { RentScheduleService } from './services/rent-schedule.service';
 import { PaymentsDashboardService } from './services/payments-dashboard.service';
+import { PaymentsMonthlyService } from './services/payments-monthly.service';
 
 @Module({
   imports: [DatabaseModule],
@@ -12,6 +13,7 @@ import { PaymentsDashboardService } from './services/payments-dashboard.service'
     PaymentsService,
     RentScheduleService,
     PaymentsDashboardService,
+    PaymentsMonthlyService,
   ],
   // RentScheduleService is exported so PropertiesModule can generate a
   // collection schedule while creating a tenant lease.

@@ -29,6 +29,33 @@ export const round2 = (n: number): number => Math.round(n * 100) / 100;
 /** Tolerance for "fully paid" so float noise never leaves a 0.001 balance. */
 export const PAID_EPSILON = 0.005;
 
+/** Most months a single monthly-view request may span (10 years). */
+export const MAX_MONTH_COLUMNS = 120;
+
+/** The bucket key a date falls into: `"2026-03"`. Always UTC. */
+export const monthKey = (d: Date): string =>
+  `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+
+/**
+ * Every month key from `from` to `to` inclusive.
+ *
+ * Callers seed their buckets with this so a month with no activity renders as a
+ * zero column rather than disappearing from the table.
+ */
+export function eachMonth(from: Date, to: Date): string[] {
+  const keys: string[] = [];
+  const cursor = new Date(
+    Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), 1),
+  );
+  const end = new Date(Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), 1));
+
+  while (cursor <= end && keys.length < MAX_MONTH_COLUMNS) {
+    keys.push(monthKey(cursor));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+  return keys;
+}
+
 /**
  * Add whole months in UTC, clamping the day to the target month's length so
  * 31 Jan + 1 month is 28/29 Feb rather than rolling into March.
