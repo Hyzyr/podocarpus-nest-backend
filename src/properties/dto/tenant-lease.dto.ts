@@ -1,4 +1,9 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PartialType,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsString,
@@ -7,7 +12,9 @@ import {
   IsBoolean,
   IsNumber,
   IsEmail,
+  ValidateNested,
 } from 'class-validator';
+import { GenerateScheduleDto } from 'src/payments/dto/rent-schedule.dto';
 
 export class CreateTenantLeaseDto {
   @ApiProperty({ description: 'Property ID this lease belongs to' })
@@ -91,9 +98,25 @@ export class CreateTenantLeaseDto {
   @IsOptional()
   @IsString()
   terminationReason?: string;
+
+  @ApiPropertyOptional({
+    type: GenerateScheduleDto,
+    description:
+      'When to collect rent from this tenant. Optional — leave it out and assign the schedule later with PUT /tenant-leases/{id}/schedule. Pick a cadence (ANNUAL, SEMI_ANNUAL, QUARTERLY, BI_MONTHLY, MONTHLY) and the due dates and amounts are derived from the lease term, or use CUSTOM and supply the dates yourself.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GenerateScheduleDto)
+  paymentSchedule?: GenerateScheduleDto;
 }
 
-export class UpdateTenantLeaseDto extends PartialType(CreateTenantLeaseDto) {}
+/**
+ * Lease fields only. The collection schedule is managed through its own
+ * endpoints so a routine lease edit can never silently rewrite payment dates.
+ */
+export class UpdateTenantLeaseDto extends PartialType(
+  OmitType(CreateTenantLeaseDto, ['paymentSchedule'] as const),
+) {}
 
 export class TenantLeaseParamDto {
   @ApiProperty({ description: 'Tenant Lease ID' })

@@ -1,9 +1,9 @@
 model Contract {
-  id           String   @id @default(uuid())
-  propertyId   String
-  investorId   String
-  brokerId     String?
-  filesUrl     String[]
+  id         String   @id @default(uuid())
+  propertyId String
+  investorId String
+  brokerId   String?
+  filesUrl   String[]
 
   // Single JSON field for all contract form data
   formData Json? @db.Json // { contractDetails, buyerDetails, emiratesId, passportId, documents }

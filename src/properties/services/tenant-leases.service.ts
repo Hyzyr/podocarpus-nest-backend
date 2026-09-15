@@ -6,12 +6,14 @@ import {
 } from '../dto/tenant-lease.dto';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { NotificationType } from '@prisma/client';
+import { RentScheduleService } from 'src/payments/services/rent-schedule.service';
 
 @Injectable()
 export class TenantLeasesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly schedule: RentScheduleService,
   ) {}
 
   /**
@@ -53,12 +55,31 @@ export class TenantLeasesService {
       );
     }
 
-    // Create the lease
+    // Create the lease and its collection schedule in one write, so a lease is
+    // never briefly visible without the payment dates it was created with.
+    const { paymentSchedule, ...leaseFields } = dto;
+
+    const installments = paymentSchedule
+      ? this.schedule.planForNewLease(paymentSchedule, {
+          leaseStart: new Date(dto.leaseStart),
+          leaseEnd: dto.leaseEnd ? new Date(dto.leaseEnd) : null,
+          annualRent: dto.annualRent ?? null,
+          monthlyRent: dto.monthlyRent,
+        })
+      : null;
+
     const lease = await this.prisma.tenantLease.create({
       data: {
-        ...dto,
+        ...leaseFields,
         isActive: dto.isActive ?? true,
+        ...(paymentSchedule && {
+          paymentFrequency: paymentSchedule.frequency,
+          paymentAnchorDay: paymentSchedule.anchorDay ?? null,
+          scheduleUpdatedAt: new Date(),
+        }),
+        ...(installments?.length && { installments: { create: installments } }),
       },
+      include: { installments: { orderBy: { dueDate: 'asc' } } },
     });
 
     // Update property vacancy status if lease is active

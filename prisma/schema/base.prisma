@@ -80,9 +80,37 @@ enum EventStatus {
   CANCELLED
 }
 
+/// What period a recorded payment covers. Kept for the payment row itself;
+/// the lease-level collection cadence lives in RentFrequency.
 enum PaymentType {
   ANNUAL
+  SEMI_ANNUAL
+  QUARTERLY
+  BI_MONTHLY
   MONTHLY
+  CUSTOM
+}
+
+/// How often rent is collected from a tenant over a 12-month cycle.
+/// Drives automatic generation of the RentInstallment schedule.
+enum RentFrequency {
+  ANNUAL // 1 collection per year
+  SEMI_ANNUAL // 2 collections per year
+  QUARTERLY // 4 collections per year
+  BI_MONTHLY // 6 collections per year (every 2 months)
+  MONTHLY // 12 collections per year
+  CUSTOM // admin supplies the due dates by hand
+}
+
+/// Lifecycle of a single scheduled collection.
+/// OVERDUE is deliberately absent — it is derived from dueDate < now
+/// so it can never go stale without a cron job.
+enum InstallmentStatus {
+  PENDING // nothing collected yet
+  PARTIAL // some money received, balance outstanding
+  PAID // fully settled
+  WAIVED // admin forgave this installment
+  CANCELLED // schedule changed, this one no longer applies
 }
 
 enum EmailVerificationPurpose {

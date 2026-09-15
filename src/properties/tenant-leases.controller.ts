@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -14,9 +15,22 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
   ApiParam,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Roles, RolesGuard } from 'src/auth/roles';
+import { ApiErrorDto } from 'src/common/http/api-response.dto';
+import { RentScheduleService } from 'src/payments/services/rent-schedule.service';
+import {
+  CustomInstallmentDto,
+  GenerateScheduleDto,
+} from 'src/payments/dto/rent-schedule.dto';
+import {
+  LeaseScheduleDto,
+  RentInstallmentDto,
+} from 'src/payments/dto/rent-schedule.response.dto';
 import { TenantLeasesService } from './services/tenant-leases.service';
 import {
   CreateTenantLeaseDto,
@@ -30,12 +44,16 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('tenant-leases')
 export class TenantLeasesController {
-  constructor(private readonly tenantLeasesService: TenantLeasesService) {}
+  constructor(
+    private readonly tenantLeasesService: TenantLeasesService,
+    private readonly scheduleService: RentScheduleService,
+  ) {}
 
   @Post()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Create a new tenant lease',
-    description: 'Creates a new tenant lease and automatically updates property vacancy status. Validates for overlapping active leases.'
+    description:
+      'Creates a tenant lease, updates property vacancy, and rejects overlapping active leases. Pass `paymentSchedule` to set the rent collection dates at the same time — pick a cadence and the due dates and amounts are derived from the lease term, or use CUSTOM and supply the dates. It is optional: leave it out and assign the schedule later with PUT /tenant-leases/{id}/schedule.',
   })
   @ApiResponse({
     status: 201,
@@ -141,5 +159,80 @@ export class TenantLeasesController {
   @ApiResponse({ status: 404, description: 'Tenant lease not found' })
   async remove(@Param('id') id: string) {
     return this.tenantLeasesService.remove(id);
+  }
+
+  /* ------------------------- collection schedule ------------------------- */
+
+  @Get(':id/schedule')
+  @ApiOperation({
+    summary: 'Get the rent collection schedule for a lease',
+    description:
+      'Every scheduled collection with its balance and overdue flag, plus a roll-up (scheduled, collected, outstanding, overdue, next due).',
+  })
+  @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
+  @ApiOkResponse({ type: LeaseScheduleDto })
+  @ApiResponse({
+    status: 404,
+    type: ApiErrorDto,
+    description: 'Tenant lease not found',
+  })
+  async getSchedule(@Param('id', ParseUUIDPipe) id: string) {
+    return this.scheduleService.getSchedule(id);
+  }
+
+  @Put(':id/schedule')
+  // Rewriting when money is collected is an admin decision, so this is
+  // role-gated even though reading the schedule is not.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @ApiOperation({
+    summary: 'Set or replace the rent collection schedule',
+    description:
+      'Generates the due dates for a lease. ANNUAL = 1 collection a year, SEMI_ANNUAL = 2, QUARTERLY = 4, BI_MONTHLY = 6, MONTHLY = 12; CUSTOM takes your own list of dates. Amounts split the annual rent evenly across each 12-month cycle, with the last installment of a cycle absorbing the rounding remainder. Replacing a schedule that already has payments against it requires `force: true` — those payments are kept but become unscheduled.',
+  })
+  @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
+  @ApiOkResponse({ type: LeaseScheduleDto })
+  @ApiResponse({
+    status: 400,
+    type: ApiErrorDto,
+    description: 'Nothing to base the amounts on, or no dates produced',
+  })
+  @ApiResponse({
+    status: 404,
+    type: ApiErrorDto,
+    description: 'Tenant lease not found',
+  })
+  @ApiResponse({
+    status: 409,
+    type: ApiErrorDto,
+    description: 'Schedule already has payments; re-send with force: true',
+  })
+  async setSchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: GenerateScheduleDto,
+  ) {
+    return this.scheduleService.generate(id, dto);
+  }
+
+  @Post(':id/schedule/installments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
+  @ApiOperation({
+    summary: 'Add one extra collection date',
+    description:
+      'Appends a single due date to an existing schedule without regenerating it — for a renewal month, a late fee, or a one-off split.',
+  })
+  @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
+  @ApiCreatedResponse({ type: RentInstallmentDto })
+  @ApiResponse({
+    status: 404,
+    type: ApiErrorDto,
+    description: 'Tenant lease not found',
+  })
+  async addInstallment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CustomInstallmentDto,
+  ) {
+    return this.scheduleService.addInstallment(id, dto);
   }
 }

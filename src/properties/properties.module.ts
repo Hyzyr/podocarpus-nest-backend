@@ -8,9 +8,12 @@ import { PropertiesNotificationsService } from './services/properties.notificati
 import { PropertiesStatisticsService } from './services/properties.statistics.service';
 import { TenantLeasesService } from './services/tenant-leases.service';
 import { NotificationsModule } from 'src/shared/notifications/notifications.module';
+import { PaymentsModule } from 'src/payments/payments.module';
 
 @Module({
-  imports: [DatabaseModule, NotificationsModule],
+  // PaymentsModule supplies RentScheduleService, used when a lease is created
+  // with a collection schedule attached.
+  imports: [DatabaseModule, NotificationsModule, PaymentsModule],
   exports: [PropertiesService, TenantLeasesService],
   controllers: [
     PropertiesController,

@@ -94,35 +94,91 @@ model TenantLease {
   // Rent
   annualRent Float? // Expected total rent for the year
 
+  // Collection schedule
+  // How often rent is collected. The concrete due dates live in `installments`;
+  // this field records the intent so the schedule can be regenerated.
+  paymentFrequency  RentFrequency @default(ANNUAL)
+  // Day-of-month the generator anchors due dates to (1-28). Null = day of leaseStart.
+  paymentAnchorDay  Int?
+  // When the schedule was last generated/edited, for the admin UI.
+  scheduleUpdatedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  property   Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  statistics InvestmentStatistics[]
-  payments   RentPayment[]
+  property     Property               @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  statistics   InvestmentStatistics[]
+  payments     RentPayment[]
+  installments RentInstallment[]
 
   @@index([propertyId])
   @@index([leaseStart, leaseEnd])
 }
 
+/// Money actually received. Either settles a scheduled `RentInstallment`
+/// (installmentId set) or is an ad-hoc/custom collection (installmentId null).
 model RentPayment {
-  id            String      @id @default(uuid())
+  id            String  @id @default(uuid())
   tenantLeaseId String
+  // Null for ad-hoc payments that do not belong to the generated schedule.
+  installmentId String?
 
-  amount       Float       // How much was paid (AED)
-  paidDate     DateTime    // When it was paid
-  type         PaymentType // ANNUAL or MONTHLY
-  note         String?     // Optional note from admin
+  amount    Float // How much was paid (AED)
+  paidDate  DateTime // When it was paid
+  type      PaymentType // Period this payment covers
+  note      String? // Optional note from admin
+  method    String? // "Bank Transfer", "Cheque", "Cash"…
+  reference String? // Cheque no. / transaction ref
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  recordedById String?  // Which admin entered this
+  recordedById String? // Which admin entered this
 
-  tenantLease TenantLease @relation(fields: [tenantLeaseId], references: [id], onDelete: Cascade)
-  recordedBy  AppUser?    @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+  tenantLease TenantLease      @relation(fields: [tenantLeaseId], references: [id], onDelete: Cascade)
+  installment RentInstallment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+  recordedBy  AppUser?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
 
   @@index([tenantLeaseId])
   @@index([paidDate])
+  @@index([installmentId])
+}
+
+/// One scheduled collection date on a lease — the "upcoming payment" the
+/// dashboard shows before any money arrives.
+///
+/// Modelled as rows rather than a JSON array of dates on TenantLease so each
+/// date can carry its own amount, status, note and payment history, and so
+/// "what is due across every property next month" is one indexed query.
+model RentInstallment {
+  id            String @id @default(uuid())
+  tenantLeaseId String
+
+  sequence   Int // 1-based position in the schedule
+  dueDate    DateTime // When this collection is expected
+  amountDue  Float // Expected amount (AED)
+  // Mirrors SUM(payments.amount); maintained by the service on every write so
+  // list queries do not have to aggregate.
+  amountPaid Float    @default(0)
+
+  status InstallmentStatus @default(PENDING)
+
+  // Rental period this installment covers, for receipts and statements.
+  periodStart DateTime?
+  periodEnd   DateTime?
+
+  note         String? // Admin note ("tenant asked to split")
+  paidInFullAt DateTime? // Set when status flips to PAID
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenantLease TenantLease   @relation(fields: [tenantLeaseId], references: [id], onDelete: Cascade)
+  payments    RentPayment[]
+
+  @@unique([tenantLeaseId, sequence])
+  @@index([tenantLeaseId, dueDate])
+  @@index([dueDate, status])
+  @@index([status])
 }
 
 model AvailabilitySlot {
