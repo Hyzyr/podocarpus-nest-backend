@@ -1,4 +1,8 @@
- import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import {
   CreateTenantLeaseDto,
@@ -28,7 +32,9 @@ export class TenantLeasesService {
     });
 
     if (!property) {
-      throw new NotFoundException(`Property with ID ${dto.propertyId} not found`);
+      throw new NotFoundException(
+        `Property with ID ${dto.propertyId} not found`,
+      );
     }
 
     // Check for overlapping active leases
@@ -63,8 +69,7 @@ export class TenantLeasesService {
       ? this.schedule.planForNewLease(paymentSchedule, {
           leaseStart: new Date(dto.leaseStart),
           leaseEnd: dto.leaseEnd ? new Date(dto.leaseEnd) : null,
-          annualRent: dto.annualRent ?? null,
-          monthlyRent: dto.monthlyRent,
+          annualRent: dto.annualRent,
         })
       : null;
 
@@ -72,11 +77,7 @@ export class TenantLeasesService {
       data: {
         ...leaseFields,
         isActive: dto.isActive ?? true,
-        ...(paymentSchedule && {
-          paymentFrequency: paymentSchedule.frequency,
-          paymentAnchorDay: paymentSchedule.anchorDay ?? null,
-          scheduleUpdatedAt: new Date(),
-        }),
+        ...(paymentSchedule && { scheduleUpdatedAt: new Date() }),
         ...(installments?.length && { installments: { create: installments } }),
       },
       include: { installments: { orderBy: { dueDate: 'asc' } } },

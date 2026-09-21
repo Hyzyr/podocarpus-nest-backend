@@ -55,7 +55,7 @@ export class TrackerRowDto {
     nullable: true,
     example: 120000,
     description:
-      'Expected for the year. From the schedule when one exists (sum of the year’s billable installments), else the lease annualRent, else monthlyRent × 12. Null when vacant.',
+      'Expected for the year. From the schedule when one exists (sum of the year’s billable installments), else the lease annualRent. Null when vacant.',
   })
   annualRent: number | null;
 
@@ -77,7 +77,7 @@ export class TrackerRowDto {
     nullable: true,
     enum: ['ANNUAL', 'MONTHLY'],
     description:
-      'Legacy display hint: ANNUAL when the lease has annualRent set, else MONTHLY. Prefer `frequency`.',
+      'Legacy display hint, now always ANNUAL (annualRent is the only rent figure on a lease). Prefer `frequency`.',
   })
   type: 'ANNUAL' | 'MONTHLY' | null;
 
@@ -85,7 +85,7 @@ export class TrackerRowDto {
     nullable: true,
     enum: RentFrequency,
     description:
-      'The lease payment cadence. Note: reads ANNUAL (the column default) even for leases nobody configured — use `scheduled` to tell a configured lease from a legacy one.',
+      'Cadence derived from the gaps between the year’s due dates (not stored). Null when the lease has no schedule; CUSTOM when the dates are uneven.',
   })
   frequency: RentFrequency | null;
 

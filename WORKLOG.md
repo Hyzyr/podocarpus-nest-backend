@@ -14,6 +14,16 @@ Newest first, grouped by `## YYYY-MM`. Append only; don't rewrite past entries.
 
 ## 2026-09
 
+### 2026-09-21 — Swagger + frontend handoff for the annualRent-only lease model
+- **Type:** Docs
+- **Did:** Clarified the schedule endpoints' Swagger descriptions (cadence is a generation input, not stored state; `paymentFrequency` in responses is derived from due-date gaps). Wrote the upgrade handoff: `docs/LEASE_ANNUAL_RENT_FRONTEND.md` (TL;DR, changed types, field-by-field compatibility table, gotchas, build order — all examples taken from a live smoke run) and `.github/prompts/frontend-lease-annual-rent.prompt.md` (paste-into-frontend upgrade prompt). Stamped the older `frontend-rent-collection.prompt.md` with an update note so it can't be followed stale.
+- **Impact:** Frontend can upgrade from `/swagger-json` + one doc without reading backend code; the breaking changes (required `annualRent`, removed `monthlyRent`/`paymentAnchorDay`, nullable derived `paymentFrequency`) are all enumerated in one place.
+
+### 2026-09-21 — Lease money model: annualRent only, cadence derived from the schedule
+- **Type:** Refactor
+- **Did:** Dropped `monthlyRent`, `paymentFrequency`, and `paymentAnchorDay` from `TenantLease` (migration `lease_annual_rent_only`, backfills `annualRent = monthlyRent × 12` before making it required — no data lost). `annualRent` is now the lease's single money figure; monthly numbers derive from it (÷ 12). Frequency/anchor remain inputs to the schedule generator but are no longer persisted — the `RentInstallment` due dates are the truth, and responses that show a frequency infer it from the gaps between due dates (`inferFrequency`); a recorded payment's `type` now derives from the installment's own covered period. Updated DTOs, seeds, docs, and verified end-to-end (create lease with QUARTERLY schedule → 4×12000 installments, inferred frequency, collect → type QUARTERLY, tracker + monthly view).
+- **Impact:** One source of truth for rent money and dates — no more monthlyRent/annualRent drift or stale stored frequency. **Breaking for the frontend:** create/update lease now takes required `annualRent` (no `monthlyRent`); schedule responses lose `paymentAnchorDay` and `paymentFrequency` may be null. Deploy: `npx prisma migrate deploy`.
+
 ### 2026-09-20 — Auth hardening: token types, refresh-session revocation, POST logout
 - **Type:** Fix
 - **Did:** Closed the auth gaps found during the frontend session-timeout investigation. Refresh tokens now carry `type: 'refresh'` + a random `jti` and are rejected everywhere except /auth/refresh (an access token pasted into the refresh cookie can no longer mint new tokens, and vice versa). Added a `RefreshSession` table (migration `add_refresh_sessions`): a SHA-256 hash of each refresh token is stored on issue, rotated on every refresh, and deleted on logout — so logout now revokes the session server-side and a stolen refresh token dies with it. Fixed the refresh cookie maxAge (was 14 days around a 7-day JWT; both now derive from one constant). Logout is now `POST /auth/logout` (204); the old GET stays as a deprecated alias until the frontend switches, then should be deleted. Verified end-to-end with a live-server smoke test (9 checks: rotation, reuse-rejection, cross-type rejection, revocation on logout).

@@ -10,16 +10,6 @@ export const COLLECTIONS_PER_YEAR: Record<RentFrequency, number> = {
   CUSTOM: 0, // dates are supplied by hand
 };
 
-/** The `PaymentType` that matches a lease frequency, for payment rows. */
-export const FREQUENCY_TO_PAYMENT_TYPE: Record<RentFrequency, PaymentType> = {
-  ANNUAL: PaymentType.ANNUAL,
-  SEMI_ANNUAL: PaymentType.SEMI_ANNUAL,
-  QUARTERLY: PaymentType.QUARTERLY,
-  BI_MONTHLY: PaymentType.BI_MONTHLY,
-  MONTHLY: PaymentType.MONTHLY,
-  CUSTOM: PaymentType.CUSTOM,
-};
-
 /** Guard against a typo'd request generating thousands of rows. */
 export const MAX_INSTALLMENTS = 120;
 
@@ -183,4 +173,66 @@ function resolveCount(
   const months = monthsBetween(start, input.leaseEnd);
   const years = Math.max(1, Math.ceil(months / 12));
   return Math.min(years * perYear, MAX_INSTALLMENTS);
+}
+
+/** Month gaps / period lengths that correspond to a named cadence. */
+const MONTHS_TO_FREQUENCY: Record<number, RentFrequency> = {
+  1: RentFrequency.MONTHLY,
+  2: RentFrequency.BI_MONTHLY,
+  3: RentFrequency.QUARTERLY,
+  6: RentFrequency.SEMI_ANNUAL,
+  12: RentFrequency.ANNUAL,
+};
+
+const MONTHS_TO_PAYMENT_TYPE: Record<number, PaymentType> = {
+  1: PaymentType.MONTHLY,
+  2: PaymentType.BI_MONTHLY,
+  3: PaymentType.QUARTERLY,
+  6: PaymentType.SEMI_ANNUAL,
+  12: PaymentType.ANNUAL,
+};
+
+/**
+ * Read the cadence off stored due dates. The lease does not persist its
+ * frequency — the installment rows are the truth — so views that want a
+ * label derive it from the gaps between consecutive due dates. Uneven gaps
+ * mean a hand-made schedule: CUSTOM.
+ */
+export function inferFrequency(dueDates: Date[]): RentFrequency | null {
+  if (dueDates.length === 0) return null;
+  if (dueDates.length === 1) return RentFrequency.ANNUAL;
+
+  const sorted = dueDates
+    .map((d) => d.getTime())
+    .sort((a, b) => a - b)
+    .map((t) => new Date(t));
+
+  let gap: number | null = null;
+  for (let i = 1; i < sorted.length; i++) {
+    const months =
+      (sorted[i].getUTCFullYear() - sorted[i - 1].getUTCFullYear()) * 12 +
+      (sorted[i].getUTCMonth() - sorted[i - 1].getUTCMonth());
+    if (gap === null) gap = months;
+    else if (months !== gap) return RentFrequency.CUSTOM;
+  }
+  return MONTHS_TO_FREQUENCY[gap!] ?? RentFrequency.CUSTOM;
+}
+
+/**
+ * The `PaymentType` for money settling an installment that covers
+ * [periodStart, periodEnd]. Generated rows carry an exact whole-month period;
+ * anything else (hand-made CUSTOM rows without periods, truncated final
+ * periods) records as CUSTOM.
+ */
+export function paymentTypeForPeriod(
+  periodStart: Date | null,
+  periodEnd: Date | null,
+): PaymentType {
+  if (!periodStart || !periodEnd) return PaymentType.CUSTOM;
+  // periodEnd is inclusive (last covered day), so measure to the day after.
+  const months = monthsBetween(
+    periodStart,
+    new Date(periodEnd.getTime() + 86_400_000),
+  );
+  return MONTHS_TO_PAYMENT_TYPE[months] ?? PaymentType.CUSTOM;
 }

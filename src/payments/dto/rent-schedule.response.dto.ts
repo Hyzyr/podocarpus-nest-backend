@@ -144,10 +144,13 @@ export class LeaseScheduleDto {
   @ApiProperty() propertyId: string;
   @ApiPropertyOptional({ nullable: true }) tenantName: string | null;
 
-  @ApiProperty({ enum: RentFrequency }) paymentFrequency: RentFrequency;
-
-  @ApiPropertyOptional({ nullable: true, example: 1 })
-  paymentAnchorDay: number | null;
+  @ApiPropertyOptional({
+    enum: RentFrequency,
+    nullable: true,
+    description:
+      'Derived from the gaps between due dates (not stored). Null when the lease has no schedule yet; CUSTOM when the dates are hand-made/uneven.',
+  })
+  paymentFrequency: RentFrequency | null;
 
   @ApiPropertyOptional({ format: 'date-time', nullable: true })
   scheduleUpdatedAt: Date | null;

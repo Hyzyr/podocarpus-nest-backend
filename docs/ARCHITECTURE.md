@@ -220,7 +220,7 @@ AppUser (1) ──── (1) InvestorProfile
 | `Property` | 29 | contractValue, netRoiMin/Max, isVacant, isTaxFreeZone, serviceCharge |
 | `Contract` | — | formData (JSON), status (8 states), version, multi-party signatures |
 | `Event` | 3 | status (DRAFT→UPCOMING→OPEN→ENDED/CANCELLED) |
-| `TenantLease` | — | monthlyRent, startDate/endDate, occupancyRate |
+| `TenantLease` | — | annualRent, startDate/endDate, occupancyRate |
 | `InvestmentStatistics` | — | monthlyROI, totalProfit, expenses, occupancyRate |
 
 ---

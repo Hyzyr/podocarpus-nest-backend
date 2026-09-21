@@ -7,6 +7,7 @@ import {
 } from '../dto/investment-statistics.dto';
 import { NotificationsService } from 'src/shared/notifications/notifications.service';
 import { NotificationType } from '@prisma/client';
+import { round2 } from 'src/payments/rent-schedule.util';
 
 @Injectable()
 export class InvestmentStatisticsService {
@@ -38,7 +39,9 @@ export class InvestmentStatisticsService {
     });
 
     if (!contract) {
-      throw new NotFoundException(`Contract with ID ${dto.contractId} not found`);
+      throw new NotFoundException(
+        `Contract with ID ${dto.contractId} not found`,
+      );
     }
 
     // Calculate totals
@@ -52,9 +55,7 @@ export class InvestmentStatisticsService {
     // Calculate ROI percentage based on contract value
     const contractValue = contract.contractValue || 0;
     const roiPercentage =
-      contractValue > 0
-        ? (netProfit / contractValue) * 100
-        : 0;
+      contractValue > 0 ? (netProfit / contractValue) * 100 : 0;
 
     // Get previous cumulative values
     const previousStats = await this.prisma.investmentStatistics.findFirst({
@@ -68,12 +69,9 @@ export class InvestmentStatisticsService {
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
 
-    const cumulativeProfit =
-      (previousStats?.cumulativeProfit || 0) + netProfit;
+    const cumulativeProfit = (previousStats?.cumulativeProfit || 0) + netProfit;
     const cumulativeRoi =
-      contractValue > 0
-        ? (cumulativeProfit / contractValue) * 100
-        : 0;
+      contractValue > 0 ? (cumulativeProfit / contractValue) * 100 : 0;
 
     const statisticsData = {
       contractId: dto.contractId,
@@ -107,7 +105,10 @@ export class InvestmentStatisticsService {
     }
 
     // Send notification for significant ROI milestones
-    if (cumulativeRoi >= 10 && (!previousStats || previousStats.cumulativeRoi < 10)) {
+    if (
+      cumulativeRoi >= 10 &&
+      (!previousStats || previousStats.cumulativeRoi < 10)
+    ) {
       await this.notifications.notifyUser(contract.investorId, {
         type: NotificationType.contract,
         title: '🎉 10% Cumulative ROI Achieved!',
@@ -148,9 +149,7 @@ export class InvestmentStatisticsService {
     });
 
     if (!statistics) {
-      throw new NotFoundException(
-        `No statistics found for ${month}/${year}`,
-      );
+      throw new NotFoundException(`No statistics found for ${month}/${year}`);
     }
 
     return statistics;
@@ -159,7 +158,9 @@ export class InvestmentStatisticsService {
   /**
    * Get investment summary for a contract
    */
-  async getInvestmentSummary(contractId: string): Promise<InvestmentSummaryDto> {
+  async getInvestmentSummary(
+    contractId: string,
+  ): Promise<InvestmentSummaryDto> {
     const contract = await this.prisma.contract.findUnique({
       where: { id: contractId },
     });
@@ -190,8 +191,10 @@ export class InvestmentStatisticsService {
       0,
     );
 
-    const avgMonthlyRent = totalMonths > 0 ? totalRentReceived / totalMonths : 0;
-    const avgMonthlyExpenses = totalMonths > 0 ? totalExpenses / totalMonths : 0;
+    const avgMonthlyRent =
+      totalMonths > 0 ? totalRentReceived / totalMonths : 0;
+    const avgMonthlyExpenses =
+      totalMonths > 0 ? totalExpenses / totalMonths : 0;
     const avgMonthlyProfit = totalMonths > 0 ? totalNetProfit / totalMonths : 0;
 
     // Occupancy rate
@@ -259,12 +262,18 @@ export class InvestmentStatisticsService {
       orderBy: { month: 'asc' },
     });
 
-    const totalRent = statistics.reduce((sum, stat) => sum + stat.rentReceived, 0);
+    const totalRent = statistics.reduce(
+      (sum, stat) => sum + stat.rentReceived,
+      0,
+    );
     const totalExpenses = statistics.reduce(
       (sum, stat) => sum + stat.totalExpenses,
       0,
     );
-    const totalProfit = statistics.reduce((sum, stat) => sum + stat.netProfit, 0);
+    const totalProfit = statistics.reduce(
+      (sum, stat) => sum + stat.netProfit,
+      0,
+    );
 
     const contract = await this.prisma.contract.findUnique({
       where: { id: contractId },
@@ -272,9 +281,7 @@ export class InvestmentStatisticsService {
 
     const contractValue = contract?.contractValue || 0;
     const annualRoi =
-      contractValue > 0
-        ? (totalProfit / contractValue) * 100
-        : 0;
+      contractValue > 0 ? (totalProfit / contractValue) * 100 : 0;
 
     return {
       year,
@@ -304,7 +311,11 @@ export class InvestmentStatisticsService {
     });
 
     // Recalculate cumulative values for all subsequent months
-    await this.recalculateCumulatives(statistics.contractId, statistics.year, statistics.month);
+    await this.recalculateCumulatives(
+      statistics.contractId,
+      statistics.year,
+      statistics.month,
+    );
 
     return { message: 'Statistics deleted successfully' };
   }
@@ -355,9 +366,7 @@ export class InvestmentStatisticsService {
     for (const stat of statistics) {
       cumulativeProfit += stat.netProfit;
       const cumulativeRoi =
-        contractValue > 0
-          ? (cumulativeProfit / contractValue) * 100
-          : 0;
+        contractValue > 0 ? (cumulativeProfit / contractValue) * 100 : 0;
 
       await this.prisma.investmentStatistics.update({
         where: { id: stat.id },
@@ -409,7 +418,7 @@ export class InvestmentStatisticsService {
       tenantLeaseId: activeLease?.id,
       month,
       year,
-      rentReceived: activeLease ? activeLease.monthlyRent : 0,
+      rentReceived: activeLease ? round2(activeLease.annualRent / 12) : 0,
       serviceCharge: 0, // To be filled manually or from property settings
       maintenanceCost: 0, // To be filled manually
       otherExpenses: 0, // To be filled manually

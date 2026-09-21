@@ -142,7 +142,6 @@ async function seedTenantLeasesAndPayments(
         tenantPhone: lease.tenantPhone ?? null,
         leaseStart: new Date(lease.leaseStart),
         leaseEnd: lease.leaseEnd ? new Date(lease.leaseEnd) : null,
-        monthlyRent: lease.monthlyRent,
         annualRent: lease.annualRent,
         paymentMethod: lease.paymentMethod ?? null,
         depositAmount: lease.depositAmount ?? null,

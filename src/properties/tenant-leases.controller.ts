@@ -59,7 +59,10 @@ export class TenantLeasesController {
     status: 201,
     description: 'Tenant lease created successfully',
   })
-  @ApiResponse({ status: 400, description: 'Invalid input or overlapping lease' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or overlapping lease',
+  })
   @ApiResponse({ status: 404, description: 'Property not found' })
   async create(@Body() dto: CreateTenantLeaseDto) {
     return this.tenantLeasesService.create(dto);
@@ -87,9 +90,10 @@ export class TenantLeasesController {
   }
 
   @Get('expiring')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get leases expiring soon',
-    description: 'Returns active leases that will expire within the specified number of days (default: 30 days)'
+    description:
+      'Returns active leases that will expire within the specified number of days (default: 30 days)',
   })
   @ApiResponse({
     status: 200,
@@ -113,25 +117,30 @@ export class TenantLeasesController {
   }
 
   @Put(':id')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Update a tenant lease',
-    description: 'Updates lease details. Validates for overlapping leases if dates are changed. Automatically updates property vacancy if lease status changes.'
+    description:
+      'Updates lease details. Validates for overlapping leases if dates are changed. Automatically updates property vacancy if lease status changes.',
   })
   @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
   @ApiResponse({
     status: 200,
     description: 'Tenant lease updated successfully',
   })
-  @ApiResponse({ status: 400, description: 'Invalid input or overlapping lease' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or overlapping lease',
+  })
   @ApiResponse({ status: 404, description: 'Tenant lease not found' })
   async update(@Param('id') id: string, @Body() dto: UpdateTenantLeaseDto) {
     return this.tenantLeasesService.update(id, dto);
   }
 
   @Post(':id/terminate')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Terminate a lease early',
-    description: 'Marks lease as inactive, sets terminatedEarly flag, and updates property vacancy status'
+    description:
+      'Marks lease as inactive, sets terminatedEarly flag, and updates property vacancy status',
   })
   @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
   @ApiResponse({
@@ -147,9 +156,10 @@ export class TenantLeasesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Delete a tenant lease',
-    description: 'Permanently deletes a tenant lease record and automatically updates property vacancy status'
+    description:
+      'Permanently deletes a tenant lease record and automatically updates property vacancy status',
   })
   @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
   @ApiResponse({
@@ -167,7 +177,7 @@ export class TenantLeasesController {
   @ApiOperation({
     summary: 'Get the rent collection schedule for a lease',
     description:
-      'Every scheduled collection with its balance and overdue flag, plus a roll-up (scheduled, collected, outstanding, overdue, next due).',
+      'Every scheduled collection with its balance and overdue flag, plus a roll-up (scheduled, collected, outstanding, overdue, next due). `paymentFrequency` is derived from the due-date gaps: null = no schedule yet, CUSTOM = hand-made/uneven dates.',
   })
   @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
   @ApiOkResponse({ type: LeaseScheduleDto })
@@ -188,7 +198,7 @@ export class TenantLeasesController {
   @ApiOperation({
     summary: 'Set or replace the rent collection schedule',
     description:
-      'Generates the due dates for a lease. ANNUAL = 1 collection a year, SEMI_ANNUAL = 2, QUARTERLY = 4, BI_MONTHLY = 6, MONTHLY = 12; CUSTOM takes your own list of dates. Amounts split the annual rent evenly across each 12-month cycle, with the last installment of a cycle absorbing the rounding remainder. Replacing a schedule that already has payments against it requires `force: true` — those payments are kept but become unscheduled.',
+      'Generates the due dates for a lease. ANNUAL = 1 collection a year, SEMI_ANNUAL = 2, QUARTERLY = 4, BI_MONTHLY = 6, MONTHLY = 12; CUSTOM takes your own list of dates. Amounts split the annual rent evenly across each 12-month cycle, with the last installment of a cycle absorbing the rounding remainder. The cadence is an input, not stored state — the generated due dates ARE the schedule, and the `paymentFrequency` in the response is derived back from their gaps. Replacing a schedule that already has payments against it requires `force: true` — those payments are kept but become unscheduled.',
   })
   @ApiParam({ name: 'id', description: 'Tenant Lease ID' })
   @ApiOkResponse({ type: LeaseScheduleDto })

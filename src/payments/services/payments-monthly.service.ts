@@ -10,7 +10,12 @@ import {
   MonthlyViewDto,
 } from '../dto/monthly-view.response.dto';
 import { RentInstallmentDto } from '../dto/rent-schedule.response.dto';
-import { eachMonth, monthKey, round2 } from '../rent-schedule.util';
+import {
+  eachMonth,
+  inferFrequency,
+  monthKey,
+  round2,
+} from '../rent-schedule.util';
 import { BILLABLE_STATUSES, decorate } from './rent-schedule.service';
 
 /**
@@ -118,7 +123,9 @@ export class PaymentsMonthlyService {
       buildingName: lease.property.buildingName,
       unitNo: lease.property.unitNo,
       propertyTitle: lease.property.title,
-      paymentFrequency: lease.paymentFrequency,
+      paymentFrequency: inferFrequency(
+        lease.installments.map((i) => i.dueDate),
+      ),
       leaseStart: lease.leaseStart,
       leaseEnd: lease.leaseEnd,
       isActive: lease.isActive,

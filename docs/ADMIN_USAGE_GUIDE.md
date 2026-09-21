@@ -20,7 +20,6 @@
   "tenantPhone": "+971501234567",
   "leaseStart": "2026-01-01",
   "leaseEnd": "2026-12-31",
-  "monthlyRent": 3667,
   "annualRent": 44000,
   "paymentMethod": "Bank Transfer",
   "depositAmount": 5000
@@ -29,8 +28,7 @@
 
 **Notes:**
 - `propertyId` — required. UUID of the property.
-- `monthlyRent` — required. Used as fallback for collection tracker if `annualRent` is not set.
-- `annualRent` — optional but recommended. Set this so the collection tracker shows the correct annual target.
+- `annualRent` — required. The lease's only money field; monthly figures are derived from it (÷ 12).
 - `leaseEnd` — optional. Leave blank for open-ended leases.
 - Creating a lease automatically marks the property as **occupied**.
 - Returns 400 if there is already an overlapping active lease on the same property.
@@ -232,7 +230,7 @@ The main dashboard endpoint. Returns every property with its tenant, expected re
 
 **Vacant properties** have `tenant: null`, `annualRent: null`, `percent: null`. Show "VACANT" in the UI for these.
 
-**Annual rent fallback:** if `annualRent` is not set on the lease, the tracker uses `monthlyRent × 12` automatically.
+**Annual rent:** `annualRent` is required on every lease; when a collection schedule exists the tracker sums the year's billable installments instead.
 
 ---
 

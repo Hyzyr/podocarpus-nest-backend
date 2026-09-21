@@ -11,6 +11,7 @@ import {
   IsDateString,
   IsBoolean,
   IsNumber,
+  IsPositive,
   IsEmail,
   ValidateNested,
 } from 'class-validator';
@@ -45,19 +46,15 @@ export class CreateTenantLeaseDto {
   @IsDateString()
   leaseEnd?: string;
 
-  @ApiProperty({ description: 'Monthly rent amount', example: 5000 })
-  @Type(() => Number)
-  @IsNumber()
-  monthlyRent: number;
-
-  @ApiPropertyOptional({
-    description: 'Annual rent amount (total for the year)',
+  @ApiProperty({
+    description:
+      'Annual rent amount (total for the year). The single money figure on the lease — monthly views derive from it.',
     example: 60000,
   })
-  @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  annualRent?: number;
+  @IsPositive()
+  annualRent: number;
 
   @ApiPropertyOptional({
     description: 'Payment method',

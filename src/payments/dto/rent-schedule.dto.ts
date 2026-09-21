@@ -82,7 +82,7 @@ export class GenerateScheduleDto {
 
   @ApiPropertyOptional({
     description:
-      'Total rent expected per 12 months (AED). Defaults to the lease annualRent, else monthlyRent x 12. Ignored for CUSTOM.',
+      'Total rent expected per 12 months (AED). Defaults to the lease annualRent. Ignored for CUSTOM.',
     example: 120000,
   })
   @IsOptional()

@@ -21,9 +21,10 @@ import {
 } from '../dto/rent-schedule.response.dto';
 import {
   buildSchedule,
-  FREQUENCY_TO_PAYMENT_TYPE,
+  inferFrequency,
   MAX_INSTALLMENTS,
   PAID_EPSILON,
+  paymentTypeForPeriod,
   round2,
 } from '../rent-schedule.util';
 
@@ -115,11 +116,7 @@ export class RentScheduleService {
       }),
       this.prisma.tenantLease.update({
         where: { id: leaseId },
-        data: {
-          paymentFrequency: dto.frequency,
-          paymentAnchorDay: dto.anchorDay ?? null,
-          scheduleUpdatedAt: new Date(),
-        },
+        data: { scheduleUpdatedAt: new Date() },
       }),
     ]);
 
@@ -138,7 +135,6 @@ export class RentScheduleService {
       leaseStart: Date;
       leaseEnd?: Date | null;
       annualRent?: number | null;
-      monthlyRent: number;
     },
   ): Prisma.RentInstallmentCreateWithoutTenantLeaseInput[] {
     return this.planRows(dto, lease);
@@ -151,21 +147,19 @@ export class RentScheduleService {
       leaseStart: Date;
       leaseEnd?: Date | null;
       annualRent?: number | null;
-      monthlyRent: number;
     },
   ): Prisma.RentInstallmentCreateWithoutTenantLeaseInput[] {
     if (dto.frequency === RentFrequency.CUSTOM) {
       return this.planCustom(dto.installments);
     }
 
-    const annualAmount =
-      dto.annualAmount ?? lease.annualRent ?? lease.monthlyRent * 12;
+    const annualAmount = dto.annualAmount ?? lease.annualRent;
 
     if (!annualAmount || annualAmount <= 0) {
       throw new BadRequestException({
         code: ApiErrorCode.BAD_REQUEST,
         message:
-          'Cannot work out how much to collect. Set annualAmount on the request, or annualRent/monthlyRent on the lease.',
+          'Cannot work out how much to collect. Set annualAmount on the request, or annualRent on the lease.',
       });
     }
 
@@ -260,8 +254,9 @@ export class RentScheduleService {
       leaseId: lease.id,
       propertyId: lease.propertyId,
       tenantName: lease.tenantName,
-      paymentFrequency: lease.paymentFrequency,
-      paymentAnchorDay: lease.paymentAnchorDay,
+      paymentFrequency: inferFrequency(
+        lease.installments.map((i) => i.dueDate),
+      ),
       scheduleUpdatedAt: lease.scheduleUpdatedAt,
       summary: {
         installmentCount: installments.length,
@@ -493,7 +488,7 @@ export class RentScheduleService {
     const installment = await this.prisma.rentInstallment.findUnique({
       where: { id: installmentId },
       include: {
-        tenantLease: { select: { id: true, paymentFrequency: true } },
+        tenantLease: { select: { id: true } },
       },
     });
     if (!installment) {
@@ -530,7 +525,7 @@ export class RentScheduleService {
         paidDate: dto.paidDate ? new Date(dto.paidDate) : new Date(),
         type:
           dto.type ??
-          FREQUENCY_TO_PAYMENT_TYPE[installment.tenantLease.paymentFrequency],
+          paymentTypeForPeriod(installment.periodStart, installment.periodEnd),
         method: dto.method ?? null,
         reference: dto.reference ?? null,
         note: dto.note ?? null,

@@ -82,7 +82,6 @@ model TenantLease {
   // Lease terms
   leaseStart    DateTime
   leaseEnd      DateTime?
-  monthlyRent   Float
   paymentMethod String?
   depositAmount Float?
 
@@ -91,16 +90,13 @@ model TenantLease {
   terminatedEarly   Boolean @default(false)
   terminationReason String?
 
-  // Rent
-  annualRent Float? // Expected total rent for the year
+  // Rent. The single money figure on the lease — everything else (monthly
+  // display values, installment amounts) is derived from it or from the
+  // `installments` rows. Cadence/anchor are not persisted: they are inputs
+  // to the schedule generator, and the truth is the generated due dates.
+  annualRent Float // Expected total rent for the year
 
-  // Collection schedule
-  // How often rent is collected. The concrete due dates live in `installments`;
-  // this field records the intent so the schedule can be regenerated.
-  paymentFrequency  RentFrequency @default(ANNUAL)
-  // Day-of-month the generator anchors due dates to (1-28). Null = day of leaseStart.
-  paymentAnchorDay  Int?
-  // When the schedule was last generated/edited, for the admin UI.
+  // When the collection schedule was last generated/edited, for the admin UI.
   scheduleUpdatedAt DateTime?
 
   createdAt DateTime @default(now())

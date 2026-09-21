@@ -1,6 +1,7 @@
 # Rent Collection — Backend Update for Frontend
 
-Date: 2026-09-15
+Date: 2026-09-15 · **Updated 2026-09-21** for the annualRent-only lease model
+— upgrade guide: [`LEASE_ANNUAL_RENT_FRONTEND.md`](LEASE_ANNUAL_RENT_FRONTEND.md).
 Swagger: `GET /swagger` (JSON at `/swagger-json`). Every route below includes the
 global `/api` prefix.
 
@@ -31,8 +32,10 @@ checking.
 
 ## 1. The model, in four sentences
 
-- A **TenantLease** is a tenant renting a property. It now carries a
-  `paymentFrequency`.
+- A **TenantLease** is a tenant renting a property. Its only money field is
+  `annualRent`; the collection cadence is not stored on it — the installment
+  rows are the truth, and responses that show a `paymentFrequency` derive it
+  from the gaps between due dates.
 - A **RentInstallment** is *one scheduled collection date* — expected amount, due
   date, status. The set of them is the lease's **schedule**.
 - A **RentPayment** is *money actually received*. It usually points at an
@@ -162,7 +165,6 @@ POST /api/tenant-leases
   "tenantEmail": "ahmed@example.com",
   "leaseStart": "2026-01-01T00:00:00.000Z",
   "leaseEnd": "2026-12-31T00:00:00.000Z",
-  "monthlyRent": 10000,
   "annualRent": 120000,
 
   "paymentSchedule": {
@@ -176,7 +178,7 @@ That produces four installments of 30,000 on 1 Jan / 1 Apr / 1 Jul / 1 Oct.
 
 ### What the generator does
 
-- **Amount** — defaults to the lease `annualRent`, else `monthlyRent × 12`.
+- **Amount** — defaults to the lease `annualRent`.
   Override with `annualAmount`. Split evenly across each 12-month cycle; the
   **last installment of a cycle absorbs the rounding remainder**, so a cycle always
   sums exactly to the annual amount. Don't re-derive amounts client-side.
@@ -230,8 +232,9 @@ type LeaseSchedule = {
   leaseId: string;
   propertyId: string;
   tenantName: string | null;
-  paymentFrequency: RentFrequency;
-  paymentAnchorDay: number | null;
+  // Derived from due-date gaps (not stored). null = no schedule yet;
+  // CUSTOM = hand-made/uneven dates.
+  paymentFrequency: RentFrequency | null;
   scheduleUpdatedAt: string | null;
   summary: {
     installmentCount: number;
@@ -373,7 +376,7 @@ type MonthlyRow = {
   leaseId: string; propertyId: string;
   tenantName: string | null;
   buildingName: string | null; unitNo: string | null; propertyTitle: string | null;
-  paymentFrequency: RentFrequency;
+  paymentFrequency: RentFrequency | null; // derived from due dates; null = no schedule
   leaseStart: string; leaseEnd: string | null; isActive: boolean;
   hasSchedule: boolean;      // false → show "set up collection dates", not an empty row
   totals: {

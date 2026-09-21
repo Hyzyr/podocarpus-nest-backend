@@ -141,7 +141,13 @@ export class MonthlyRowDto {
   @ApiPropertyOptional({ nullable: true }) unitNo: string | null;
   @ApiPropertyOptional({ nullable: true }) propertyTitle: string | null;
 
-  @ApiProperty({ enum: RentFrequency }) paymentFrequency: RentFrequency;
+  @ApiPropertyOptional({
+    enum: RentFrequency,
+    nullable: true,
+    description:
+      'Derived from the gaps between due dates (not stored). Null when the lease has no schedule.',
+  })
+  paymentFrequency: RentFrequency | null;
 
   @ApiProperty({ format: 'date-time' }) leaseStart: Date;
   @ApiPropertyOptional({ format: 'date-time', nullable: true })

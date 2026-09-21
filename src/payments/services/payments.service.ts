@@ -7,7 +7,7 @@ import { PrismaService } from 'src/shared/database/prisma/prisma.service';
 import { ApiErrorCode } from 'src/common/http/api-error';
 import { CreatePaymentDto, UpdatePaymentDto } from '../dto/payment.dto';
 import { RentScheduleService } from './rent-schedule.service';
-import { round2 } from '../rent-schedule.util';
+import { inferFrequency, round2 } from '../rent-schedule.util';
 
 @Injectable()
 export class PaymentsService {
@@ -205,9 +205,7 @@ export class PaymentsService {
           select: {
             id: true,
             tenantName: true,
-            monthlyRent: true,
             annualRent: true,
-            paymentFrequency: true,
             payments: {
               where: { paidDate: { gte: yearStart, lt: yearEnd } },
               select: {
@@ -239,6 +237,22 @@ export class PaymentsService {
       },
       orderBy: [{ buildingName: 'asc' }, { unitNo: 'asc' }],
     });
+
+    // Frequency is inferred from due-date gaps, so it needs the lease's whole
+    // schedule — the year-filtered installments above can hold a single date
+    // (e.g. an Oct-start quarterly lease) and would read as ANNUAL.
+    const leaseIds = properties.flatMap((p) => p.tenantLeases.map((l) => l.id));
+    const allDue = await this.prisma.rentInstallment.findMany({
+      where: { tenantLeaseId: { in: leaseIds } },
+      select: { tenantLeaseId: true, dueDate: true },
+    });
+    const dueByLease = new Map<string, Date[]>();
+    for (const d of allDue) {
+      (
+        dueByLease.get(d.tenantLeaseId) ??
+        dueByLease.set(d.tenantLeaseId, []).get(d.tenantLeaseId)!
+      ).push(d.dueDate);
+    }
 
     const now = new Date();
     let totalAnnualRent = 0;
@@ -280,7 +294,7 @@ export class PaymentsService {
 
       const annual = hasSchedule
         ? round2(billable.reduce((s, i) => s + i.amountDue, 0))
-        : (lease.annualRent ?? lease.monthlyRent * 12);
+        : lease.annualRent;
 
       const collected = round2(
         lease.payments.reduce((s, p) => s + p.amount, 0),
@@ -301,8 +315,8 @@ export class PaymentsService {
         collected,
         remaining: round2(annual - collected),
         percent: annual > 0 ? Math.round((collected / annual) * 100) : 0,
-        type: lease.annualRent ? 'ANNUAL' : 'MONTHLY',
-        frequency: lease.paymentFrequency,
+        type: 'ANNUAL',
+        frequency: inferFrequency(dueByLease.get(lease.id) ?? []),
         scheduled: hasSchedule,
         overdueCount: open.filter(
           (i) => i.dueDate < now && i.amountPaid < i.amountDue,

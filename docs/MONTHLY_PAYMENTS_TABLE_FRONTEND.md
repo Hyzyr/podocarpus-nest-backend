@@ -187,7 +187,9 @@ const label = [row.tenantName, row.unitNo && `Unit ${row.unitNo}`, row.buildingN
   .filter(Boolean).join(' · ') || row.propertyTitle || 'Unnamed lease';
 ```
 
-Show `paymentFrequency` as a small chip on the row — it explains at a glance why
+Show `paymentFrequency` as a small chip on the row (it is derived from the
+schedule's due-date gaps and is `null` when the lease has no schedule) — it
+explains at a glance why
 a `QUARTERLY` tenant's row is mostly empty, which otherwise reads as missing data.
 
 ### Sorting and filtering (client-side, on `rows`)
