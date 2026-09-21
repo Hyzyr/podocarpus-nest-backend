@@ -14,6 +14,11 @@ Newest first, grouped by `## YYYY-MM`. Append only; don't rewrite past entries.
 
 ## 2026-09
 
+### 2026-09-21 — Collection schedules generated from real lease data (+ demo dataset)
+- **Type:** Data
+- **Did:** The database had 27 leases and 75 payments but **zero installments**, so every "upcoming / overdue / collected" view was empty. Added `prisma/schedule-tools.ts` (shared helpers: infer a lease's cadence from its own payment history, generate installments via the app's own `buildSchedule`, allocate existing payments oldest-first, recompute status exactly like `RentScheduleService.recompute`) and two entry points: `prisma/backfill-schedules.ts` — production-safe and idempotent, only adds schedules to leases that have none and links existing payments, never invents or deletes money (`--dry`, `--all` flags) — and `prisma/demo-payments.ts`, demo-only, which renews lapsed terms forward and settles history on a fixed profile mix (40% current / 20% part-paid / 20% behind / 20% sporadic) so the views show a realistic spread. Both are wired into `reset-seed`, so `npx prisma db seed` now rebuilds the full demo in one command; added `npm run seed:schedules` and `seed:demo`.
+- **Impact:** Local demo now has 251 installments / 140 payments — 99 paid, 7 partial, 14 overdue and 16 due in the next 90 days — so the tracker (78% collected), the monthly grid and the payments dashboard all render with real-looking data. On the live server `backfill-schedules.ts` gives the same views for the real portfolio without touching the recorded money; documented in the update checklist as section B2.
+
 ### 2026-09-21 — Swagger + frontend handoff for the annualRent-only lease model
 - **Type:** Docs
 - **Did:** Clarified the schedule endpoints' Swagger descriptions (cadence is a generation input, not stored state; `paymentFrequency` in responses is derived from due-date gaps). Wrote the upgrade handoff: `docs/LEASE_ANNUAL_RENT_FRONTEND.md` (TL;DR, changed types, field-by-field compatibility table, gotchas, build order — all examples taken from a live smoke run) and `.github/prompts/frontend-lease-annual-rent.prompt.md` (paste-into-frontend upgrade prompt). Stamped the older `frontend-rent-collection.prompt.md` with an update note so it can't be followed stale.

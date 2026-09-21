@@ -5,10 +5,22 @@ Full detail is in [SETUP.md](./SETUP.md) — this is just the "don't forget" ver
 
 ---
 
-> **Next deploy (auth hardening, 2026-09-20):** includes the `add_refresh_sessions`
-> migration — follow section C (`npx prisma migrate deploy`). All existing sessions
-> are invalidated once: users are silently logged out and must sign in again.
-> Frontend should switch logout to `POST /auth/logout` (GET still works, deprecated).
+> **Next deploy carries TWO migrations.** Run section C once —
+> `npx prisma migrate deploy` applies both in order.
+>
+> 1. `add_refresh_sessions` (auth hardening, 2026-09-20) — every existing
+>    session is invalidated: users are silently logged out and must sign in
+>    again. Frontend should move logout to `POST /auth/logout` (the GET route
+>    still works but is deprecated).
+> 2. `lease_annual_rent_only` (2026-09-21) — drops `monthlyRent`,
+>    `paymentFrequency` and `paymentAnchorDay` from `TenantLease` after
+>    backfilling `annualRent = monthlyRent × 12`, so no lease loses its rent
+>    figure. **Breaking for the frontend** — see
+>    [LEASE_ANNUAL_RENT_FRONTEND.md](./LEASE_ANNUAL_RENT_FRONTEND.md); deploy
+>    the matching frontend build with it.
+>
+> After the restart, run section D — the rent collection views stay empty
+> until the leases have collection schedules.
 
 ## Golden rule
 The server does NOT read your local `.env`. If you change env variables locally,
@@ -50,6 +62,27 @@ npm run build
 
 > **Rent collection release** (schedules, dashboard, monthly table) has its own
 > step-by-step runbook: [DEPLOY_RENT_COLLECTION.md](./DEPLOY_RENT_COLLECTION.md).
+
+## D. Rent collection views look empty on the server
+
+If the collection tracker / monthly table show no upcoming or overdue rent, the
+leases have no **collection schedule** (installment rows). Generate them from
+the leases' own data — safe to run on production, and safe to re-run:
+
+```bash
+npx tsx prisma/backfill-schedules.ts --dry   # preview: which leases, which cadence
+npx tsx prisma/backfill-schedules.ts         # apply (active leases only)
+npx tsx prisma/backfill-schedules.ts --all   # also schedule ended/inactive leases
+```
+
+It only ADDS installments to leases that have none, and links existing payments
+to the dates they settle. It never deletes, edits or invents a payment. The
+cadence is inferred from each tenant's own payment history; an admin can
+overwrite any schedule afterwards with `PUT /api/tenant-leases/{id}/schedule`.
+
+> `prisma/demo-payments.ts` is the opposite — it INVENTS payments for a
+> good-looking demo and refuses to run with `NODE_ENV=production`. Never run it
+> on the live server.
 
 ---
 

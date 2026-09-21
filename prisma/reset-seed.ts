@@ -19,6 +19,8 @@ import {
   events,
   tenantLeases,
 } from './seed-data.js';
+import { backfillLease } from './schedule-tools';
+import { enrichDemoData } from './demo-payments';
 
 // 1. Setup the connection pool and adapter
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
@@ -171,6 +173,46 @@ async function seedTenantLeasesAndPayments(
 }
 
 /**
+ * Give every seeded lease a collection schedule and link its payments to it.
+ *
+ * Without this the tracker and monthly table have nothing to show: the money
+ * is recorded but there is no expected date to compare it against.
+ */
+async function seedSchedules(tx: TxClient) {
+  console.log('🗓️  Generating collection schedules...');
+
+  const leases = await tx.tenantLease.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      tenantName: true,
+      leaseStart: true,
+      leaseEnd: true,
+      annualRent: true,
+      payments: { select: { paidDate: true } },
+    },
+  });
+
+  let installments = 0;
+  let linked = 0;
+
+  for (const lease of leases) {
+    const result = await backfillLease(
+      tx,
+      lease,
+      lease.payments.map((p) => p.paidDate),
+    );
+    if (result) {
+      installments += result.installments;
+      linked += result.linkedPayments;
+    }
+  }
+
+  console.log(`  ✅ Created ${installments} installments across ${leases.length} leases`);
+  console.log(`  ✅ Linked ${linked} existing payments to their installments`);
+}
+
+/**
  * Main reset seed function
  */
 async function main() {
@@ -192,9 +234,20 @@ async function main() {
 
         // 4. Create tenant leases and payments
         await seedTenantLeasesAndPayments(tx, admin.id);
+
+        // 5. Give them collection schedules, so the payment views have data
+        await seedSchedules(tx);
       },
       { timeout: 60_000 },
     );
+
+    // 6. Outside the transaction: renew lapsed terms and settle history so the
+    // collection views show upcoming, overdue and collected side by side.
+    // Demo-only; it refuses to run with NODE_ENV=production.
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('');
+      await enrichDemoData(prisma);
+    }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`\n✅ Database reset seed completed in ${duration}s`);

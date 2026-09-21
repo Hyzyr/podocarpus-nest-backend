@@ -21,7 +21,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate": "npx prisma migrate dev --name init",
     "prisma:seed": "npx prisma db seed",
-    "mail:test": "tsx scripts/send-test-email.ts"
+    "mail:test": "tsx scripts/send-test-email.ts",
+    "seed:schedules": "tsx prisma/backfill-schedules.ts",
+    "seed:demo": "tsx prisma/demo-payments.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
