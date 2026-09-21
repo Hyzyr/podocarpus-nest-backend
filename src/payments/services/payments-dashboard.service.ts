@@ -60,7 +60,7 @@ export class PaymentsDashboardService {
 
     const [
       windowed,
-      adHocPayments,
+      windowPayments,
       openInstallments,
       overdue,
       upcoming,
@@ -77,14 +77,15 @@ export class PaymentsDashboardService {
         },
       }),
 
-      // Payments in the window that settle nothing scheduled.
+      // Every payment in the window. Needed in full, not just the ad-hoc ones:
+      // the `received` series has to chart leases that have no schedule yet,
+      // whose money is all ad-hoc but is still real cash in the month.
       this.prisma.rentPayment.findMany({
         where: {
           paidDate: { gte: from, lte: to },
-          installmentId: null,
           ...(propertyScope && { tenantLease: propertyScope }),
         },
-        select: { amount: true, paidDate: true },
+        select: { amount: true, paidDate: true, installmentId: true },
       }),
 
       // Every still-open installment, for the overdue/upcoming totals.
@@ -144,7 +145,9 @@ export class PaymentsDashboardService {
       billable.reduce((s, i) => s + i.amountPaid, 0),
     );
     const collectedAdHoc = round2(
-      adHocPayments.reduce((s, p) => s + p.amount, 0),
+      windowPayments
+        .filter((p) => !p.installmentId)
+        .reduce((s, p) => s + p.amount, 0),
     );
 
     const overdueOpen = openInstallments.filter((i) => i.dueDate < now);
@@ -177,7 +180,7 @@ export class PaymentsDashboardService {
             : 0,
       },
       byStatus: countByStatus(windowed),
-      monthly: buildMonthly(windowed, from, to),
+      monthly: buildMonthly(windowed, windowPayments, from, to),
       overdue: overdue.map((i) => decorate(i, now)),
       upcoming: upcoming.map((i) => decorate(i, now)),
       recentPayments: recent.map(shapePayment),
@@ -224,10 +227,17 @@ function countByStatus(
 }
 
 /**
- * Scheduled vs collected per month across the window.
+ * Three series per month across the window.
  *
- * Both series come from the installments so a bar and its target always refer
- * to the same obligations; ad-hoc payments are deliberately excluded.
+ * - `scheduled` / `collected` come from the installments, bucketed by **due
+ *   date**, so a bar and its target always describe the same obligations.
+ * - `received` comes from the payments, bucketed by **paid date**, and includes
+ *   ad-hoc money.
+ *
+ * `received` exists because the first two are zero for a lease with no schedule,
+ * which is every lease that predates schedules. Charting `collected` alone made
+ * a database full of real payments look empty. Plot `received` for cash flow;
+ * plot `scheduled` vs `collected` for collection performance.
  */
 function buildMonthly(
   rows: {
@@ -236,10 +246,17 @@ function buildMonthly(
     amountPaid: number;
     status: InstallmentStatus;
   }[],
+  payments: { paidDate: Date; amount: number }[],
   from: Date,
   to: Date,
 ): DashboardMonthPointDto[] {
   const buckets = new Map<string, DashboardMonthPointDto>();
+  const blank = (month: string): DashboardMonthPointDto => ({
+    month,
+    scheduled: 0,
+    collected: 0,
+    received: 0,
+  });
 
   // Seed every month in the window so gaps render as zero, not as missing bars.
   const cursor = new Date(
@@ -247,24 +264,23 @@ function buildMonthly(
   );
   const end = new Date(Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), 1));
   while (cursor <= end && buckets.size < 120) {
-    buckets.set(monthKey(cursor), {
-      month: monthKey(cursor),
-      scheduled: 0,
-      collected: 0,
-    });
+    buckets.set(monthKey(cursor), blank(monthKey(cursor)));
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
 
   for (const row of rows) {
     if (!BILLABLE_STATUSES.includes(row.status)) continue;
     const key = monthKey(row.dueDate);
-    const bucket = buckets.get(key) ?? {
-      month: key,
-      scheduled: 0,
-      collected: 0,
-    };
+    const bucket = buckets.get(key) ?? blank(key);
     bucket.scheduled = round2(bucket.scheduled + row.amountDue);
     bucket.collected = round2(bucket.collected + row.amountPaid);
+    buckets.set(key, bucket);
+  }
+
+  for (const payment of payments) {
+    const key = monthKey(payment.paidDate);
+    const bucket = buckets.get(key) ?? blank(key);
+    bucket.received = round2(bucket.received + payment.amount);
     buckets.set(key, bucket);
   }
 

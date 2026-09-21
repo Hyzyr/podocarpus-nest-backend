@@ -43,6 +43,7 @@ model AppUser {
   recordedPayments        RentPayment[]            @relation("PaymentRecorder")
   extraEmails             UserEmail[]
   emailVerifications      EmailVerification[]
+  refreshSessions         RefreshSession[]
 
   @@index([role, isEnabled])
 }
@@ -156,4 +157,20 @@ model ActivityLog {
 
   @@index([userId, type])
   @@index([entityId])
+}
+
+/// One row per live refresh token (one per device/browser session).
+/// Only a SHA-256 hash of the token is stored. Rows are deleted on logout
+/// and rotated on every /auth/refresh, so deleting a row revokes the session
+/// server-side — a stolen refresh token dies with it.
+model RefreshSession {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -24,9 +24,11 @@ import { EmailVerificationService } from './email-verification.service';
 
 import {
   getAuthCookies,
+  hashRefreshToken,
   removeAuthCookies,
   setAuthCookies,
 } from '../auth.tokens';
+import { REFRESH_TOKEN_TTL_SEC } from '../auth.constants';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import {
@@ -87,8 +89,7 @@ export class AuthService {
     await this.sendWelcomeEmail(user.id, user.email, true);
 
     // create tokens
-    const payload: TokenPayload = { sub: user.id, role: user.role };
-    setAuthCookies(payload, this.jwtService, reply);
+    await this.issueAuthCookies(user, reply);
 
     // ...existing code...
 
@@ -168,8 +169,7 @@ export class AuthService {
     }
 
     // create tokens
-    const payload: TokenPayload = { sub: user.id, role: user.role };
-    setAuthCookies(payload, this.jwtService, reply);
+    await this.issueAuthCookies(user, reply);
 
     return {
       user: authUserParser.parse(user),
@@ -267,15 +267,48 @@ export class AuthService {
       );
     }
 
-    const tokenPayload: TokenPayload = { sub: user.id, role: user.role };
-    setAuthCookies(tokenPayload, this.jwtService, reply);
+    await this.issueAuthCookies(user, reply);
 
     return {
       user: authUserParser.parse(user),
     };
   }
 
-  async logout(reply: FastifyReply) {
+  /**
+   * Signs tokens, sets cookies, and records the refresh session in the DB.
+   * The stored hash is what lets us revoke sessions server-side (logout,
+   * rotation on refresh): a refresh token with no matching row is rejected.
+   */
+  private async issueAuthCookies(
+    user: { id: string; role: UserRole },
+    reply: FastifyReply,
+  ): Promise<void> {
+    const { refreshToken } = setAuthCookies(
+      { sub: user.id, role: user.role },
+      this.jwtService,
+      reply,
+    );
+    await this.prisma.refreshSession.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashRefreshToken(refreshToken),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_SEC * 1000),
+      },
+    });
+    // opportunistic cleanup so expired sessions don't pile up
+    await this.prisma.refreshSession.deleteMany({
+      where: { userId: user.id, expiresAt: { lt: new Date() } },
+    });
+  }
+
+  async logout(req: FastifyRequest, reply: FastifyReply) {
+    const { refreshToken } = getAuthCookies(req);
+    if (refreshToken) {
+      // revoke the session server-side, not just in the browser
+      await this.prisma.refreshSession.deleteMany({
+        where: { tokenHash: hashRefreshToken(refreshToken) },
+      });
+    }
     removeAuthCookies(reply);
   }
 
@@ -286,6 +319,7 @@ export class AuthService {
     try {
       const payload =
         await this.jwtService.verifyAsync<TokenPayload>(accessToken);
+      if (payload.type === 'refresh') throw new UnauthorizedException();
 
       const user = await this.prisma.appUser.findUnique({
         where: { id: `${payload.sub}` },
@@ -324,14 +358,27 @@ export class AuthService {
       const payload =
         await this.jwtService.verifyAsync<TokenPayload>(refreshToken);
 
-      // optionally check if refresh token is revoked in DB
+      // A token without type: 'refresh' (e.g. an access token dropped into
+      // the refresh cookie) must never mint new tokens.
+      if (payload.type !== 'refresh') throw new UnauthorizedException();
+
+      // Reject tokens whose session was revoked (logout) or already rotated.
+      const tokenHash = hashRefreshToken(refreshToken);
+      const session = await this.prisma.refreshSession.findUnique({
+        where: { tokenHash },
+      });
+      if (!session || session.expiresAt < new Date()) {
+        throw new UnauthorizedException();
+      }
+
       const user = await this.prisma.appUser.findUnique({
         where: { id: `${payload.sub}` },
       });
-      if (!user) throw new UnauthorizedException();
+      if (!user || !user.isEnabled) throw new UnauthorizedException();
 
-      // issue new tokens
-      setAuthCookies({ sub: user.id, role: user.role }, this.jwtService, reply);
+      // rotate: the old session dies, the new one replaces it
+      await this.prisma.refreshSession.delete({ where: { id: session.id } });
+      await this.issueAuthCookies(user, reply);
       return {
         user: authUserParser.parse(user),
       };

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { FastifyRequest } from 'fastify';
@@ -19,7 +19,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: TokenPayload) {
+  validate(payload: TokenPayload) {
+    // A refresh token must never authenticate an API request. Tokens signed
+    // before the type claim existed carry no type and pass as access tokens
+    // until their (2h) expiry.
+    if (payload.type === 'refresh') throw new UnauthorizedException();
     // will be available in req.user
     return { userId: '' + payload.sub, role: payload.role };
   }

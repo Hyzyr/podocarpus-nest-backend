@@ -329,6 +329,10 @@ type Paginated<T> = {
 
 ## 4b. The month-by-month table (rent roll)
 
+> Building the UI for this? [`MONTHLY_PAYMENTS_TABLE_FRONTEND.md`](MONTHLY_PAYMENTS_TABLE_FRONTEND.md)
+> is the implementation guide — layout, the cell-render decision table, and the
+> cases that look like bugs. This section is the API contract.
+
 ```http
 GET /api/payments/monthly?year=2026
 ```

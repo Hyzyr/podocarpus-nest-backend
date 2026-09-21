@@ -41,6 +41,7 @@ import { PaymentsMonthlyService } from './services/payments-monthly.service';
 import { CreatePaymentDto, UpdatePaymentDto } from './dto/payment.dto';
 import { MonthlyViewQueryDto } from './dto/monthly-view.dto';
 import { MonthlyViewDto } from './dto/monthly-view.response.dto';
+import { CollectionTrackerDto } from './dto/collection-tracker.response.dto';
 import {
   CollectInstallmentDto,
   InstallmentQueryDto,
@@ -117,10 +118,10 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Per-unit collection table for a year',
     description:
-      'One row per enabled property. Leases with a generated schedule report against it; older leases fall back to annualRent.',
+      'One row per enabled property. Leases with a generated schedule report against it; older leases fall back to annualRent. Vacant properties still get a row with the tenant-dependent fields null.',
   })
   @ApiQuery({ name: 'year', required: true, type: Number, example: 2026 })
-  @ApiResponse({ status: 200, description: 'Collection tracker data' })
+  @ApiOkResponse({ type: CollectionTrackerDto })
   async collectionTracker(@Query('year', ParseIntPipe) year: number) {
     return this.paymentsService.getCollectionTracker(year);
   }

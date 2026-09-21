@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Delete,
+  HttpCode,
+  HttpStatus,
   Get,
   Param,
   Patch,
@@ -120,12 +122,35 @@ export class AuthController {
     return this.auth.googleLogin(dto.idToken, reply, dto.role);
   }
 
-  @Get('logout')
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 204, description: 'User logged out successfully' })
-  async logout(@Res({ passthrough: true }) reply: FastifyReply) {
-    this.auth.logout(reply); // clears cookies
+  async logout(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    await this.auth.logout(req, reply); // revokes refresh session + clears cookies
     return; // Nest handles 204
+  }
+
+  /**
+   * @deprecated State-changing GET is logout-CSRF-prone; use POST /auth/logout.
+   * Kept only until the frontend switches to the POST route, then delete.
+   */
+  @Get('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Logout user (deprecated, use POST)',
+    deprecated: true,
+  })
+  @ApiResponse({ status: 204, description: 'User logged out successfully' })
+  async logoutGet(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    await this.auth.logout(req, reply);
+    return;
   }
 
   @Get('me')
@@ -211,9 +236,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Update current user profile',
-    description: 'Update profile information for the currently logged-in user, including profile photo URL'
+    description:
+      'Update profile information for the currently logged-in user, including profile photo URL',
   })
   @ApiResponse({
     status: 200,
@@ -288,10 +314,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Email is already verified' })
   @ApiResponse({ status: 404, description: 'Email not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async resendEmail(
-    @CurrentUser() user: CurrentUser,
-    @Param('id') id: string,
-  ) {
+  async resendEmail(@CurrentUser() user: CurrentUser, @Param('id') id: string) {
     return this.emailVerification.resendExtraEmail(user, id);
   }
 
@@ -307,10 +330,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 404, description: 'Email not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async deleteEmail(
-    @CurrentUser() user: CurrentUser,
-    @Param('id') id: string,
-  ) {
+  async deleteEmail(@CurrentUser() user: CurrentUser, @Param('id') id: string) {
     return this.emailVerification.deleteExtraEmail(user, id);
   }
 

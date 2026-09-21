@@ -5,6 +5,11 @@ Full detail is in [SETUP.md](./SETUP.md) — this is just the "don't forget" ver
 
 ---
 
+> **Next deploy (auth hardening, 2026-09-20):** includes the `add_refresh_sessions`
+> migration — follow section C (`npx prisma migrate deploy`). All existing sessions
+> are invalidated once: users are silently logged out and must sign in again.
+> Frontend should switch logout to `POST /auth/logout` (GET still works, deprecated).
+
 ## Golden rule
 The server does NOT read your local `.env`. If you change env variables locally,
 you MUST also change them **on the server** and **restart**. Nothing is automatic.
@@ -40,6 +45,11 @@ npm run build
 ```
 > Use `migrate deploy` on the server — NOT `migrate dev`.
 > Never run `migrate reset` on production (it wipes data).
+> Always `pg_dump` first, and note the row counts of anything that matters so
+> you can prove nothing moved afterwards.
+
+> **Rent collection release** (schedules, dashboard, monthly table) has its own
+> step-by-step runbook: [DEPLOY_RENT_COLLECTION.md](./DEPLOY_RENT_COLLECTION.md).
 
 ---
 

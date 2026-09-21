@@ -217,8 +217,27 @@ export class DashboardStatusBreakdownDto {
 
 export class DashboardMonthPointDto {
   @ApiProperty({ example: '2026-03' }) month: string;
-  @ApiProperty({ example: 40000 }) scheduled: number;
-  @ApiProperty({ example: 40000 }) collected: number;
+
+  @ApiProperty({
+    example: 40000,
+    description:
+      'Due in this month, from the schedule. Zero for leases that have no schedule yet.',
+  })
+  scheduled: number;
+
+  @ApiProperty({
+    example: 40000,
+    description:
+      'Collected against this month’s installments, wherever the money landed. Pair with `scheduled` for collection performance.',
+  })
+  collected: number;
+
+  @ApiProperty({
+    example: 42500,
+    description:
+      'Money that actually arrived in this month, ad-hoc included. Use this for a cash-flow chart — it is the only series that has data for leases with no schedule.',
+  })
+  received: number;
 }
 
 export class PaymentsDashboardDto {
